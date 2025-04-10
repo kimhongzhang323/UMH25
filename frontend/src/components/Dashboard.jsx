@@ -24,13 +24,18 @@ const orderVolumeData = [
 ]
 
 function Dashboard() {
+  function calculateRevenue() {
+    return orderVolumeData.reduce((total, order) => {
+      return total += order.orders
+    }, 0)
+  }
+
   function calculateTotalOrders() {
     return orderVolumeData.reduce((total, order) => total + order.orders, 0)
   }
 
   function calculateAverageOrderValue() {
-    // Assuming some total revenue value - you'll need to replace with actual calculation
-    const totalRevenue = 12500; // This should come from your transaction data
+    const totalRevenue = 12500;
     return (totalRevenue / calculateTotalOrders()).toFixed(2)
   }
 
@@ -39,52 +44,59 @@ function Dashboard() {
       <h1 className="text-2xl md:text-3xl font-semibold text-center mb-6 md:mb-8 text-white">Merchant Analytics</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+
+        {/* Total Sales Card */}
+        <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-pink-600">
+          <h2 className="text-base md:text-2xl font-medium text-indigo-300 mb-2">Total Orders This Week</h2>
+          <p className="text-2xl md:text-3xl font-bold text-white">RM 12500</p>
+        </div>
+
         {/* Total Orders Card */}
         <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-indigo-500">
-          <h2 className="text-base md:text-lg font-medium text-indigo-300 mb-2">Total Orders This Week</h2>
+          <h2 className="text-base md:text-2xl font-medium text-indigo-300 mb-2">Total Orders This Week</h2>
           <p className="text-2xl md:text-3xl font-bold text-white">{calculateTotalOrders()}</p>
         </div>
 
         {/* Average Order Value Card */}
         <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-emerald-500">
-          <h2 className="text-base md:text-lg font-medium text-emerald-300 mb-2">Average Order Value</h2>
+          <h2 className="text-base md:text-2xl font-medium text-emerald-300 mb-2">Average Order Value</h2>
           <p className="text-2xl md:text-3xl font-bold text-white">RM {calculateAverageOrderValue()}</p>
         </div>
 
         {/* Top Selling Items Card */}
         <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-amber-500">
-          <h2 className="text-base md:text-lg font-medium text-amber-300 mb-2">Top Selling Items</h2>
+          <h2 className="text-base md:text-2xl font-medium text-amber-300 mb-2">Top Selling Items</h2>
           <ol className="space-y-1 text-white">
             <li className="flex items-center">
               <span className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center mr-2">1</span>
-              Fried Spring Rolls
+              <p className="text-xl">Fried Spring Rolls</p>
             </li>
             <li className="flex items-center">
               <span className="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center mr-2">2</span>
-              Fried Rice
+              <p className="text-xl">Fried Rice</p>
             </li>
             <li className="flex items-center">
               <span className="w-6 h-6 bg-amber-800 rounded-full flex items-center justify-center mr-2">3</span>
-              Nasi Lemak
+              <p className="text-xl">Nasi Lemak</p>
             </li>
           </ol>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-8 min-w-[300px]">
+        {/* Order Volume Trend Chart */}
         <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
           <h2 className="text-lg md:text-xl font-medium text-indigo-300 mb-4">Order Volume Trend</h2>
-          {/* Increased height */}
-          <div className="h-72 md:h-96"> {/* <-- Increased height values */}
+          <div className="h-72 md:h-96">
             <OrderVolumeChart data={orderVolumeData} />
           </div>
         </div>
 
-        {/* Repeat for the Peak Hours Chart */}
+        {/* Peak Hours Chart */}
         <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
           <h2 className="text-lg md:text-xl font-medium text-indigo-300 mb-4">Peak Hours</h2>
           {/* Increased height */}
-          <div className="h-72 md:h-96"> {/* <-- Increased height values */}
+          <div className="h-72 md:h-96">
             <PeakHoursChart data={peakHoursData} />
           </div>
         </div>
