@@ -8,8 +8,8 @@ import OrderVolumeChart from '../charts/OrderVolumeChart'
 //  - Best-selling items (keywords.csv, items.csv)
 //  - Order volume trend (chart showing orders over time)  (transaction_data.csv)
 //  - Peak hours (what time of the day does merchant sell the most - can present in a chart) (transaction_data.csv)
-//  - Extra insights: inventory levels (?), best selling leaderboard, order value line chart on order volume chart
-//  - 
+//  - Extra insights: inventory levels (?), leaderboard by revenue (?), unique customers in last week
+
 
 //  hardcode data for now
 const peakHoursData = [
@@ -34,6 +34,18 @@ const orderVolumeData = [
   { "date": "2025-04-09", "orders": 30 }
 ]
 
+//  hardcode orders data for now
+const ordersData = [
+  { "orderTime": "2023-07-05", "orderValue": 10.46, "eaterId": 1 },
+  { "orderTime": "2023-07-06", "orderValue": 10.46, "eaterId": 2 },
+  { "orderTime": "2023-07-09", "orderValue": 6.46, "eaterId": 3 },
+  { "orderTime": "2023-07-05", "orderValue": 20.46, "eaterId": 1 },
+  { "orderTime": "2023-07-07", "orderValue": 60.4, "eaterId": 2 },
+  { "orderTime": "2023-07-06", "orderValue": 40.00, "eaterId": 4 },
+  { "orderTime": "2023-07-06", "orderValue": 50.46, "eaterId": 4 },
+  { "orderTime": "2023-07-05", "orderValue": 17.6, "eaterId": 1 },
+]
+
 function Dashboard() {
   function calculateTotalOrders() {
     return orderVolumeData.reduce((total, order) => total + order.orders, 0)
@@ -44,15 +56,20 @@ function Dashboard() {
     return (totalRevenue / calculateTotalOrders()).toFixed(2)
   }
 
+  function calculateUniqueCustomers() {
+    const uniqueCustomers = new Set(ordersData.map(order => order.eaterId));
+    return uniqueCustomers.size;
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 p-4 md:p-8 text-gray-100 font-sans">
       <h1 className="text-2xl md:text-3xl font-semibold text-center mb-6 md:mb-8 text-white">Merchant Analytics</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
 
         {/* Total Sales Card */}
         <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-pink-600">
-          <h2 className="text-base md:text-2xl font-medium text-indigo-300 mb-2">Total Orders This Week</h2>
+          <h2 className="text-base md:text-2xl font-medium text-indigo-300 mb-2">Total Sales This Week</h2>
           <p className="text-2xl md:text-3xl font-bold text-white">RM 12500</p>
         </div>
 
@@ -86,6 +103,13 @@ function Dashboard() {
             </li>
           </ol>
         </div>
+
+        {/* Unique Customers Card */}
+        <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-cyan-600">
+          <h2 className="text-base md:text-2xl font-medium text-cyan-400 mb-2">Unique Customers In the Last Week</h2>
+          <p className="text-2xl md:text-3xl font-bold text-white">{calculateUniqueCustomers()}</p>
+        </div>
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-8 min-w-[300px]">
