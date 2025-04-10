@@ -2,6 +2,16 @@ import React from 'react'
 import PeakHoursChart from '../charts/PeakHoursChart'
 import OrderVolumeChart from '../charts/OrderVolumeChart'
 
+
+//  Things needed:
+//  - Total sales this week (transaction_data.csv)
+//  - Best-selling items (keywords.csv, items.csv)
+//  - Order volume trend (chart showing orders over time)  (transaction_data.csv)
+//  - Peak hours (what time of the day does merchant sell the most - can present in a chart) (transaction_data.csv)
+//  - Extra insights: inventory levels (?), best selling leaderboard, order value line chart on order volume chart
+//  - 
+
+//  hardcode data for now
 const peakHoursData = [
   { "hour": 0, "orders": 5 }, { "hour": 1, "orders": 2 }, { "hour": 2, "orders": 1 },
   { "hour": 3, "orders": 0 }, { "hour": 4, "orders": 0 }, { "hour": 5, "orders": 3 },
@@ -13,6 +23,7 @@ const peakHoursData = [
   { "hour": 21, "orders": 30 }, { "hour": 22, "orders": 20 }, { "hour": 23, "orders": 10 }
 ]
 
+//  hardcode data for now
 const orderVolumeData = [
   { "date": "2025-04-03", "orders": 45 },
   { "date": "2025-04-04", "orders": 52 },
@@ -24,12 +35,6 @@ const orderVolumeData = [
 ]
 
 function Dashboard() {
-  function calculateRevenue() {
-    return orderVolumeData.reduce((total, order) => {
-      return total += order.orders
-    }, 0)
-  }
-
   function calculateTotalOrders() {
     return orderVolumeData.reduce((total, order) => total + order.orders, 0)
   }
