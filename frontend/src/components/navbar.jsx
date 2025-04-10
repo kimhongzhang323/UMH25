@@ -12,7 +12,8 @@ export default function Navbar() {
     <nav className="bg-slate-800 text-white p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex space-x-6 items-center">
-          <h1 className="font-bold text-xl">Logo</h1>
+          <img className="w-15 h-auto" src="public/grab-transparent.png" alt="Logo of Grab but transparent" />
+          <p className='font-bold font-sans-serif text-xl'>HEX Assistant</p>
           <div className="flex space-x-4">
             <a href="/" className="hover:text-blue-300 transition-colors">Home</a>
             <a href="/chat" className="hover:text-blue-300 transition-colors">Chat</a>
