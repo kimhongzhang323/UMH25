@@ -1,23 +1,59 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Sparkles, Plus, Menu, Image, Search, File, Brain } from 'lucide-react';
+import { Send, Bot, User, Loader2, Sparkles, Plus, Menu, Image, Search, File, Brain, Mic, MicOff } from 'lucide-react';
 
-export default function App() {
+export default function Chatbot() {
   const [messages, setMessages] = useState([
     {
       id: '1',
-      text: 'Hello! I am your MEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
+      text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
       sender: 'bot',
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeMode, setActiveMode] = useState('chat'); // 'chat', 'deep-think', 'search', 'image'
+  const [activeMode, setActiveMode] = useState('chat');
   const [filePreview, setFilePreview] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState(null);
+  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setIsSpeechSupported(true);
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = 'en-US';
+
+      recognitionInstance.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+        setInput(prev => prev + ' ' + transcript);
+      };
+
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        setIsRecording(false);
+      };
+
+      recognitionInstance.onend = () => {
+        if (isRecording) {
+          recognitionInstance.start();
+        }
+      };
+
+      setRecognition(recognitionInstance);
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -107,7 +143,7 @@ export default function App() {
     setMessages([
       {
         id: '1',
-        text: 'Hello! I am your MEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
+        text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
         sender: 'bot',
         timestamp: new Date(),
       },
@@ -134,6 +170,21 @@ export default function App() {
 
   const triggerFileInput = () => {
     fileInputRef.current.click();
+  };
+
+  const toggleRecording = () => {
+    if (!isSpeechSupported) {
+      alert('Speech recognition is not supported in your browser');
+      return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+    } else {
+      recognition.start();
+      setIsRecording(true);
+    }
   };
 
   const renderModeIndicator = () => {
@@ -187,7 +238,7 @@ export default function App() {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-semibold">MEX Assistant</h1>
+          <h1 className="text-lg font-semibold">HEX Assistant</h1>
           <div className="w-8"></div> {/* Spacer for balance */}
         </header>
 
@@ -392,11 +443,22 @@ export default function App() {
                     activeMode === 'image' ? 'Describe the image you want to generate...' :
                     activeMode === 'deep-think' ? 'Ask me to think deeply about...' :
                     activeMode === 'search' ? 'What would you like to search for?' :
-                    'Message MEX...'
+                    'Message HEX...'
                   }
                   rows="1"
                   className="flex-1 bg-transparent border-0 resize-none max-h-[200px] focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-400 p-2"
                 />
+                <button
+                  type="button"
+                  onClick={toggleRecording}
+                  className={`p-2 rounded-lg mr-2 ${
+                    isRecording 
+                      ? 'bg-red-100 text-red-600 animate-pulse' 
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
                 <button
                   type="submit"
                   disabled={!input.trim() || loading}
@@ -404,7 +466,7 @@ export default function App() {
                     input.trim()
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-100 text-gray-400'
-                  } transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-2`}
+                  } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -415,7 +477,7 @@ export default function App() {
               </div>
             </form>
             <div className="text-xs text-gray-500 text-center mt-2">
-              MEX can make mistakes. Consider checking important information.
+              HEX can make mistakes. Consider checking important information.
             </div>
           </div>
         </div>
