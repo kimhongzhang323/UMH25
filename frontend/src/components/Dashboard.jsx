@@ -1,13 +1,6 @@
 import React from 'react'
-import '../styles/dashboard.css'
 import PeakHoursChart from '../charts/PeakHoursChart'
 import OrderVolumeChart from '../charts/OrderVolumeChart'
-
-//  Things needed:
-//  - Total sales this week (transaction_data.csv)
-//  - Best-selling items (keywords.csv, items.csv)
-//  - Order volume trend (chart showing orders over time)  (transaction_data.csv)
-//  - Peak hours (what time of the day does merchant sell the most - can present in a chart) (transaction_data.csv)
 
 const peakHoursData = [
   { "hour": 0, "orders": 5 }, { "hour": 1, "orders": 2 }, { "hour": 2, "orders": 1 },
@@ -27,54 +20,74 @@ const orderVolumeData = [
   { "date": "2025-04-06", "orders": 55 },
   { "date": "2025-04-07", "orders": 68 },
   { "date": "2025-04-08", "orders": 75 },
-  { "date": "2025-04-09", "orders": 30 } 
+  { "date": "2025-04-09", "orders": 30 }
 ]
 
 function Dashboard() {
-
   function calculateTotalOrders() {
-    const sum = orderVolumeData.reduce((total, order) => {
-      return total += order.orders
-    }, 0)
-    return sum
+    return orderVolumeData.reduce((total, order) => total + order.orders, 0)
+  }
+
+  function calculateAverageOrderValue() {
+    // Assuming some total revenue value - you'll need to replace with actual calculation
+    const totalRevenue = 12500; // This should come from your transaction data
+    return (totalRevenue / calculateTotalOrders()).toFixed(2)
   }
 
   return (
-    <div className="dashboard-container">
-      <h1>Merchant Analytics</h1>
+    <div className="min-h-screen bg-gray-900 p-4 md:p-8 text-gray-100 font-sans">
+      <h1 className="text-2xl md:text-3xl font-semibold text-center mb-6 md:mb-8 text-white">Merchant Analytics</h1>
 
-      <div className="dashboard-grid">
-
-        <div className="dashboard-card">
-          <h2>Total Orders This Week</h2>
-          <p>{calculateTotalOrders()}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+        {/* Total Orders Card */}
+        <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-indigo-500">
+          <h2 className="text-base md:text-lg font-medium text-indigo-300 mb-2">Total Orders This Week</h2>
+          <p className="text-2xl md:text-3xl font-bold text-white">{calculateTotalOrders()}</p>
         </div>
 
-        <div className="dashboard-card">
-          <h2>Average Order Value</h2>
-          <p>RM 37.23</p>
+        {/* Average Order Value Card */}
+        <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-emerald-500">
+          <h2 className="text-base md:text-lg font-medium text-emerald-300 mb-2">Average Order Value</h2>
+          <p className="text-2xl md:text-3xl font-bold text-white">RM {calculateAverageOrderValue()}</p>
         </div>
 
-        <div className="dashboard-card">
-          <h2>Top Selling items</h2>
-          <ol>
-            <li>Fried Spring Rolls</li>
-            <li>Fried Rice</li>
-            <li>Nasi Lemak</li>
+        {/* Top Selling Items Card */}
+        <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 border-l-4 border-amber-500">
+          <h2 className="text-base md:text-lg font-medium text-amber-300 mb-2">Top Selling Items</h2>
+          <ol className="space-y-1 text-white">
+            <li className="flex items-center">
+              <span className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center mr-2">1</span>
+              Fried Spring Rolls
+            </li>
+            <li className="flex items-center">
+              <span className="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center mr-2">2</span>
+              Fried Rice
+            </li>
+            <li className="flex items-center">
+              <span className="w-6 h-6 bg-amber-800 rounded-full flex items-center justify-center mr-2">3</span>
+              Nasi Lemak
+            </li>
           </ol>
         </div>
       </div>
 
-      <div className="chart-container">
-        <h2>Order Volume Trend</h2>
-        {/* Chart would go here */}
-        <OrderVolumeChart data={orderVolumeData} />
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-8 min-w-[300px]">
+        <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
+          <h2 className="text-lg md:text-xl font-medium text-indigo-300 mb-4">Order Volume Trend</h2>
+          {/* Increased height */}
+          <div className="h-72 md:h-96"> {/* <-- Increased height values */}
+            <OrderVolumeChart data={orderVolumeData} />
+          </div>
+        </div>
 
-      <div className="chart-container">
-        <h2>Peak Hours</h2>
-        {/* Peak hour line chart data here */}
-        <PeakHoursChart data={peakHoursData} />
+        {/* Repeat for the Peak Hours Chart */}
+        <div className="bg-gray-800 rounded-xl p-4 md:p-6 shadow-lg">
+          <h2 className="text-lg md:text-xl font-medium text-indigo-300 mb-4">Peak Hours</h2>
+          {/* Increased height */}
+          <div className="h-72 md:h-96"> {/* <-- Increased height values */}
+            <PeakHoursChart data={peakHoursData} />
+          </div>
+        </div>
       </div>
     </div>
   )

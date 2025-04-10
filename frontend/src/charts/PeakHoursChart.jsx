@@ -47,44 +47,41 @@ const PeakHoursChart = ({ data }) => {
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: '#e0e0e0',
-        },
-      },
-      tooltip: {
-        backgroundColor: '#1e1e1e',
-        titleColor: '#a5b4fc',
-        bodyColor: '#e0e0e0',
-        borderColor: '#4f46e5',
-        borderWidth: 1,
+// In your PeakHoursChart component
+const options = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top',
+      labels: {
+        color: '#e0e0e0', // Keep legend text white
       },
     },
-    scales: {
-      x: {
-        grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-        },
-        ticks: {
-          color: '#e0e0e0',
-        },
+    tooltip: {
+      // ... keep your existing tooltip config
+    },
+  },
+  scales: {
+    x: {
+      grid: {
+        color: 'rgba(255, 255, 255, 0.1)',
       },
-      y: {
-        grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-        },
-        ticks: {
-          color: '#e0e0e0',
-          stepSize: 10,
-        },
+      ticks: {
+        color: '#FFFFFF', // Black color for x-axis labels
       },
     },
-    maintainAspectRatio: false,
-  };
+    y: {
+      grid: {
+        color: 'rgba(255, 255, 255, 0.1)',
+      },
+      ticks: {
+        color: '#e0e0e0', // Keep y-axis labels white
+        stepSize: 10,
+      },
+    },
+  },
+  maintainAspectRatio: false,
+};
 
   return (
     <div className="chart-container" style={{ height: '400px' }}>
