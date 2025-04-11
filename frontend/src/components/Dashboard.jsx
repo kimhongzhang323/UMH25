@@ -45,7 +45,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       // Simulate API loading
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // await new Promise(resolve => setTimeout(resolve, 800));
       
       // Mock data
       const mockData = {
