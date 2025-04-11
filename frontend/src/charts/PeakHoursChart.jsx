@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import {
@@ -23,10 +22,8 @@ ChartJS.register(
 );
 
 const PeakHoursChart = ({ data }) => {
-  // Format the data for Chart.js
   const chartData = {
     labels: data.map(item => {
-      // Convert 24-hour format to 12-hour AM/PM format
       const hour = item.hour % 12 || 12;
       const ampm = item.hour < 12 ? 'AM' : 'PM';
       return `${hour}${ampm}`;
@@ -35,56 +32,90 @@ const PeakHoursChart = ({ data }) => {
       {
         label: 'Number of Orders',
         data: data.map(item => item.orders),
-        borderColor: '#4f46e5', // Purple
-        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-        tension: 0.3,
+        borderColor: '#8B5CF6', // Violet-500
+        backgroundColor: 'rgba(139, 92, 246, 0.05)',
+        borderWidth: 2,
+        tension: 0.4,
         fill: true,
-        pointBackgroundColor: '#ffffff',
-        pointBorderColor: '#4f46e5',
+        pointBackgroundColor: '#FFFFFF',
+        pointBorderColor: '#8B5CF6',
+        pointBorderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
       },
     ],
   };
 
-// In your PeakHoursChart component
-const options = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top',
-      labels: {
-        color: '#e0e0e0', // Keep legend text white
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: '#374151', // Gray-700
+          font: {
+            size: 14,
+            weight: '500'
+          },
+          padding: 20,
+          boxWidth: 12,
+        }
+      },
+      tooltip: {
+        backgroundColor: '#FFFFFF',
+        titleColor: '#111827', // Gray-900
+        bodyColor: '#374151', // Gray-700
+        borderColor: '#E5E7EB', // Gray-200
+        borderWidth: 1,
+        padding: 12,
+        boxPadding: 4,
+        usePointStyle: true,
+        callbacks: {
+          label: (context) => {
+            return `Orders: ${context.raw}`;
+          }
+        }
       },
     },
-    tooltip: {
-      // ... keep your existing tooltip config
+    scales: {
+      x: {
+        grid: {
+          display: false,
+          drawBorder: false,
+        },
+        ticks: {
+          color: '#6B7280', // Gray-500
+          font: {
+            size: 12
+          }
+        },
+      },
+      y: {
+        grid: {
+          color: '#E5E7EB', // Gray-200
+          drawBorder: false,
+        },
+        ticks: {
+          color: '#6B7280', // Gray-500
+          font: {
+            size: 12
+          },
+          stepSize: 10,
+          padding: 10,
+        },
+        min: 0,
+      },
     },
-  },
-  scales: {
-    x: {
-      grid: {
-        color: 'rgba(255, 255, 255, 0.1)',
-      },
-      ticks: {
-        color: '#FFFFFF', // Black color for x-axis labels
-      },
-    },
-    y: {
-      grid: {
-        color: 'rgba(255, 255, 255, 0.1)',
-      },
-      ticks: {
-        color: '#e0e0e0', // Keep y-axis labels white
-        stepSize: 10,
-      },
-    },
-  },
-  maintainAspectRatio: false,
-};
+    elements: {
+      line: {
+        cubicInterpolationMode: 'monotone'
+      }
+    }
+  };
 
   return (
-    <div className="chart-container" style={{ height: '400px' }}>
+    <div className="w-full h-full p-4">
       <Line data={chartData} options={options} />
     </div>
   );
