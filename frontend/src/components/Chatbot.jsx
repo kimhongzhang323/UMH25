@@ -128,6 +128,13 @@ export default function Chatbot() {
     "What are the best marketing strategies?",
     "Can you help me analyze my sales data?",
   ]); // Example prompts
+  const [merchantFilters, setMerchantFilters] = useState({
+    businessType: '',
+    productCategory: '',
+    location: '',
+    challenges: []
+  });
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
 
   // Refs
   const messagesEndRef = useRef(null);
@@ -1039,6 +1046,17 @@ Would you like specific details about any of these areas?`;
                 <Brain className="w-4 h-4" />
                 Merchant Guidance
               </button>
+              <button
+                onClick={() => setShowFilterPanel(true)}
+                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
+                  merchantFilters.businessType 
+                    ? 'bg-yellow-100 text-yellow-600' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <ShoppingBag className="w-4 h-4" />
+                {merchantFilters.businessType ? 'Merchant' : 'Filter'}
+              </button>
             </div>
 
             <form
@@ -1120,6 +1138,133 @@ Would you like specific details about any of these areas?`;
           </div>
         </div>
       </div>
+      {showFilterPanel && (
+        <div className="fixed bottom-20 right-4 bg-white shadow-lg rounded-lg p-6 max-w-sm w-full z-50">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-yellow-600" />
+              Merchant Filters
+            </h2>
+            <button 
+              onClick={() => setShowFilterPanel(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Business Type
+              </label>
+              <select
+                value={merchantFilters.businessType}
+                onChange={(e) => setMerchantFilters(prev => ({
+                  ...prev,
+                  businessType: e.target.value
+                }))}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Select Business Type</option>
+                <option value="restaurant">Restaurant/Cafe</option>
+                <option value="retail">Retail Store</option>
+                <option value="ecommerce">E-commerce</option>
+                <option value="service">Service Business</option>
+                <option value="manufacturer">Manufacturer</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product Category
+              </label>
+              <input
+                type="text"
+                value={merchantFilters.productCategory}
+                onChange={(e) => setMerchantFilters(prev => ({
+                  ...prev,
+                  productCategory: e.target.value
+                }))}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="e.g. fashion, electronics, food"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                value={merchantFilters.location}
+                onChange={(e) => setMerchantFilters(prev => ({
+                  ...prev,
+                  location: e.target.value
+                }))}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="City or region"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Business Challenges
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  'Marketing', 
+                  'Inventory', 
+                  'Staffing', 
+                  'Online Sales',
+                  'Customer Retention',
+                  'Pricing'
+                ].map(item => (
+                  <label key={item} className="flex items-center text-sm">
+                    <input
+                      type="checkbox"
+                      checked={merchantFilters.challenges.includes(item)}
+                      onChange={() => {
+                        setMerchantFilters(prev => ({
+                          ...prev,
+                          challenges: prev.challenges.includes(item)
+                            ? prev.challenges.filter(c => c !== item)
+                            : [...prev.challenges, item]
+                        }));
+                      }}
+                      className="mr-2"
+                    />
+                    {item}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              onClick={() => {
+                setMerchantFilters({
+                  businessType: '',
+                  productCategory: '',
+                  location: '',
+                  challenges: []
+                });
+                setShowFilterPanel(false);
+              }}
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => setShowFilterPanel(false)}
+              className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

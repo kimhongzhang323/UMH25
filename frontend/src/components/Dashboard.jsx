@@ -16,7 +16,30 @@ const Dashboard = () => {
     recentOrders: []
   });
 
-  // State for WebSocket connection (removed unused variable)
+  // AI Features State
+  const [salesPredictions, setSalesPredictions] = useState({
+    nextWeekPrediction: 0,
+    confidenceLevel: 0,
+    recommendedPrep: {}
+  });
+
+  const [menuRecommendations, setMenuRecommendations] = useState({
+    bestPerformers: [],
+    underperformers: [],
+    suggestedCombos: []
+  });
+
+  const [customerInsights, setCustomerInsights] = useState({
+    customerSegments: [],
+    popularTimes: [],
+    sentimentAnalysis: {}
+  });
+
+  const [anomalies, setAnomalies] = useState([]);
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [userInput, setUserInput] = useState('');
 
   // Mock API fetch
   useEffect(() => {
@@ -24,7 +47,7 @@ const Dashboard = () => {
       // Simulate API loading
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Mock data - in a real app, this would come from an API
+      // Mock data
       const mockData = {
         totalSales: 12500,
         totalOrders: 385,
@@ -104,6 +127,60 @@ const Dashboard = () => {
         ...mockData,
         loading: false
       });
+
+      // Initialize AI data
+      setSalesPredictions({
+        nextWeekPrediction: 14250,
+        confidenceLevel: 85,
+        recommendedPrep: {
+          inventoryIncrease: "20%",
+          staffIncrease: "2 extra staff",
+          timing: "Friday dinner rush"
+        }
+      });
+
+      setMenuRecommendations({
+        bestPerformers: ["Zinger Burger", "Hot & Spicy Chicken", "Popcorn Chicken"],
+        underperformers: ["Coleslaw", "Mashed Potato", "Corn on the Cob"],
+        suggestedCombos: [
+          { items: ["Zinger Burger", "Fries", "Pepsi"], projectedIncrease: 15 },
+          { items: ["Popcorn Chicken", "Cheese Fries"], projectedIncrease: 10 },
+          { items: ["Twister Wrap", "Coleslaw", "Pepsi"], projectedIncrease: 8 }
+        ]
+      });
+
+      setCustomerInsights({
+        customerSegments: [
+          { type: "Young Adults", percentage: 45 },
+          { type: "Families", percentage: 30 },
+          { type: "Professionals", percentage: 25 }
+        ],
+        popularTimes: [
+          { period: "12:00-14:00", percentage: 35 },
+          { period: "18:00-20:00", percentage: 40 },
+          { period: "20:00-22:00", percentage: 25 }
+        ],
+        sentimentAnalysis: {
+          positive: 78,
+          neutral: 18,
+          negative: 4
+        }
+      });
+
+      setAnomalies([
+        {
+          type: "Inventory Shortage",
+          description: "Zinger Burger patties running low (12% below optimal)",
+          severity: "High",
+          time: "10:30 AM"
+        },
+        {
+          type: "Staffing Alert",
+          description: "Predicted understaffing during Friday dinner rush",
+          severity: "Medium",
+          time: "Yesterday"
+        }
+      ]);
     };
 
     fetchDashboardData();
@@ -111,16 +188,14 @@ const Dashboard = () => {
 
   // Simulate WebSocket connection for real-time updates
   useEffect(() => {
-    // In a real app, this would be a real WebSocket connection
     const socket = {
       onmessage: null,
       send: () => {},
       close: () => {}
     };
 
-    // Mock WebSocket messages
     const interval = setInterval(() => {
-      if (Math.random() > 0.7) { // 30% chance of a new order
+      if (Math.random() > 0.7) {
         const newOrder = generateMockOrder(dashboardData.totalOrders + 1);
         
         setDashboardData(prev => ({
@@ -128,15 +203,23 @@ const Dashboard = () => {
           totalOrders: prev.totalOrders + 1,
           totalSales: prev.totalSales + newOrder.amount,
           averageOrderValue: ((prev.totalSales + newOrder.amount) / (prev.totalOrders + 1)),
-          recentOrders: [newOrder, ...prev.recentOrders.slice(0, 9)] // Keep only last 10 orders
+          recentOrders: [newOrder, ...prev.recentOrders.slice(0, 9)]
         }));
       }
-    }, 10000); // New order every 10 seconds on average
+    }, 10000);
 
-    // Removed unused setWs call
-    // WebSocket connection setup (removed unused variable)
+    // Update AI predictions periodically
+    const aiUpdateInterval = setInterval(() => {
+      setSalesPredictions(prev => ({
+        ...prev,
+        nextWeekPrediction: prev.nextWeekPrediction * (0.98 + Math.random() * 0.04),
+        confidenceLevel: Math.min(95, Math.max(75, prev.confidenceLevel + (Math.random() * 10 - 5)))
+      }));
+    }, 30000);
+
     return () => {
       clearInterval(interval);
+      clearInterval(aiUpdateInterval);
       socket.close();
     };
   }, [dashboardData.totalOrders, dashboardData.totalSales]);
@@ -154,7 +237,7 @@ const Dashboard = () => {
       { name: "Zinger Stacker Box", price: 14.50 }
     ];
     
-    const itemCount = Math.floor(Math.random() * 3) + 1; // 1-3 items
+    const itemCount = Math.floor(Math.random() * 3) + 1;
     const items = [];
     let total = 0;
     
@@ -172,9 +255,27 @@ const Dashboard = () => {
       customer: `${customers[Math.floor(Math.random() * customers.length)]} ${Math.random() > 0.5 ? "bin" : "binti"} ${customers[Math.floor(Math.random() * customers.length)]}`,
       items,
       amount: parseFloat(total.toFixed(2)),
-      status: statuses[Math.floor(Math.random() * 2)], // Mostly preparing or ready
+      status: statuses[Math.floor(Math.random() * 2)],
       time: "just now"
     };
+  };
+
+  // Get AI response for chat
+  const getAIResponse = (question) => {
+    const responses = {
+      "sales": "Current sales trends show a 12% increase week-over-week, with peak hours between 12-2pm and 6-8pm.",
+      "inventory": "Inventory levels are optimal except for Zinger Burger patties which are 12% below recommended levels.",
+      "staff": "Based on predicted order volume, I recommend scheduling 2 additional staff members for Friday dinner service.",
+      "menu": "Our top performing items are Zinger Burger and Hot & Spicy Chicken. Consider promoting these more.",
+      "default": "I can help you analyze sales trends, inventory levels, staffing needs, and menu performance. What would you like to know?"
+    };
+
+    question = question.toLowerCase();
+    if (question.includes("sales")) return responses.sales;
+    if (question.includes("invent")) return responses.inventory;
+    if (question.includes("staff")) return responses.staff;
+    if (question.includes("menu")) return responses.menu;
+    return responses.default;
   };
 
   // Format currency
@@ -226,7 +327,7 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-light text-gray-800">KFC Analytics</h1>
-          <p className="text-gray-500 mt-2">Insights and trends for your KFC menu</p>
+          <p className="text-gray-500 mt-2">AI-powered insights and trends for your KFC restaurant</p>
         </div>
 
         {/* Metrics Grid */}
@@ -291,6 +392,122 @@ const Dashboard = () => {
             <p className="text-gray-500">{dashboardData.topSellingItems[0].sales} orders this week</p>
           </div>
         </div>
+
+        {/* AI Features Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* AI Sales Predictions */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center mb-4">
+              <svg className="w-6 h-6 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-800">AI Sales Forecast</h3>
+            </div>
+            <p className="text-xl font-light text-gray-900 mb-2">
+              Predicted sales next week: {formatCurrency(salesPredictions.nextWeekPrediction)}
+            </p>
+            <div className="mb-3">
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-purple-600 h-2.5 rounded-full" 
+                  style={{width: `${salesPredictions.confidenceLevel}%`}}
+                ></div>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Confidence level: {salesPredictions.confidenceLevel}%
+              </p>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <h4 className="font-medium text-purple-800 mb-1">AI Recommendation</h4>
+              <p className="text-sm text-purple-700">
+                Increase inventory of Zinger Burgers by {salesPredictions.recommendedPrep.inventoryIncrease} and schedule {salesPredictions.recommendedPrep.staffIncrease} for {salesPredictions.recommendedPrep.timing}.
+              </p>
+            </div>
+          </div>
+
+          {/* AI Menu Optimizer */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center mb-4">
+              <svg className="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-800">AI Menu Optimizer</h3>
+            </div>
+            
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-700 mb-2">Top Performers</h4>
+              <div className="flex flex-wrap gap-2">
+                {menuRecommendations.bestPerformers.map(item => (
+                  <span key={item} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-700 mb-2">Underperformers</h4>
+              <div className="flex flex-wrap gap-2">
+                {menuRecommendations.underperformers.map(item => (
+                  <span key={item} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-gray-700 mb-2">Suggested Combos</h4>
+              <ul className="space-y-2">
+                {menuRecommendations.suggestedCombos.map((combo, i) => (
+                  <li key={i} className="flex items-center">
+                    <span className="mr-2 text-blue-500">✓</span>
+                    <span>{combo.items.join(" + ")}</span>
+                    <span className="ml-auto text-sm text-gray-500">+{combo.projectedIncrease}% sales</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* AI Anomaly Detector */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center mb-4">
+              <svg className="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-800">AI Anomaly Detection</h3>
+            </div>
+            
+            {anomalies.length > 0 ? (
+              <div className="space-y-3">
+                {anomalies.map((anomaly, i) => (
+                  <div key={i} className="p-3 bg-red-50 border border-red-100 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium text-red-800">{anomaly.type}</h4>
+                        <p className="text-sm text-red-600">{anomaly.description}</p>
+                      </div>
+                      <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                        {anomaly.severity}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex justify-between text-xs text-gray-500">
+                      <span>Detected at {anomaly.time}</span>
+                      <button className="text-blue-600 hover:text-blue-800">
+                        View details
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-gray-500">No anomalies detected in the last 24 hours</p>
+              </div>
+            )}
+          </div>
+        </div>
             
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -321,6 +538,81 @@ const Dashboard = () => {
             </div>
             <div className="h-80">
               <PeakHoursChart data={dashboardData.peakHours} />
+            </div>
+          </div>
+        </div>
+
+        {/* Customer Insights */}
+        <div className="mt-8 bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center mb-4">
+            <svg className="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <h2 className="text-xl font-light text-gray-800">AI Customer Insights</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <h3 className="font-medium text-gray-700 mb-3">Customer Segments</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {customerInsights.customerSegments.map(segment => (
+                  <div key={segment.type} className="p-2 bg-blue-50 rounded-lg text-center">
+                    <p className="font-medium text-blue-800">{segment.percentage}%</p>
+                    <p className="text-xs text-blue-600">{segment.type}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-medium text-gray-700 mb-3">Customer Sentiment</h3>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mr-3">
+                    <div 
+                      className="bg-green-600 h-2.5 rounded-full" 
+                      style={{width: `${customerInsights.sentimentAnalysis.positive}%`}}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">
+                    {customerInsights.sentimentAnalysis.positive}% Positive
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mr-3">
+                    <div 
+                      className="bg-yellow-500 h-2.5 rounded-full" 
+                      style={{width: `${customerInsights.sentimentAnalysis.neutral}%`}}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">
+                    {customerInsights.sentimentAnalysis.neutral}% Neutral
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mr-3">
+                    <div 
+                      className="bg-red-600 h-2.5 rounded-full" 
+                      style={{width: `${customerInsights.sentimentAnalysis.negative}%`}}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">
+                    {customerInsights.sentimentAnalysis.negative}% Negative
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-medium text-gray-700 mb-3">Popular Visit Times</h3>
+              <ul className="space-y-2">
+                {customerInsights.popularTimes.map((time, i) => (
+                  <li key={i} className="flex justify-between">
+                    <span>{time.period}</span>
+                    <span className="font-medium">{time.percentage}% of customers</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
@@ -467,6 +759,57 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Chat Assistant */}
+      {chatOpen && (
+        <div className="fixed bottom-4 right-4 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
+          <div className="bg-blue-600 text-white p-3 rounded-t-xl flex justify-between items-center">
+            <h3 className="font-medium">HEX Assistant</h3>
+            <button onClick={() => setChatOpen(false)} className="text-white hover:text-blue-200">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="p-3 h-64 overflow-y-auto">
+            {chatMessages.map((msg, i) => (
+              <div key={i} className={`mb-2 ${msg.sender === 'AI' ? 'text-left' : 'text-right'}`}>
+                <div className={`inline-block px-3 py-2 rounded-lg ${msg.sender === 'AI' ? 'bg-gray-100 text-gray-800' : 'bg-blue-100 text-blue-800'}`}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="p-3 border-t border-gray-200">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              setChatMessages([...chatMessages, {sender: 'User', text: userInput}]);
+              setTimeout(() => {
+                setChatMessages(prev => [...prev, {sender: 'AI', text: getAIResponse(userInput)}]);
+              }, 1000);
+              setUserInput('');
+            }}>
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder="Ask about sales, inventory, or trends..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Floating chat button */}
+      <button 
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      </button>
     </div>
   );
 };
