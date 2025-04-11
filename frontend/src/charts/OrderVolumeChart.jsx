@@ -34,12 +34,14 @@ const OrderVolumeChart = ({ data }) => {
       {
         label: 'Number of Orders',
         data: data.map(item => item.orders),
-        borderColor: '#10b981', // Emerald green
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.3,
+        borderColor: '#3B82F6', // Blue-500
+        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+        borderWidth: 2,
+        tension: 0.4,
         fill: true,
-        pointBackgroundColor: '#ffffff',
-        pointBorderColor: '#10b981',
+        pointBackgroundColor: '#FFFFFF',
+        pointBorderColor: '#3B82F6',
+        pointBorderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
       },
@@ -48,52 +50,78 @@ const OrderVolumeChart = ({ data }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
         labels: {
-          color: '#e0e0e0',
-        },
+          color: '#374151', // Gray-700
+          font: {
+            size: 14,
+            weight: '500'
+          },
+          padding: 20,
+          boxWidth: 12,
+        }
       },
       tooltip: {
-        backgroundColor: '#1e1e1e',
-        titleColor: '#a5b4fc',
-        bodyColor: '#e0e0e0',
-        borderColor: '#10b981',
+        backgroundColor: '#FFFFFF',
+        titleColor: '#111827', // Gray-900
+        bodyColor: '#374151', // Gray-700
+        borderColor: '#E5E7EB', // Gray-200
         borderWidth: 1,
+        padding: 12,
+        boxPadding: 4,
+        usePointStyle: true,
         callbacks: {
           title: (context) => {
             const date = parseISO(data[context[0].dataIndex].date);
             return format(date, 'EEEE, MMMM d'); // E.g., "Wednesday, April 3"
           },
-        },
+          label: (context) => {
+            return `Orders: ${context.raw}`;
+          }
+        }
       },
     },
     scales: {
       x: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          display: false,
+          drawBorder: false,
         },
         ticks: {
-          color: '#e0e0e0',
+          color: '#6B7280', // Gray-500
+          font: {
+            size: 12
+          }
         },
       },
       y: {
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: '#E5E7EB', // Gray-200
+          drawBorder: false,
         },
         ticks: {
-          color: '#e0e0e0',
+          color: '#6B7280', // Gray-500
+          font: {
+            size: 12
+          },
           stepSize: 10,
+          padding: 10,
         },
-        min: 0, // Start y-axis at 0
+        min: 0,
       },
     },
-    maintainAspectRatio: false,
+    elements: {
+      line: {
+        cubicInterpolationMode: 'monotone'
+      }
+    }
   };
 
   return (
-    <div className="chart-container" style={{ height: '400px' }}>
+    <div className="w-full h-full p-4">
       <Line data={chartData} options={options} />
     </div>
   );
