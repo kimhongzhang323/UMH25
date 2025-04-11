@@ -332,7 +332,7 @@ export default function Chatbot() {
 
       {/* Sidebar */}
       <div
-        className={`w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed z-40 transition-all duration-300 ${
+        className={`w-64 bg-white border-r border-gray-200 flex flex-col h-screen absolute z-40 transition-all duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
