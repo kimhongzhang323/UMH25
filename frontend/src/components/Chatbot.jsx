@@ -1,7 +1,77 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Sparkles, Plus, Menu, Image, Search, File, Brain, Mic, MicOff } from 'lucide-react';
+import { Send, Loader2, Plus, Menu, Image, Search, File, Brain, Mic, MicOff, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Chatbot() {
+  // Sample chat history data
+  const sampleChatHistory = [
+    {
+      id: 'chat1',
+      title: 'Marketing Strategy',
+      preview: 'Let me analyze our competitors...',
+      timestamp: new Date(Date.now() - 86400000), // Yesterday
+      messages: [
+        {
+          id: '1',
+          text: 'Can you analyze our competitors in the food delivery market?',
+          sender: 'user',
+          timestamp: new Date(Date.now() - 86400000),
+        },
+        {
+          id: '2',
+          text: 'After analyzing competitors: 1. Competitor A has 40% market share 2. Competitor B focuses on premium restaurants 3. Competitor C has fastest delivery times',
+          sender: 'bot',
+          timestamp: new Date(Date.now() - 86300000),
+          mode: 'deep-think'
+        }
+      ]
+    },
+    {
+      id: 'chat2',
+      title: 'Image Generation',
+      preview: 'Restaurant menu design...',
+      timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+      messages: [
+        {
+          id: '1',
+          text: 'Generate an image of a modern restaurant menu',
+          sender: 'user',
+          timestamp: new Date(Date.now() - 3600000),
+          mode: 'image'
+        },
+        {
+          id: '2',
+          text: 'Here\'s the generated image of a modern restaurant menu',
+          sender: 'bot',
+          timestamp: new Date(Date.now() - 3590000),
+          isImage: true,
+          imageUrl: 'https://source.unsplash.com/random/800x400/?restaurant,menu'
+        }
+      ]
+    },
+    {
+      id: 'chat3',
+      title: 'Market Research',
+      preview: 'Latest food trends...',
+      timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
+      messages: [
+        {
+          id: '1',
+          text: 'Search for latest food trends in Southeast Asia',
+          sender: 'user',
+          timestamp: new Date(Date.now() - 1800000),
+          mode: 'search'
+        },
+        {
+          id: '2',
+          text: 'Search results for food trends:\n1. Plant-based meats growing 30% YoY\n2. Cloud kitchens expanding\n3. Ghost kitchens gaining popularity',
+          sender: 'bot',
+          timestamp: new Date(Date.now() - 1790000),
+          mode: 'search'
+        }
+      ]
+    }
+  ];
+
   const [messages, setMessages] = useState([
     {
       id: '1',
@@ -16,28 +86,25 @@ export default function Chatbot() {
   const [filePreview, setFilePreview] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState(null);
-  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [chatHistory, setChatHistory] = useState(sampleChatHistory);
+  const [currentChatId, setCurrentChatId] = useState(null);
 
-  // Initialize speech recognition
+  // Initialize speech recognition (no echo)
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
-      setIsSpeechSupported(true);
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = true;
+      recognitionInstance.interimResults = false;
       recognitionInstance.lang = 'en-US';
 
       recognitionInstance.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join('');
-        setInput(prev => prev + ' ' + transcript);
+        const transcript = event.results[0][0].transcript;
+        setInput(prev => prev ? `${prev} ${transcript}` : transcript);
       };
 
       recognitionInstance.onerror = (event) => {
@@ -52,6 +119,7 @@ export default function Chatbot() {
       };
 
       setRecognition(recognitionInstance);
+      return () => recognitionInstance.abort();
     }
   }, []);
 
@@ -71,6 +139,58 @@ export default function Chatbot() {
     }
   }, [input]);
 
+  // Load a chat from history
+  const loadChat = (chatId) => {
+    const chat = chatHistory.find(c => c.id === chatId);
+    if (chat) {
+      setMessages(chat.messages);
+      setCurrentChatId(chatId);
+    }
+  };
+
+  // Create new chat
+  const newChat = () => {
+    setMessages([
+      {
+        id: '1',
+        text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
+        sender: 'bot',
+        timestamp: new Date(),
+      },
+    ]);
+    setActiveMode('chat');
+    setFilePreview(null);
+    setInput('');
+    setCurrentChatId(null);
+  };
+
+  // Save current chat to history
+  const saveChatToHistory = () => {
+    if (messages.length <= 1) return; // Don't save empty chats
+    
+    const newChat = {
+      id: `chat${Date.now()}`,
+      title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
+      preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
+      timestamp: new Date(),
+      messages: [...messages]
+    };
+
+    setChatHistory(prev => [newChat, ...prev]);
+    setCurrentChatId(newChat.id);
+  };
+
+  // Prototype function for fake responses based on mode
+  const generateFakeResponse = (userInput, mode) => {
+    const responses = {
+      chat: `I understand you said: "${userInput}". This is a standard response from your HEX assistant.`,
+      'deep-think': `Deep analysis of "${userInput}":\n\n1. First point of consideration...\n2. Second perspective...\n3. Potential implications...\n\nThis is a more thorough response than standard chat mode.`,
+      search: `Search results for "${userInput}":\n\n1. First relevant result (example.com)\n2. Second source (example.org)\n3. Additional information (example.net)`,
+      image: `Here's the generated image based on: "${userInput}"`
+    };
+    return responses[mode] || responses.chat;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -84,51 +204,39 @@ export default function Chatbot() {
       file: filePreview
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
     setFilePreview(null);
     setLoading(true);
 
-    // Simulate different response types based on mode
+    // Simulate API call with different response types
     setTimeout(() => {
-      let botMsg;
-      switch(activeMode) {
-        case 'image':
-          botMsg = {
-            id: (Date.now() + 1).toString(),
-            text: `Here's the image you requested based on: "${input}"`,
-            sender: 'bot',
-            timestamp: new Date(),
-            isImage: true,
-            imageUrl: `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}`
-          };
-          break;
-        case 'deep-think':
-          botMsg = {
-            id: (Date.now() + 1).toString(),
-            text: `After deep consideration about "${input}", here's my analysis:\n\n1. First point of analysis...\n2. Second perspective...\n3. Potential implications...\n\nThis is a more thorough response than standard chat mode.`,
-            sender: 'bot',
-            timestamp: new Date(),
-          };
-          break;
-        case 'search':
-          botMsg = {
-            id: (Date.now() + 1).toString(),
-            text: `Search results for "${input}":\n\n1. First relevant result...\n2. Second source...\n3. Additional information...`,
-            sender: 'bot',
-            timestamp: new Date(),
-          };
-          break;
-        default:
-          botMsg = {
-            id: (Date.now() + 1).toString(),
-            text: `Thank you for your message. I understand you said: "${input}"\n\nThis is a standard response.`,
-            sender: 'bot',
-            timestamp: new Date(),
-          };
-      }
-      setMessages((prev) => [...prev, botMsg]);
+      const botMsg = {
+        id: (Date.now() + 1).toString(),
+        text: generateFakeResponse(input, activeMode),
+        sender: 'bot',
+        timestamp: new Date(),
+        isImage: activeMode === 'image',
+        imageUrl: activeMode === 'image' ? 
+          `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}` : null
+      };
+
+      setMessages(prev => [...prev, botMsg]);
       setLoading(false);
+      
+      // Save to history if this is a new chat
+      if (!currentChatId) {
+        saveChatToHistory();
+      } else {
+        // Update existing chat in history
+        setChatHistory(prev => 
+          prev.map(chat => 
+            chat.id === currentChatId 
+              ? {...chat, messages: [...chat.messages, userMsg, botMsg]} 
+              : chat
+          )
+        );
+      }
     }, 1500);
   };
 
@@ -137,19 +245,6 @@ export default function Chatbot() {
       e.preventDefault();
       handleSubmit(e);
     }
-  };
-
-  const newChat = () => {
-    setMessages([
-      {
-        id: '1',
-        text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
-        sender: 'bot',
-        timestamp: new Date(),
-      },
-    ]);
-    setActiveMode('chat');
-    setFilePreview(null);
   };
 
   const handleFileChange = (e) => {
@@ -173,7 +268,7 @@ export default function Chatbot() {
   };
 
   const toggleRecording = () => {
-    if (!isSpeechSupported) {
+    if (!recognition) {
       alert('Speech recognition is not supported in your browser');
       return;
     }
@@ -182,66 +277,108 @@ export default function Chatbot() {
       recognition.stop();
       setIsRecording(false);
     } else {
+      setInput(''); // Clear input when starting new recording
       recognition.start();
       setIsRecording(true);
     }
   };
 
   const renderModeIndicator = () => {
-    switch(activeMode) {
-      case 'image':
-        return <span className="flex items-center gap-1 text-blue-600"><Image className="w-4 h-4" /> Image</span>;
-      case 'deep-think':
-        return <span className="flex items-center gap-1 text-purple-600"><Brain className="w-4 h-4" /> Deep Think</span>;
-      case 'search':
-        return <span className="flex items-center gap-1 text-green-600"><Search className="w-4 h-4" /> Search</span>;
-      default:
-        return <span className="flex items-center gap-1 text-gray-600">Chat</span>;
+    const modeConfig = {
+      chat: { icon: null, color: 'gray' },
+      'deep-think': { icon: <Brain className="w-4 h-4" />, color: 'purple' },
+      search: { icon: <Search className="w-4 h-4" />, color: 'green' },
+      image: { icon: <Image className="w-4 h-4" />, color: 'blue' }
+    };
+
+    const { icon, color } = modeConfig[activeMode] || modeConfig.chat;
+    return (
+      <span className={`flex items-center gap-1 text-${color}-600`}>
+        {icon}
+        {activeMode === 'deep-think' ? 'Deep Think' : 
+         activeMode === 'search' ? 'Search' : 
+         activeMode === 'image' ? 'Image' : 'Chat'}
+      </span>
+    );
+  };
+
+  const formatDate = (date) => {
+    const now = new Date();
+    const diff = now - date;
+    const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex">
+      {/* Sidebar Toggle Button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className={`fixed left-4 top-16 z-50 p-2 rounded-full bg-white border border-gray-200 shadow-sm ${
+          sidebarOpen ? 'ml-64' : 'ml-0'
+        } transition-all duration-300`}
+      >
+        {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+      </button>
+
       {/* Sidebar */}
-      {sidebarOpen && (
-        <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
-          <div className="p-4">
-            <button
-              onClick={newChat}
-              className="w-full flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-100 transition-colors text-sm font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New chat</span>
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2">
-            {/* History items would go here */}
+      <div
+        className={`w-64 bg-white border-r border-gray-200 flex flex-col h-screen absolute z-40 transition-all duration-300 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="p-4">
+          <button
+            onClick={newChat}
+            className="w-full flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-100 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New chat</span>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2">
+          {chatHistory.length > 0 ? (
+            <>
+              {chatHistory.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => loadChat(chat.id)}
+                  className={`w-full text-left p-3 rounded-lg mb-2 hover:bg-gray-100 transition-colors ${
+                    currentChatId === chat.id ? 'bg-gray-100' : ''
+                  }`}
+                >
+                  <div className="font-medium text-gray-900 truncate">{chat.title}</div>
+                  <div className="text-sm text-gray-500 truncate">{chat.preview}</div>
+                  <div className="text-xs text-gray-400 mt-1">{formatDate(chat.timestamp)}</div>
+                </button>
+              ))}
+            </>
+          ) : (
             <div className="p-2 text-sm text-gray-500 text-center">
               No previous chats
             </div>
-          </div>
-          <div className="p-4 border-t border-gray-200">
-            <div className="text-xs text-gray-500">
-              <p>Your data is secure and private</p>
-            </div>
+          )}
+        </div>
+        <div className="p-4 border-t border-gray-200">
+          <div className="text-xs text-gray-500">
+            <p>Your data is secure and private</p>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-md hover:bg-gray-100"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <h1 className="text-lg font-semibold">HEX Assistant</h1>
-          <div className="w-8"></div> {/* Spacer for balance */}
-        </header>
-
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${
+        sidebarOpen ? 'ml-64' : 'ml-0'
+      }`}>
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="max-w-3xl mx-auto w-full p-4">
@@ -265,9 +402,9 @@ export default function Chatbot() {
                     }`}
                   >
                     {msg.sender === 'bot' ? (
-                      <img src="/grab.png" alt="AI Icon" />
+                      <img src="/grab.png" alt="HEX Assistant" className="w-6 h-6" />
                     ) : (
-                      <span className="text-sm font-medium text-white">Kim</span>
+                      <span className="text-sm font-medium">You</span>
                     )}
                   </div>
                   <div
@@ -333,7 +470,7 @@ export default function Chatbot() {
               <div className="mb-6 pr-8">
                 <div className="flex gap-4 flex-row">
                   <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-5 h-5" />
+                    <img src="/grab.png" alt="HEX Assistant" className="w-6 h-6" />
                   </div>
                   <div className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-3 rounded-2xl">
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
@@ -355,49 +492,28 @@ export default function Chatbot() {
           <div className="max-w-3xl mx-auto w-full">
             {/* Mode Selector */}
             <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
-              <button
-                onClick={() => setActiveMode('chat')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'chat' 
-                    ? 'bg-blue-100 text-blue-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Chat
-              </button>
-              <button
-                onClick={() => setActiveMode('deep-think')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'deep-think' 
-                    ? 'bg-purple-100 text-purple-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <Brain className="w-4 h-4" />
-                Deep Think
-              </button>
-              <button
-                onClick={() => setActiveMode('search')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'search' 
-                    ? 'bg-green-100 text-green-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <Search className="w-4 h-4" />
-                Search
-              </button>
-              <button
-                onClick={() => setActiveMode('image')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'image' 
-                    ? 'bg-orange-100 text-orange-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <Image className="w-4 h-4" />
-                Text to Image
-              </button>
+              {['chat', 'deep-think', 'search', 'image'].map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setActiveMode(mode)}
+                  className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
+                    activeMode === mode 
+                      ? `bg-${mode === 'deep-think' ? 'purple' : 
+                         mode === 'search' ? 'green' : 
+                         mode === 'image' ? 'blue' : 'gray'}-100 text-${mode === 'deep-think' ? 'purple' : 
+                         mode === 'search' ? 'green' : 
+                         mode === 'image' ? 'blue' : 'gray'}-600` 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {mode === 'deep-think' ? <Brain className="w-4 h-4" /> : 
+                   mode === 'search' ? <Search className="w-4 h-4" /> : 
+                   mode === 'image' ? <Image className="w-4 h-4" /> : null}
+                  {mode === 'deep-think' ? 'Deep Think' : 
+                   mode === 'search' ? 'Search' : 
+                   mode === 'image' ? 'Image' : 'Chat'}
+                </button>
+              ))}
             </div>
 
             <form
@@ -476,9 +592,6 @@ export default function Chatbot() {
                 <span>{renderModeIndicator()}</span>
               </div>
             </form>
-            <div className="text-xs text-gray-500 text-center mt-2">
-              HEX can make mistakes. Consider checking important information.
-            </div>
           </div>
         </div>
       </div>
