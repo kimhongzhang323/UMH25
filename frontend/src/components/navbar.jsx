@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users } from 'lucide-react';
+import { Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users,Settings } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -138,7 +138,14 @@ export default function Navbar() {
                 >
                   <Users className="mr-3 h-5 w-5" />
                   Customer Service
-                </a>          
+          </a>
+          <a 
+            href="/profile" 
+            className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Profile
+          </a>          
 
 
         </div>
@@ -196,12 +203,19 @@ export default function Navbar() {
                 </a>
                 <a 
                   href="/customer-service" 
-                  className="flex items-center pb-1 pr-3 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
+                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
                   onClick={toggleMobileMenu}
                 >
                   <Users className="mr-3 h-5 w-5" />
                   Customer Service
                 </a>
+                <a 
+                  href="/profile" 
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Profile
+                </a>  
               </div>
             </div>
 
