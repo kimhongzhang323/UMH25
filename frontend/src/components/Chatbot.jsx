@@ -1,11 +1,106 @@
 // Imports
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Sparkles, Plus, Menu, Image, Search, File, Brain, Mic, MicOff, Store, ShoppingBag } from 'lucide-react';
+import { 
+  Send, 
+  Bot, 
+  User, 
+  Loader2, 
+  Sparkles, 
+  Plus, 
+  Menu, 
+  Image, 
+  Search, 
+  File, 
+  Brain, 
+  Mic, 
+  MicOff, 
+  Store, 
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 
 // Component
 export default function Chatbot() {
+  // Sample chat history data - from main branch
+  const sampleChatHistory = [
+    {
+      id: 'chat1',
+      title: 'Marketing Strategy',
+      preview: 'Let me analyze our competitors...',
+      timestamp: new Date(Date.now() - 86400000), // Yesterday
+      messages: [
+        {
+          id: '1',
+          text: 'Can you analyze our competitors in the food delivery market?',
+          sender: 'user',
+          timestamp: new Date(Date.now() - 86400000),
+        },
+        {
+          id: '2',
+          text: 'After analyzing competitors: 1. Competitor A has 40% market share 2. Competitor B focuses on premium restaurants 3. Competitor C has fastest delivery times',
+          sender: 'bot',
+          timestamp: new Date(Date.now() - 86300000),
+          mode: 'deep-think'
+        }
+      ]
+    },
+    {
+      id: 'chat2',
+      title: 'Image Generation',
+      preview: 'Restaurant menu design...',
+      timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+      messages: [
+        {
+          id: '1',
+          text: 'Generate an image of a modern restaurant menu',
+          sender: 'user',
+          timestamp: new Date(Date.now() - 3600000),
+          mode: 'image'
+        },
+        {
+          id: '2',
+          text: 'Here\'s the generated image of a modern restaurant menu',
+          sender: 'bot',
+          timestamp: new Date(Date.now() - 3590000),
+          isImage: true,
+          imageUrl: 'https://source.unsplash.com/random/800x400/?restaurant,menu'
+        }
+      ]
+    },
+    {
+      id: 'chat3',
+      title: 'Market Research',
+      preview: 'Latest food trends...',
+      timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
+      messages: [
+        {
+          id: '1',
+          text: 'Search for latest food trends in Southeast Asia',
+          sender: 'user',
+          timestamp: new Date(Date.now() - 1800000),
+          mode: 'search'
+        },
+        {
+          id: '2',
+          text: 'Search results for food trends:\n1. Plant-based meats growing 30% YoY\n2. Cloud kitchens expanding\n3. Ghost kitchens gaining popularity',
+          sender: 'bot',
+          timestamp: new Date(Date.now() - 1790000),
+          mode: 'search'
+        }
+      ]
+    }
+  ];
+
   // State Management
-  const [messages, setMessages] = useState([]); // Start with no messages
+  const [messages, setMessages] = useState([
+    {
+      id: '1',
+      text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
+      sender: 'bot',
+      timestamp: new Date(),
+    },
+  ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeMode, setActiveMode] = useState('chat');
@@ -14,7 +109,7 @@ export default function Chatbot() {
   const [recognition, setRecognition] = useState(null);
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [chatHistory, setChatHistory] = useState([]); // Store chat history
+  const [chatHistory, setChatHistory] = useState(sampleChatHistory); // Use sample data from main branch
   const [currentChatId, setCurrentChatId] = useState(null); // Track the active chat
   const [merchantProfile, setMerchantProfile] = useState({
     merchantType: '',
@@ -44,7 +139,6 @@ export default function Chatbot() {
     // Speech recognition initialization
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
-      setIsSpeechSupported(true);
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = false;
       recognitionInstance.interimResults = false; // Ensure only final results are processed
@@ -52,7 +146,7 @@ export default function Chatbot() {
 
       recognitionInstance.onresult = (event) => {
         const transcript = event.results[0][0].transcript; // Use only the first result
-        setInput(prev => prev + ' ' + transcript);
+        setInput(prev => prev ? `${prev} ${transcript}` : transcript);
         recognitionInstance.stop(); // Stop recording after processing input
         setIsRecording(false); // Update recording state
       };
@@ -69,6 +163,7 @@ export default function Chatbot() {
       };
 
       setRecognition(recognitionInstance);
+      return () => recognitionInstance.abort();
     }
   }, []);
 
@@ -105,11 +200,17 @@ export default function Chatbot() {
     if (currentChatId) {
       setChatHistory((prev) =>
         prev.map((chat) =>
-          chat.id === currentChatId ? { ...chat, messages, name: messages[1]?.text || chat.name } : chat
+          chat.id === currentChatId ? { 
+            ...chat, 
+            messages, 
+            title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || chat.title,
+            preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
+            timestamp: new Date()
+          } : chat
         )
       );
     }
-  }, [messages]);
+  }, [messages, currentChatId]);
 
   // Handlers
   const handleProfileSubmit = (e) => {
@@ -120,11 +221,52 @@ export default function Chatbot() {
       ...prev,
       {
         id: Date.now().toString(),
-        text: `Welcome to Merchant Guidance mode, ${merchantProfile.name}! As a ${merchantProfile.businessSize} business with a ${merchantProfile.merchantType} selling ${merchantProfile.productType}, I'll provide personalized advice to help you grow. What specific area would you like guidance on today?`,
+        text: `Welcome to Merchant Guidance mode, ${merchantProfile.name || 'merchant'}! As a ${merchantProfile.businessSize} business with a ${merchantProfile.merchantType} selling ${merchantProfile.productType}, I'll provide personalized advice to help you grow. What specific area would you like guidance on today?`,
         sender: 'bot',
         timestamp: new Date(),
       }
     ]);
+  };
+
+  // Load a chat from history
+  const loadChat = (chatId) => {
+    const chat = chatHistory.find(c => c.id === chatId);
+    if (chat) {
+      setMessages(chat.messages);
+      setCurrentChatId(chatId);
+    }
+  };
+
+  // Create new chat
+  const newChat = () => {
+    setMessages([
+      {
+        id: '1',
+        text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
+        sender: 'bot',
+        timestamp: new Date(),
+      },
+    ]);
+    setActiveMode('chat');
+    setFilePreview(null);
+    setInput('');
+    setCurrentChatId(null);
+  };
+
+  // Save current chat to history
+  const saveChatToHistory = () => {
+    if (messages.length <= 1) return; // Don't save empty chats
+    
+    const newChat = {
+      id: `chat${Date.now()}`,
+      title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
+      preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
+      timestamp: new Date(),
+      messages: [...messages]
+    };
+
+    setChatHistory(prev => [newChat, ...prev]);
+    setCurrentChatId(newChat.id);
   };
 
   const handleSubmit = async (e) => {
@@ -139,36 +281,65 @@ export default function Chatbot() {
       mode: activeMode,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
 
-    // Extract keywords (basic implementation)
-    const keywords = input
-      .split(' ')
-      .filter((word) => word.length > 3)
-      .slice(0, 3)
-      .join(', ');
-
-    // Add a new chat to the sidebar
-    const newChatId = Date.now().toString();
-    setChatHistory((prev) => [
-      ...prev,
-      { id: newChatId, name: keywords || 'New Chat', messages: [userMsg] },
-    ]);
-    setCurrentChatId(newChatId);
-
-    // Simulate bot response
     setTimeout(() => {
+      let responseText;
+      
+      // Handle merchant guidance mode
+      if (activeMode === 'merchant-guidance') {
+        responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
+      } else {
+        // Use the generateFakeResponse function from main branch
+        responseText = generateFakeResponse(input, activeMode);
+      }
+      
       const botMsg = {
         id: (Date.now() + 1).toString(),
-        text: `You asked about: ${keywords || input}. Here's my response...`,
+        text: responseText,
         sender: 'bot',
         timestamp: new Date(),
+        isImage: activeMode === 'image',
+        imageUrl: activeMode === 'image' ? 
+          `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}` : null
       };
-      setMessages((prev) => [...prev, botMsg]);
+
+      setMessages(prev => [...prev, botMsg]);
       setLoading(false);
+      
+      // Save to history if this is a new chat
+      if (!currentChatId) {
+        saveChatToHistory();
+      } else {
+        // Update existing chat in history
+        setChatHistory(prev => 
+          prev.map(chat => 
+            chat.id === currentChatId 
+              ? {
+                ...chat, 
+                messages: [...chat.messages, userMsg, botMsg],
+                title: userMsg.text.substring(0, 30) || chat.title,
+                preview: botMsg.text.substring(0, 50) || 'New conversation',
+                timestamp: new Date()
+              } 
+              : chat
+          )
+        );
+      }
     }, 1500);
+  };
+
+  // Prototype function for fake responses based on mode - from main branch
+  const generateFakeResponse = (userInput, mode) => {
+    const responses = {
+      chat: `I understand you said: "${userInput}". This is a standard response from your HEX assistant.`,
+      'deep-think': `Deep analysis of "${userInput}":\n\n1. First point of consideration...\n2. Second perspective...\n3. Potential implications...\n\nThis is a more thorough response than standard chat mode.`,
+      search: `Search results for "${userInput}":\n\n1. First relevant result (example.com)\n2. Second source (example.org)\n3. Additional information (example.net)`,
+      image: `Here's the generated image based on: "${userInput}"`
+    };
+    return responses[mode] || responses.chat;
   };
 
   const handleKeyDown = (e) => {
@@ -195,7 +366,7 @@ export default function Chatbot() {
   };
 
   const toggleRecording = () => {
-    if (!isSpeechSupported) {
+    if (!recognition) {
       alert('Speech recognition is not supported in your browser');
       return;
     }
@@ -204,58 +375,10 @@ export default function Chatbot() {
       recognition.stop();
       setIsRecording(false);
     } else {
-      if (recognition) {
-        recognition.start();
-        setIsRecording(true);
-      }
+      setInput(''); // Clear input when starting new recording
+      recognition.start();
+      setIsRecording(true);
     }
-  };
-
-  const newChat = () => {
-    const newChatId = Date.now().toString();
-    const initialMessage = {
-      id: '1',
-      text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
-      sender: 'bot',
-      timestamp: new Date(),
-    };
-
-    setChatHistory((prev) => [
-      ...prev,
-      { id: newChatId, name: 'New Chat', messages: [initialMessage] },
-    ]);
-    setMessages([initialMessage]);
-    setCurrentChatId(newChatId);
-    setActiveMode('chat');
-    setFilePreview(null);
-  };
-
-  const handleChatNameChange = (chatId, newName) => {
-    setChatHistory((prev) =>
-      prev.map((chat) =>
-        chat.id === chatId ? { ...chat, name: newName } : chat
-      )
-    );
-  };
-
-  const deleteChat = (chatId) => {
-    setChatHistory((prev) => prev.filter((chat) => chat.id !== chatId));
-    if (currentChatId === chatId) {
-      setMessages([]);
-      setCurrentChatId(null);
-    }
-  };
-
-  const loadChat = (chatId) => {
-    const chat = chatHistory.find((c) => c.id === chatId);
-    if (chat) {
-      setMessages(chat.messages);
-      setCurrentChatId(chatId);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
   };
 
   const handleChatNameEdit = (chatId) => {
@@ -266,13 +389,18 @@ export default function Chatbot() {
     setEditingChatId(null);
   };
 
-  // Utility Functions
-  const scrollToBottom = () => {
-    const navbarHeight = document.querySelector('header')?.offsetHeight || 0; // Adjust for navbar height
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.scrollBy(0, -navbarHeight); // Offset the scroll position
+  const deleteChat = (chatId) => {
+    setChatHistory((prev) => prev.filter((chat) => chat.id !== chatId));
+    if (currentChatId === chatId) {
+      newChat(); // Create a new chat if the current one is deleted
+    }
   };
 
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  // Utility Functions for Merchant Guidance (from Micheal branch)
   const generatePersonalizedMerchantResponse = (query, profile) => {
     const lowercaseQuery = query.toLowerCase();
     
@@ -375,7 +503,6 @@ export default function Chatbot() {
                       'Market-appropriate expansion'}`;
     }
     
-    // ... keep other existing conditions (pricing, inventory, customer) with similar enhancements ...
     // Pricing Strategy
     if (lowercaseQuery.includes('pricing') || lowercaseQuery.includes('price')) {
       return `For your ${profile.businessSize} business selling ${profile.productType} as a ${profile.merchantType}, here's my pricing guidance:
@@ -445,17 +572,39 @@ Would you like specific details about any of these areas?`;
   };
 
   const renderModeIndicator = () => {
-    switch(activeMode) {
-      case 'image':
-        return <span className="flex items-center gap-1 text-blue-600"><Image className="w-4 h-4" /> Image</span>;
-      case 'deep-think':
-        return <span className="flex items-center gap-1 text-purple-600"><Brain className="w-4 h-4" /> Deep Think</span>;
-      case 'search':
-        return <span className="flex items-center gap-1 text-green-600"><Search className="w-4 h-4" /> Search</span>;
-      case 'merchant-guidance':
-        return <span className="flex items-center gap-1 text-yellow-600"><Store className="w-4 h-4" /> Merchant Guidance</span>;
-      default:
-        return <span className="flex items-center gap-1 text-gray-600">Chat</span>;
+    const modeConfig = {
+      chat: { icon: null, color: 'gray' },
+      'deep-think': { icon: <Brain className="w-4 h-4" />, color: 'purple' },
+      search: { icon: <Search className="w-4 h-4" />, color: 'green' },
+      image: { icon: <Image className="w-4 h-4" />, color: 'blue' },
+      'merchant-guidance': { icon: <Store className="w-4 h-4" />, color: 'yellow' }
+    };
+
+    const { icon, color } = modeConfig[activeMode] || modeConfig.chat;
+    return (
+      <span className={`flex items-center gap-1 text-${color}-600`}>
+        {icon}
+        {activeMode === 'deep-think' ? 'Deep Think' : 
+         activeMode === 'search' ? 'Search' : 
+         activeMode === 'image' ? 'Image' : 
+         activeMode === 'merchant-guidance' ? 'Merchant Guidance' : 'Chat'}
+      </span>
+    );
+  };
+
+  const formatDate = (date) => {
+    const now = new Date();
+    const diff = now - date;
+    const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
     }
   };
 
@@ -606,7 +755,6 @@ Would you like specific details about any of these areas?`;
                     className="w-full p-2 border border-gray-300 rounded-md"
                     placeholder="Region/State"
                   />
-                  
                 </div>
               </div>
             </div>
@@ -630,84 +778,92 @@ Would you like specific details about any of these areas?`;
         </div>
       )}
 
-      {/* Sidebar */}
-      {sidebarOpen && (
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-screen transition-transform duration-300">
-          <div className="p-4">
-            <button
-              onClick={newChat}
-              className="w-full flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-100 transition-colors text-sm font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New chat</span>
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2">
-            {chatHistory.length > 0 ? (
-              chatHistory.map((chat) => (
-                <div
-                  key={chat.id}
-                  onClick={() => loadChat(chat.id)}
-                  className={`flex items-center gap-3 rounded-lg p-3 hover:bg-gray-100 transition-colors text-sm font-medium ${
-                    chat.id === currentChatId ? 'bg-gray-100' : ''
-                  }`}
-                >
-                  <span className="flex-1">{chat.name}</span>
-                </div>
-              ))
-            ) : (
-              <div className="p-2 text-sm text-gray-500 text-center">
-                No previous chats
-              </div>
-            )}
-          </div>
-          {/* Merchant Profile Quick View if profile exists */}
-          {merchantProfile.merchantType && (
-            <div className="p-3 border-t border-gray-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Store className="w-4 h-4 text-yellow-600" />
-                <span className="text-sm font-medium">Merchant Profile</span>
-                <button 
-                  onClick={() => setShowProfileSetup(true)}
-                  className="ml-auto text-xs text-blue-600"
-                >
-                  Edit
-                </button>
-              </div>
-              <div className="text-xs text-gray-600 space-y-1">
-                {merchantProfile.merchantType && <p><span className="font-medium">Merchant Type:</span> {merchantProfile.merchantType}</p>}
-                {merchantProfile.productType && <p><span className="font-medium">Products:</span> {merchantProfile.productType}</p>}
-                {merchantProfile.businessSize && <p><span className="font-medium">Business Size:</span> {merchantProfile.businessSize}</p>}
-                {merchantProfile.challenges.length > 0 && (
-                  <p>
-                    <span className="font-medium">Challenges:</span> {merchantProfile.challenges.join(', ')}
-                  </p>
-                )}
-                {merchantProfile.location.marketType && <p><span className="font-medium">Community Type:</span> {merchantProfile.location.marketType}</p>}
-                {merchantProfile.location.region && <p><span className="font-medium">Region:</span> {merchantProfile.location.region}</p>}
-              </div>
-            </div>
-          )}
-          <div className="p-4 border-t border-gray-200">
-            <div className="text-xs text-gray-500">
-              <p>Your data is secure and private</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Sidebar Toggle Button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className={`fixed left-4 top-16 z-50 p-2 rounded-full bg-white border border-gray-200 shadow-sm ${
+          sidebarOpen ? 'ml-64' : 'ml-0'
+        } transition-all duration-300`}
+      >
+        {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+      </button>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-start p-4">
+      {/* Sidebar */}
+      <div
+        className={`w-64 bg-white border-r border-gray-200 flex flex-col h-screen absolute z-40 transition-all duration-300 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="p-4">
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-3 rounded-full hover:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={newChat}
+            className="w-full flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-100 transition-colors text-sm font-medium"
           >
-            <Menu className="w-6 h-6" />
+            <Plus className="w-4 h-4" />
+            <span>New chat</span>
           </button>
         </div>
+        <div className="flex-1 overflow-y-auto p-2">
+          {chatHistory.length > 0 ? (
+            <>
+              {chatHistory.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => loadChat(chat.id)}
+                  className={`w-full text-left p-3 rounded-lg mb-2 hover:bg-gray-100 transition-colors ${
+                    currentChatId === chat.id ? 'bg-gray-100' : ''
+                  }`}
+                >
+                  <div className="font-medium text-gray-900 truncate">{chat.title}</div>
+                  <div className="text-sm text-gray-500 truncate">{chat.preview}</div>
+                  <div className="text-xs text-gray-400 mt-1">{formatDate(chat.timestamp)}</div>
+                </button>
+              ))}
+            </>
+          ) : (
+            <div className="p-2 text-sm text-gray-500 text-center">
+              No previous chats
+            </div>
+          )}
+        </div>
+        {/* Merchant Profile Quick View if profile exists */}
+        {merchantProfile.merchantType && (
+          <div className="p-3 border-t border-gray-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Store className="w-4 h-4 text-yellow-600" />
+              <span className="text-sm font-medium">Merchant Profile</span>
+              <button 
+                onClick={() => setShowProfileSetup(true)}
+                className="ml-auto text-xs text-blue-600"
+              >
+                Edit
+              </button>
+            </div>
+            <div className="text-xs text-gray-600 space-y-1">
+              {merchantProfile.merchantType && <p><span className="font-medium">Merchant Type:</span> {merchantProfile.merchantType}</p>}
+              {merchantProfile.productType && <p><span className="font-medium">Products:</span> {merchantProfile.productType}</p>}
+              {merchantProfile.businessSize && <p><span className="font-medium">Business Size:</span> {merchantProfile.businessSize}</p>}
+              {merchantProfile.challenges.length > 0 && (
+                <p>
+                  <span className="font-medium">Challenges:</span> {merchantProfile.challenges.join(', ')}
+                </p>
+              )}
+              {merchantProfile.location.marketType && <p><span className="font-medium">Community Type:</span> {merchantProfile.location.marketType}</p>}
+              {merchantProfile.location.region && <p><span className="font-medium">Region:</span> {merchantProfile.location.region}</p>}
+            </div>
+          </div>
+        )}
+        <div className="p-4 border-t border-gray-200">
+          <div className="text-xs text-gray-500">
+            <p>Your data is secure and private</p>
+          </div>
+        </div>
+      </div>
 
+      {/* Main Content */}
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${
+        sidebarOpen ? 'ml-64' : 'ml-0'
+      }`}>
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="max-w-3xl mx-auto w-full p-4">
@@ -734,7 +890,7 @@ Would you like specific details about any of these areas?`;
                       }`}
                     >
                       {msg.sender === 'bot' ? (
-                        <img src="/grab.png" alt="AI Icon" />
+                        <img src="/grab.png" alt="HEX Assistant" className="w-6 h-6" />
                       ) : (
                         <span className="text-sm font-medium text-white">
                           {merchantProfile.name ? merchantProfile.name.charAt(0) : "U"}
@@ -806,7 +962,7 @@ Would you like specific details about any of these areas?`;
               <div className="mb-6 pr-8">
                 <div className="flex gap-4 flex-row">
                   <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-5 h-5" />
+                    <img src="/grab.png" alt="HEX Assistant" className="w-6 h-6" />
                   </div>
                   <div className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-3 rounded-2xl">
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
@@ -961,9 +1117,6 @@ Would you like specific details about any of these areas?`;
                 <span>{renderModeIndicator()}</span>
               </div>
             </form>
-            <div className="text-xs text-gray-500 text-center mt-2">
-              HEX can make mistakes. Consider checking important information.
-            </div>
           </div>
         </div>
       </div>
