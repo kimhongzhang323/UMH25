@@ -764,7 +764,7 @@ const Dashboard = () => {
       {chatOpen && (
         <div className="fixed bottom-4 right-4 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
           <div className="bg-blue-600 text-white p-3 rounded-t-xl flex justify-between items-center">
-            <h3 className="font-medium">KFC AI Assistant</h3>
+            <h3 className="font-medium">HEX Assistant</h3>
             <button onClick={() => setChatOpen(false)} className="text-white hover:text-blue-200">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
