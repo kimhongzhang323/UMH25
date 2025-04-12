@@ -97,7 +97,7 @@ export default function Navbar() {
               alt="Grab logo" 
             />
             <span className="ml-3 text-xl font-semibold text-gray-900">
-              HEX Assistant
+              MEX Assistant
             </span>
           </div>
           <button 
@@ -189,7 +189,7 @@ export default function Navbar() {
                   alt="Grab logo" 
                 />
                 <span className="ml-3 text-xl font-semibold text-gray-900 hidden md:block">
-                  HEX Assistant
+                  MEX Assistant
                 </span>
               </div>
 

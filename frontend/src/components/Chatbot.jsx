@@ -17,12 +17,13 @@ import {
   Store, 
   ShoppingBag,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Languages
 } from 'lucide-react';
 
 // Component
 export default function Chatbot() {
-  // Sample chat history data - from main branch
+  // Sample chat history data
   const sampleChatHistory = [
     {
       id: 'chat1',
@@ -107,10 +108,15 @@ export default function Chatbot() {
   const [filePreview, setFilePreview] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState(null);
-  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [chatHistory, setChatHistory] = useState(sampleChatHistory); // Use sample data from main branch
-  const [currentChatId, setCurrentChatId] = useState(null); // Track the active chat
+  const [chatHistory, setChatHistory] = useState(sampleChatHistory);
+  const [currentChatId, setCurrentChatId] = useState(null);
+  const [examplePrompts, setExamplePrompts] = useState([
+    "How do I grow my business?",
+    "What are the best marketing strategies?",
+    "Can you help me analyze my sales data?",
+  ]);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [merchantProfile, setMerchantProfile] = useState({
     merchantType: '',
     productType: '',
@@ -118,23 +124,10 @@ export default function Chatbot() {
     challenges: [],
     location: {
       region: '',
-      marketType: '', // urban, suburban, rural
-    }
+      marketType: '',
+    },
+    language: 'en'
   });
-  const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [editingChatId, setEditingChatId] = useState(null); // Track which chat is being edited
-  const [examplePrompts, setExamplePrompts] = useState([
-    "How do I grow my business?",
-    "What are the best marketing strategies?",
-    "Can you help me analyze my sales data?",
-  ]); // Example prompts
-  const [merchantFilters, setMerchantFilters] = useState({
-    businessType: '',
-    productCategory: '',
-    location: '',
-    challenges: []
-  });
-  const [showFilterPanel, setShowFilterPanel] = useState(false);
 
   // Refs
   const messagesEndRef = useRef(null);
@@ -143,19 +136,18 @@ export default function Chatbot() {
 
   // Effects
   useEffect(() => {
-    // Speech recognition initialization
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = false; // Ensure only final results are processed
-      recognitionInstance.lang = 'en-US';
+      recognitionInstance.interimResults = false;
+      recognitionInstance.lang = merchantProfile.language === 'zh' ? 'zh-CN' : 'en-US';
 
       recognitionInstance.onresult = (event) => {
-        const transcript = event.results[0][0].transcript; // Use only the first result
+        const transcript = event.results[0][0].transcript;
         setInput(prev => prev ? `${prev} ${transcript}` : transcript);
-        recognitionInstance.stop(); // Stop recording after processing input
-        setIsRecording(false); // Update recording state
+        recognitionInstance.stop();
+        setIsRecording(false);
       };
 
       recognitionInstance.onerror = (event) => {
@@ -172,21 +164,19 @@ export default function Chatbot() {
       setRecognition(recognitionInstance);
       return () => recognitionInstance.abort();
     }
-  }, []);
+  }, [merchantProfile.language]);
 
   useEffect(() => {
-    // Scroll to bottom on new messages
     const scrollToBottom = () => {
-      const navbarHeight = document.querySelector('header')?.offsetHeight || 0; // Adjust for navbar height
+      const navbarHeight = document.querySelector('header')?.offsetHeight || 0;
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.scrollBy(0, -navbarHeight); // Offset the scroll position
+      window.scrollBy(0, -navbarHeight);
     };
 
     scrollToBottom();
   }, [messages, loading]);
 
   useEffect(() => {
-    // Adjust textarea height dynamically
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
@@ -195,15 +185,6 @@ export default function Chatbot() {
   }, [input]);
 
   useEffect(() => {
-    // Show profile setup for merchant guidance
-    if (activeMode === 'merchant-guidance' && 
-        (!merchantProfile.name || !merchantProfile.merchantType)) {
-      setShowProfileSetup(true);
-    }
-  }, [activeMode, merchantProfile]);
-
-  useEffect(() => {
-    // Sync chat history with current chat
     if (currentChatId) {
       setChatHistory((prev) =>
         prev.map((chat) =>
@@ -220,22 +201,6 @@ export default function Chatbot() {
   }, [messages, currentChatId]);
 
   // Handlers
-  const handleProfileSubmit = (e) => {
-    e.preventDefault();
-    setShowProfileSetup(false);
-    // Add a welcome message specific to merchant guidance
-    setMessages(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        text: `Welcome to Merchant Guidance mode, ${merchantProfile.name || 'merchant'}! As a ${merchantProfile.businessSize} business with a ${merchantProfile.merchantType} selling ${merchantProfile.productType}, I'll provide personalized advice to help you grow. What specific area would you like guidance on today?`,
-        sender: 'bot',
-        timestamp: new Date(),
-      }
-    ]);
-  };
-
-  // Load a chat from history
   const loadChat = (chatId) => {
     const chat = chatHistory.find(c => c.id === chatId);
     if (chat) {
@@ -244,7 +209,6 @@ export default function Chatbot() {
     }
   };
 
-  // Create new chat
   const newChat = () => {
     setMessages([
       {
@@ -260,9 +224,8 @@ export default function Chatbot() {
     setCurrentChatId(null);
   };
 
-  // Save current chat to history
   const saveChatToHistory = () => {
-    if (messages.length <= 1) return; // Don't save empty chats
+    if (messages.length <= 1) return;
     
     const newChat = {
       id: `chat${Date.now()}`,
@@ -295,11 +258,10 @@ export default function Chatbot() {
     setTimeout(() => {
       let responseText;
       
-      // Handle merchant guidance mode
-      if (activeMode === 'merchant-guidance') {
+      // Generate response based on merchant profile if available
+      if (merchantProfile.merchantType) {
         responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
       } else {
-        // Use the generateFakeResponse function from main branch
         responseText = generateFakeResponse(input, activeMode);
       }
       
@@ -316,11 +278,9 @@ export default function Chatbot() {
       setMessages(prev => [...prev, botMsg]);
       setLoading(false);
       
-      // Save to history if this is a new chat
       if (!currentChatId) {
         saveChatToHistory();
       } else {
-        // Update existing chat in history
         setChatHistory(prev => 
           prev.map(chat => 
             chat.id === currentChatId 
@@ -338,7 +298,6 @@ export default function Chatbot() {
     }, 1500);
   };
 
-  // Prototype function for fake responses based on mode - from main branch
   const generateFakeResponse = (userInput, mode) => {
     const responses = {
       chat: `I understand you said: "${userInput}". This is a standard response from your HEX assistant.`,
@@ -349,69 +308,9 @@ export default function Chatbot() {
     return responses[mode] || responses.chat;
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFilePreview({
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          preview: event.target.result
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const toggleRecording = () => {
-    if (!recognition) {
-      alert('Speech recognition is not supported in your browser');
-      return;
-    }
-
-    if (isRecording) {
-      recognition.stop();
-      setIsRecording(false);
-    } else {
-      setInput(''); // Clear input when starting new recording
-      recognition.start();
-      setIsRecording(true);
-    }
-  };
-
-  const handleChatNameEdit = (chatId) => {
-    setEditingChatId(chatId);
-  };
-
-  const saveChatName = () => {
-    setEditingChatId(null);
-  };
-
-  const deleteChat = (chatId) => {
-    setChatHistory((prev) => prev.filter((chat) => chat.id !== chatId));
-    if (currentChatId === chatId) {
-      newChat(); // Create a new chat if the current one is deleted
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
-  };
-
-  // Utility Functions for Merchant Guidance (from Micheal branch)
   const generatePersonalizedMerchantResponse = (query, profile) => {
     const lowercaseQuery = query.toLowerCase();
     
-    // Helper function to get tailored advice based on business maturity
     const getMaturityBasedAdvice = () => {
       const challengeCount = profile.challenges.length;
       if (challengeCount <= 1) return "emerging";
@@ -419,44 +318,32 @@ export default function Chatbot() {
       return "established";
     };
 
-    // Helper function to get channel strategy based on merchant type
     const getChannelStrategy = () => {
       switch(profile.merchantType) {
-        case 'physical':
-          return 'local SEO, community events, and foot traffic optimization';
-        case 'online':
-          return 'social media marketing, email campaigns, and marketplace optimization';
-        case 'b2b':
-          return 'LinkedIn marketing, industry networking, and referral programs';
-        case 'ecommerce':
-          return 'multi-channel selling, social commerce, and retargeting campaigns';
-        default:
-          return 'digital marketing and customer engagement';
+        case 'physical': return 'local SEO, community events, and foot traffic optimization';
+        case 'online': return 'social media marketing, email campaigns, and marketplace optimization';
+        case 'b2b': return 'LinkedIn marketing, industry networking, and referral programs';
+        case 'ecommerce': return 'multi-channel selling, social commerce, and retargeting campaigns';
+        default: return 'digital marketing and customer engagement';
       }
     };
 
-    // Helper function to get scaling advice based on business size
     const getScalingStrategy = () => {
       switch(profile.businessSize) {
-        case 'small':
-          return 'focus on building core customer base and optimizing operations';
-        case 'medium':
-          return 'invest in automation and expand market reach';
-        case 'large':
-          return 'optimize supply chain and explore new market segments';
-        default:
-          return 'sustainable growth and market expansion';
+        case 'small': return 'focus on building core customer base and optimizing operations';
+        case 'medium': return 'invest in automation and expand market reach';
+        case 'large': return 'optimize supply chain and explore new market segments';
+        default: return 'sustainable growth and market expansion';
       }
     };
 
-    // Helper function to get location-based strategy
     const getLocationStrategy = () => {
       const { location } = profile;
       if (!location.marketType) return 'location-based marketing';
 
       switch(location.marketType) {
         case 'urban':
-          return `dense urban market penetration, focusing on convenience and quick service for busy city customers${
+          return `dense urban market penetration, focusing on convenience and quick service${
             profile.merchantType === 'physical' ? ', leveraging high foot traffic areas' : 
             ', targeting mobile-first urban consumers'
           }`;
@@ -470,8 +357,7 @@ export default function Chatbot() {
             profile.merchantType === 'physical' ? ', being a destination business' : 
             'focusing on delivery reliability and rural customer service'
           }`;
-        default:
-          return 'balanced market approach across different location types';
+        default: return 'balanced market approach across different location types';
       }
     };
 
@@ -578,25 +464,47 @@ Would you like me to help design a specific customer retention campaign?`;
 Would you like specific details about any of these areas?`;
   };
 
-  const renderModeIndicator = () => {
-    const modeConfig = {
-      chat: { icon: null, color: 'gray' },
-      'deep-think': { icon: <Brain className="w-4 h-4" />, color: 'purple' },
-      search: { icon: <Search className="w-4 h-4" />, color: 'green' },
-      image: { icon: <Image className="w-4 h-4" />, color: 'blue' },
-      'merchant-guidance': { icon: <Store className="w-4 h-4" />, color: 'yellow' }
-    };
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
 
-    const { icon, color } = modeConfig[activeMode] || modeConfig.chat;
-    return (
-      <span className={`flex items-center gap-1 text-${color}-600`}>
-        {icon}
-        {activeMode === 'deep-think' ? 'Deep Think' : 
-         activeMode === 'search' ? 'Search' : 
-         activeMode === 'image' ? 'Image' : 
-         activeMode === 'merchant-guidance' ? 'Merchant Guidance' : 'Chat'}
-      </span>
-    );
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setFilePreview({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          preview: event.target.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (!recognition) {
+      alert('Speech recognition is not supported in your browser');
+      return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+    } else {
+      setInput('');
+      recognition.start();
+      setIsRecording(true);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
   };
 
   const formatDate = (date) => {
@@ -604,18 +512,12 @@ Would you like specific details about any of these areas?`;
     const diff = now - date;
     const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 0) {
-      return 'Today';
-    } else if (diffDays === 1) {
-      return 'Yesterday';
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   };
 
-  // Render example prompts if no messages exist
   const renderExamplePrompts = () => (
     <div className="text-center mt-10">
       <h2 className="text-xl font-semibold mb-4">What can I help with?</h2>
@@ -633,158 +535,27 @@ Would you like specific details about any of these areas?`;
     </div>
   );
 
-  // Render
+  const renderModeIndicator = () => {
+    const modeConfig = {
+      chat: { icon: null, color: 'gray' },
+      'deep-think': { icon: <Brain className="w-4 h-4" />, color: 'purple' },
+      search: { icon: <Search className="w-4 h-4" />, color: 'green' },
+      image: { icon: <Image className="w-4 h-4" />, color: 'blue' }
+    };
+
+    const { icon, color } = modeConfig[activeMode] || modeConfig.chat;
+    return (
+      <span className={`flex items-center gap-1 text-${color}-600`}>
+        {icon}
+        {activeMode === 'deep-think' ? 'Deep Think' : 
+         activeMode === 'search' ? 'Search' : 
+         activeMode === 'image' ? 'Image' : 'Chat'}
+      </span>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex">
-      {/* Merchant Profile Setup */}
-      {activeMode === 'merchant-guidance' && showProfileSetup && (
-        <div className="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-6 max-w-sm w-full z-50">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Store className="w-5 h-5 text-yellow-600" />
-            Merchant Profile Setup
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Help us personalize our guidance by sharing some details about your business.
-          </p>
-          <form onSubmit={handleProfileSubmit}>
-            <div className="space-y-4">
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Merchant Type
-                </label>
-                <select
-                  value={merchantProfile.merchantType}
-                  onChange={(e) => setMerchantProfile(prev => ({...prev, merchantType: e.target.value}))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                >
-                  <option value="">Select Merchant Type</option>
-                  <option value="physical">Physical Store</option>
-                  <option value="online">Online Shop</option>
-                  <option value="b2b">B2B (Selling to Business)</option>
-                  <option value="ecommerce">E-commerce Merchant</option>
-                  <option value="exclusive-online">Exclusive Online Seller</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Main Product Type
-                </label>
-                <input
-                  type="text"
-                  value={merchantProfile.productType}
-                  onChange={(e) => setMerchantProfile(prev => ({...prev, productType: e.target.value}))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  placeholder="e.g. handmade jewelry, organic snacks"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Business Size
-                </label>
-                <select
-                  value={merchantProfile.businessSize}
-                  onChange={(e) => setMerchantProfile(prev => ({...prev, businessSize: e.target.value}))}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                >
-                  <option value="">Select Size</option>
-                  <option value="small">Small (1-10 employees)</option>
-                  <option value="medium">Medium (11-50 employees)</option>
-                  <option value="large">Large (51+ employees)</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Top Business Challenges (Select up to 3)
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['marketing', 'inventory management', 'customer acquisition', 'retention', 'pricing strategy', 'supply chain issues', 'staffing', 'technology', 'scaling', 'premium positioning', 'competition', 'seasonal fluctuations'].map(challenge => (
-                    <label key={challenge} className="flex items-center text-sm">
-                      <input
-                        type="checkbox"
-                        checked={merchantProfile.challenges.includes(challenge)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            if (merchantProfile.challenges.length < 3) {
-                              setMerchantProfile(prev => ({
-                                ...prev, 
-                                challenges: [...prev.challenges, challenge]
-                              }));
-                            }
-                          } else {
-                            setMerchantProfile(prev => ({
-                              ...prev,
-                              challenges: prev.challenges.filter(c => c !== challenge)
-                            }));
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      {challenge.charAt(0).toUpperCase() + challenge.slice(1)}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location Details
-                </label>
-                <div className="space-y-2">
-                  <select
-                    value={merchantProfile.location.marketType}
-                    onChange={(e) => setMerchantProfile(prev => ({
-                      ...prev,
-                      location: { ...prev.location, marketType: e.target.value }
-                    }))}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="">Select Community Type </option>
-                    <option value="urban">Urban</option>
-                    <option value="suburban">Suburban</option>
-                    <option value="rural">Rural</option>
-                  </select>
-                  
-                  <input
-                    type="text"
-                    value={merchantProfile.location.region}
-                    onChange={(e) => setMerchantProfile(prev => ({
-                      ...prev,
-                      location: { ...prev.location, region: e.target.value }
-                    }))}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    placeholder="Region/State"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowProfileSetup(false)}
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md mr-2"
-              >
-                Skip for Now
-              </button>
-              <button
-                type="submit"
-                className="bg-yellow-600 text-white px-4 py-2 rounded-md"
-              >
-                Save Profile
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
       {/* Sidebar Toggle Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -797,7 +568,7 @@ Would you like specific details about any of these areas?`;
 
       {/* Sidebar */}
       <div
-        className={`w-64 bg-white border-r border-gray-200 flex flex-col h-screen absolute z-40 transition-all duration-300 ${
+        className={`fixed w-64 bg-white border-r border-gray-200 flex flex-col h-screen z-40 transition-all duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -840,7 +611,7 @@ Would you like specific details about any of these areas?`;
               <Store className="w-4 h-4 text-yellow-600" />
               <span className="text-sm font-medium">Merchant Profile</span>
               <button 
-                onClick={() => setShowProfileSetup(true)}
+                onClick={() => setShowFilterPanel(true)}
                 className="ml-auto text-xs text-blue-600"
               >
                 Edit
@@ -857,6 +628,7 @@ Would you like specific details about any of these areas?`;
               )}
               {merchantProfile.location.marketType && <p><span className="font-medium">Community Type:</span> {merchantProfile.location.marketType}</p>}
               {merchantProfile.location.region && <p><span className="font-medium">Region:</span> {merchantProfile.location.region}</p>}
+              {merchantProfile.language && <p><span className="font-medium">Language:</span> {merchantProfile.language === 'zh' ? 'Chinese' : 'English'}</p>}
             </div>
           </div>
         )}
@@ -913,8 +685,7 @@ Would you like specific details about any of these areas?`;
                         <div className="text-xs text-gray-500 mb-1">
                           {msg.mode === 'image' ? 'Image generation' : 
                            msg.mode === 'deep-think' ? 'Deep thinking' : 
-                           msg.mode === 'search' ? 'Web search' : 
-                           msg.mode === 'merchant-guidance' ? 'Merchant guidance' : 'Chat'}
+                           msg.mode === 'search' ? 'Web search' : 'Chat'}
                         </div>
                       )}
                       {msg.file && (
@@ -976,8 +747,7 @@ Would you like specific details about any of these areas?`;
                     <span className="text-gray-700">
                       {activeMode === 'image' ? 'Generating image...' : 
                        activeMode === 'deep-think' ? 'Deep thinking...' : 
-                       activeMode === 'search' ? 'Searching...' :
-                       activeMode === 'merchant-guidance' ? 'Preparing merchant guidance...' : 'Thinking...'}
+                       activeMode === 'search' ? 'Searching...' : 'Thinking...'}
                     </span>
                   </div>
                 </div>
@@ -1036,26 +806,15 @@ Would you like specific details about any of these areas?`;
                 Text to Image
               </button>
               <button
-                onClick={() => setActiveMode('merchant-guidance')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'merchant-guidance' 
-                    ? 'bg-yellow-100 text-yellow-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <Brain className="w-4 h-4" />
-                Merchant Guidance
-              </button>
-              <button
                 onClick={() => setShowFilterPanel(true)}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  merchantFilters.businessType 
+                  merchantProfile.merchantType 
                     ? 'bg-yellow-100 text-yellow-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <ShoppingBag className="w-4 h-4" />
-                {merchantFilters.businessType ? 'Merchant' : 'Filter'}
+                {merchantProfile.merchantType ? 'Merchant' : 'Business Profile'}
               </button>
             </div>
 
@@ -1138,133 +897,320 @@ Would you like specific details about any of these areas?`;
           </div>
         </div>
       </div>
-      {showFilterPanel && (
-        <div className="fixed bottom-20 right-4 bg-white shadow-lg rounded-lg p-6 max-w-sm w-full z-50">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-yellow-600" />
-              Merchant Filters
-            </h2>
-            <button 
-              onClick={() => setShowFilterPanel(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ×
-            </button>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Business Type
-              </label>
-              <select
-                value={merchantFilters.businessType}
-                onChange={(e) => setMerchantFilters(prev => ({
-                  ...prev,
-                  businessType: e.target.value
-                }))}
-                className="w-full p-2 border border-gray-300 rounded-md"
-              >
-                <option value="">Select Business Type</option>
-                <option value="restaurant">Restaurant/Cafe</option>
-                <option value="retail">Retail Store</option>
-                <option value="ecommerce">E-commerce</option>
-                <option value="service">Service Business</option>
-                <option value="manufacturer">Manufacturer</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product Category
-              </label>
-              <input
-                type="text"
-                value={merchantFilters.productCategory}
-                onChange={(e) => setMerchantFilters(prev => ({
-                  ...prev,
-                  productCategory: e.target.value
-                }))}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder="e.g. fashion, electronics, food"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <input
-                type="text"
-                value={merchantFilters.location}
-                onChange={(e) => setMerchantFilters(prev => ({
-                  ...prev,
-                  location: e.target.value
-                }))}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder="City or region"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Business Challenges
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  'Marketing', 
-                  'Inventory', 
-                  'Staffing', 
-                  'Online Sales',
-                  'Customer Retention',
-                  'Pricing'
-                ].map(item => (
-                  <label key={item} className="flex items-center text-sm">
-                    <input
-                      type="checkbox"
-                      checked={merchantFilters.challenges.includes(item)}
-                      onChange={() => {
-                        setMerchantFilters(prev => ({
-                          ...prev,
-                          challenges: prev.challenges.includes(item)
-                            ? prev.challenges.filter(c => c !== item)
-                            : [...prev.challenges, item]
-                        }));
-                      }}
-                      className="mr-2"
-                    />
-                    {item}
-                  </label>
-                ))}
+
+      {/* Merchant Profile Panel */}
+        {showFilterPanel && (
+          <div className="fixed right-0 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] flex flex-col">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Store className="w-5 h-5 text-yellow-600" />
+                  Merchant Profile & Insights Configuration
+                </h2>
+                <button 
+                  onClick={() => setShowFilterPanel(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto pr-2">
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  setShowFilterPanel(false);
+                }}>
+                  <div className="space-y-4">
+                    {/* Business Profile Section */}
+                    <div className="border-b pb-4">
+                      <h3 className="font-medium text-gray-800 mb-3">Business Profile</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Business Type
+                          </label>
+                          <select
+                            value={merchantProfile.merchantType}
+                            onChange={(e) => setMerchantProfile(prev => ({
+                              ...prev,
+                              merchantType: e.target.value
+                            }))}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select Business Type</option>
+                            <option value="restaurant">Restaurant/Food Service</option>
+                            <option value="retail">Retail Store</option>
+                            <option value="service">Service Business</option>
+                            <option value="ecommerce">E-commerce</option>
+                            <option value="grocery">Grocery/Convenience</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Main Product Categories
+                          </label>
+                          <input
+                            type="text"
+                            value={merchantProfile.productType}
+                            onChange={(e) => setMerchantProfile(prev => ({
+                              ...prev,
+                              productType: e.target.value
+                            }))}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                            placeholder="e.g. fast food, electronics, beauty products"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Business Size
+                          </label>
+                          <select
+                            value={merchantProfile.businessSize}
+                            onChange={(e) => setMerchantProfile(prev => ({
+                              ...prev,
+                              businessSize: e.target.value
+                            }))}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select Size</option>
+                            <option value="micro">Micro (1 employee)</option>
+                            <option value="small">Small (2-10 employees)</option>
+                            <option value="medium">Medium (11-50 employees)</option>
+                            <option value="large">Large (51+ employees)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Location & Market Section */}
+                    <div className="border-b pb-4">
+                      <h3 className="font-medium text-gray-800 mb-3">Location & Market</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Market Type
+                          </label>
+                          <select
+                            value={merchantProfile.location.marketType}
+                            onChange={(e) => setMerchantProfile(prev => ({
+                              ...prev,
+                              location: { ...prev.location, marketType: e.target.value }
+                            }))}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select Market Type</option>
+                            <option value="urban">Urban City Center</option>
+                            <option value="suburban">Suburban Area</option>
+                            <option value="rural">Rural Area</option>
+                            <option value="tourist">Tourist Area</option>
+                            <option value="transport">Transport Hub</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Country/Region
+                          </label>
+                          <select
+                            value={merchantProfile.location.region}
+                            onChange={(e) => setMerchantProfile(prev => ({
+                              ...prev,
+                              location: { ...prev.location, region: e.target.value }
+                            }))}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select Country</option>
+                            <option value="SG">Singapore</option>
+                            <option value="MY">Malaysia</option>
+                            <option value="ID">Indonesia</option>
+                            <option value="TH">Thailand</option>
+                            <option value="VN">Vietnam</option>
+                            <option value="PH">Philippines</option>
+                            <option value="KH">Cambodia</option>
+                            <option value="MM">Myanmar</option>
+                            <option value="LA">Laos</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Business Challenges Section */}
+                    <div className="border-b pb-4">
+                      <h3 className="font-medium text-gray-800 mb-3">Business Focus Areas</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          'Sales growth', 
+                          'Customer retention',
+                          'Marketing effectiveness',
+                          'Inventory management',
+                          'Staff productivity',
+                          'Cost reduction',
+                          'Digital transformation',
+                          'Delivery optimization',
+                          'Menu/pricing strategy',
+                          'Competitive positioning'
+                        ].map(challenge => (
+                          <label key={challenge} className="flex items-center text-sm">
+                            <input
+                              type="checkbox"
+                              checked={merchantProfile.challenges.includes(challenge)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  if (merchantProfile.challenges.length < 3) {
+                                    setMerchantProfile(prev => ({
+                                      ...prev, 
+                                      challenges: [...prev.challenges, challenge]
+                                    }));
+                                  }
+                                } else {
+                                  setMerchantProfile(prev => ({
+                                    ...prev,
+                                    challenges: prev.challenges.filter(c => c !== challenge)
+                                  }));
+                                }
+                              }}
+                              className="mr-2"
+                            />
+                            {challenge}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Communication Preferences */}
+                    <div className="border-b pb-4">
+                      <h3 className="font-medium text-gray-800 mb-3">Communication Preferences</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Primary Language
+                          </label>
+                          <select
+                            value={merchantProfile.language}
+                            onChange={(e) => setMerchantProfile(prev => ({
+                              ...prev,
+                              language: e.target.value
+                            }))}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="en">English</option>
+                            <option value="zh">Chinese (中文)</option>
+                            <option value="ms">Malay (Bahasa Melayu)</option>
+                            <option value="id">Indonesian (Bahasa Indonesia)</option>
+                            <option value="th">Thai (ไทย)</option>
+                            <option value="vi">Vietnamese (Tiếng Việt)</option>
+                            <option value="tl">Filipino (Tagalog)</option>
+                            <option value="km">Khmer (ភាសាខ្មែរ)</option>
+                            <option value="lo">Lao (ພາສາລາວ)</option>
+                            <option value="my">Burmese (မြန်မာဘာသာ)</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Preferred Insight Format
+                          </label>
+                          <div className="space-y-2">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name="insightFormat"
+                                checked={merchantProfile.insightFormat === 'text'}
+                                onChange={() => setMerchantProfile(prev => ({
+                                  ...prev,
+                                  insightFormat: 'text'
+                                }))}
+                                className="mr-2"
+                              />
+                              Text Summary
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name="insightFormat"
+                                checked={merchantProfile.insightFormat === 'visual'}
+                                onChange={() => setMerchantProfile(prev => ({
+                                  ...prev,
+                                  insightFormat: 'visual'
+                                }))}
+                                className="mr-2"
+                              />
+                              Visual Charts
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name="insightFormat"
+                                checked={merchantProfile.insightFormat === 'both'}
+                                onChange={() => setMerchantProfile(prev => ({
+                                  ...prev,
+                                  insightFormat: 'both'
+                                }))}
+                                className="mr-2"
+                              />
+                              Both Text and Visuals
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Data Integration */}
+                    <div>
+                      <h3 className="font-medium text-gray-800 mb-3">Data Integration</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Connect Transaction Data
+                          </label>
+                          <button
+                            type="button"
+                            className="w-full p-2 border border-gray-300 rounded-md text-left flex justify-between items-center"
+                          >
+                            <span>Upload CSV or Connect API</span>
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Inventory System Integration
+                          </label>
+                          <select
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select Inventory System</option>
+                            <option value="grab">Grab Inventory Manager</option>
+                            <option value="manual">Manual Entry</option>
+                            <option value="other">Other System (Specify)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowFilterPanel(false)}
+                      className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                    >
+                      Save Configuration
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
-          
-          <div className="mt-6 flex justify-end gap-2">
-            <button
-              onClick={() => {
-                setMerchantFilters({
-                  businessType: '',
-                  productCategory: '',
-                  location: '',
-                  challenges: []
-                });
-                setShowFilterPanel(false);
-              }}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              Clear
-            </button>
-            <button
-              onClick={() => setShowFilterPanel(false)}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
-            >
-              Apply Filters
-            </button>
-          </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }
