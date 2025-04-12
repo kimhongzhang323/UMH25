@@ -168,7 +168,7 @@ export default function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <nav className="sticky top-0 w-full z-30 bg-white border-b border-gray-100 shadow-sm self-start">
+      <nav className="sticky top-0 w-full z-100 bg-white border-b border-gray-100 shadow-sm self-start">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 ">
           <div className="flex justify-between items-center h-16">
             {/* Left side - Logo and Navigation */}

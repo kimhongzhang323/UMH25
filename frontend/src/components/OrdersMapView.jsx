@@ -177,7 +177,7 @@ const OrdersMapView = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen relative">
+    <div className="flex grow flex-col w-full h-[40%]">
       {/* Header */}
       <div className="bg-white shadow-sm p-4">
         <h1 className="text-xl font-semibold text-gray-800">KFC Active Orders Map</h1>
@@ -260,7 +260,7 @@ const OrdersMapView = () => {
           </div>
 
           {/* Map */}
-          <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }}>
+          <MapContainer className="z-10" center={mapCenter} zoom={mapZoom} style={{ height: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; OpenStreetMap contributors'
