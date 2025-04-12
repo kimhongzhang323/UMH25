@@ -56,13 +56,15 @@ The **Grab MEX AI Assistant** is an end-to-end merchant support platform combini
 
 ```mermaid
 graph TD
-    A[Frontend] -->|API Calls| B[Backend]
+    A[React Frontend] -->|HTTP| B[FastAPI Backend]
     B --> C[Llama 2 Service]
     B --> D[Stable Diffusion]
     B --> E[DeepSeek Analytics]
-    C --> F[(PostgreSQL)]
+    B --> F[(PostgreSQL Database)]
+    C --> F
     D --> G[(S3 Storage)]
-    E --> H[(TimescaleDB)]
+    E --> F
+    F --> H[TimescaleDB Extension]
 ```
 
 **Component Details:**  
