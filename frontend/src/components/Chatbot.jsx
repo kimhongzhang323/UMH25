@@ -1,20 +1,20 @@
 // Imports
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  Send,
-  Bot,
-  User,
-  Loader2,
-  Sparkles,
-  Plus,
-  Menu,
-  Image,
-  Search,
-  File,
-  Brain,
-  Mic,
-  MicOff,
-  Store,
+import { 
+  Send, 
+  Bot, 
+  User, 
+  Loader2, 
+  Sparkles, 
+  Plus, 
+  Menu, 
+  Image, 
+  Search, 
+  File, 
+  Brain, 
+  Mic, 
+  MicOff, 
+  Store, 
   ShoppingBag,
   ChevronLeft,
   ChevronRight
@@ -196,7 +196,7 @@ export default function Chatbot() {
 
   useEffect(() => {
     // Show profile setup for merchant guidance
-    if (activeMode === 'merchant-guidance' &&
+    if (activeMode === 'merchant-guidance' && 
         (!merchantProfile.name || !merchantProfile.merchantType)) {
       setShowProfileSetup(true);
     }
@@ -207,9 +207,9 @@ export default function Chatbot() {
     if (currentChatId) {
       setChatHistory((prev) =>
         prev.map((chat) =>
-          chat.id === currentChatId ? {
-            ...chat,
-            messages,
+          chat.id === currentChatId ? { 
+            ...chat, 
+            messages, 
             title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || chat.title,
             preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
             timestamp: new Date()
@@ -263,7 +263,7 @@ export default function Chatbot() {
   // Save current chat to history
   const saveChatToHistory = () => {
     if (messages.length <= 1) return; // Don't save empty chats
-
+    
     const newChat = {
       id: `chat${Date.now()}`,
       title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
@@ -294,7 +294,7 @@ export default function Chatbot() {
 
     setTimeout(() => {
       let responseText;
-
+      
       // Handle merchant guidance mode
       if (activeMode === 'merchant-guidance') {
         responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
@@ -302,35 +302,35 @@ export default function Chatbot() {
         // Use the generateFakeResponse function from main branch
         responseText = generateFakeResponse(input, activeMode);
       }
-
+      
       const botMsg = {
         id: (Date.now() + 1).toString(),
         text: responseText,
         sender: 'bot',
         timestamp: new Date(),
         isImage: activeMode === 'image',
-        imageUrl: activeMode === 'image' ?
+        imageUrl: activeMode === 'image' ? 
           `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}` : null
       };
 
       setMessages(prev => [...prev, botMsg]);
       setLoading(false);
-
+      
       // Save to history if this is a new chat
       if (!currentChatId) {
         saveChatToHistory();
       } else {
         // Update existing chat in history
-        setChatHistory(prev =>
-          prev.map(chat =>
-            chat.id === currentChatId
+        setChatHistory(prev => 
+          prev.map(chat => 
+            chat.id === currentChatId 
               ? {
-                ...chat,
+                ...chat, 
                 messages: [...chat.messages, userMsg, botMsg],
                 title: userMsg.text.substring(0, 30) || chat.title,
                 preview: botMsg.text.substring(0, 50) || 'New conversation',
                 timestamp: new Date()
-              }
+              } 
               : chat
           )
         );
@@ -410,7 +410,7 @@ export default function Chatbot() {
   // Utility Functions for Merchant Guidance (from Micheal branch)
   const generatePersonalizedMerchantResponse = (query, profile) => {
     const lowercaseQuery = query.toLowerCase();
-
+    
     // Helper function to get tailored advice based on business maturity
     const getMaturityBasedAdvice = () => {
       const challengeCount = profile.challenges.length;
@@ -457,17 +457,17 @@ export default function Chatbot() {
       switch(location.marketType) {
         case 'urban':
           return `dense urban market penetration, focusing on convenience and quick service for busy city customers${
-            profile.merchantType === 'physical' ? ', leveraging high foot traffic areas' :
+            profile.merchantType === 'physical' ? ', leveraging high foot traffic areas' : 
             ', targeting mobile-first urban consumers'
           }`;
         case 'suburban':
           return `community-centric approach, focusing on family-oriented marketing${
-            profile.merchantType === 'physical' ? ' and local shopping center presence' :
+            profile.merchantType === 'physical' ? ' and local shopping center presence' : 
             ' and suburban lifestyle alignment'
           }`;
         case 'rural':
           return `wider geographic coverage strategy, emphasizing reliability and community trust${
-            profile.merchantType === 'physical' ? ', being a destination business' :
+            profile.merchantType === 'physical' ? ', being a destination business' : 
             'focusing on delivery reliability and rural customer service'
           }`;
         default:
@@ -481,15 +481,15 @@ export default function Chatbot() {
         profile.location.marketType || 'mixed'
       } market selling ${profile.productType}, here's your tailored marketing strategy:
 
-1. **Location-Based Strategy**:
+1. **Location-Based Strategy**: 
    - Market Type: ${profile.location.marketType || 'Not specified'}
    - Approach: ${getLocationStrategy()}
    - Regional Focus: ${profile.location.region ? `Optimize for ${profile.location.region} market preferences` : 'General market approach'}
 
-2. **Channel Focus**:
+2. **Channel Focus**: 
    - Primary: ${getChannelStrategy()}
-   - Business Stage: ${getMaturityBasedAdvice() === 'emerging' ? 'Focus on building brand awareness' :
-                     getMaturityBasedAdvice() === 'growing' ? 'Expand market reach' :
+   - Business Stage: ${getMaturityBasedAdvice() === 'emerging' ? 'Focus on building brand awareness' : 
+                     getMaturityBasedAdvice() === 'growing' ? 'Expand market reach' : 
                      'Strengthen market position'}
 
 3. **Local Targeting**:
@@ -509,7 +509,7 @@ export default function Chatbot() {
                       profile.location.marketType === 'rural' ? 'Regional authority building' :
                       'Market-appropriate expansion'}`;
     }
-
+    
     // Pricing Strategy
     if (lowercaseQuery.includes('pricing') || lowercaseQuery.includes('price')) {
       return `For your ${profile.businessSize} business selling ${profile.productType} as a ${profile.merchantType}, here's my pricing guidance:
@@ -524,7 +524,7 @@ export default function Chatbot() {
 
 Would you like a more detailed pricing strategy for a specific product line?`;
     }
-
+    
     // Inventory Management
     if (lowercaseQuery.includes('inventory') || lowercaseQuery.includes('stock') || lowercaseQuery.includes('supply chain')) {
       return `For your ${profile.productType} inventory management as a ${profile.merchantType}, here are tailored recommendations:
@@ -539,7 +539,7 @@ Would you like a more detailed pricing strategy for a specific product line?`;
 
 Would you like specific supplier recommendations for your ${profile.productType} products?`;
     }
-
+    
     // Customer Retention
     if (lowercaseQuery.includes('customer') || lowercaseQuery.includes('client') || lowercaseQuery.includes('retention')) {
       return `For your ${profile.merchantType} business, here are personalized customer retention strategies:
@@ -554,7 +554,7 @@ Would you like specific supplier recommendations for your ${profile.productType}
 
 Would you like me to help design a specific customer retention campaign?`;
     }
-
+    
     // Default response with enhanced personalization
     return `For your ${profile.merchantType} business selling ${profile.productType}, here's my tailored guidance:
 
@@ -591,9 +591,9 @@ Would you like specific details about any of these areas?`;
     return (
       <span className={`flex items-center gap-1 text-${color}-600`}>
         {icon}
-        {activeMode === 'deep-think' ? 'Deep Think' :
-         activeMode === 'search' ? 'Search' :
-         activeMode === 'image' ? 'Image' :
+        {activeMode === 'deep-think' ? 'Deep Think' : 
+         activeMode === 'search' ? 'Search' : 
+         activeMode === 'image' ? 'Image' : 
          activeMode === 'merchant-guidance' ? 'Merchant Guidance' : 'Chat'}
       </span>
     );
@@ -603,7 +603,7 @@ Would you like specific details about any of these areas?`;
     const now = new Date();
     const diff = now - date;
     const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-
+    
     if (diffDays === 0) {
       return 'Today';
     } else if (diffDays === 1) {
@@ -635,7 +635,7 @@ Would you like specific details about any of these areas?`;
 
   // Render
   return (
-    <div className="bg-gray-50 text-gray-900 flex h-full">
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex">
       {/* Merchant Profile Setup */}
       {activeMode === 'merchant-guidance' && showProfileSetup && (
         <div className="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-6 max-w-sm w-full z-50">
@@ -648,7 +648,7 @@ Would you like specific details about any of these areas?`;
           </p>
           <form onSubmit={handleProfileSubmit}>
             <div className="space-y-4">
-
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Merchant Type
@@ -667,7 +667,7 @@ Would you like specific details about any of these areas?`;
                   <option value="exclusive-online">Exclusive Online Seller</option>
                 </select>
               </div>
-
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Main Product Type
@@ -681,7 +681,7 @@ Would you like specific details about any of these areas?`;
                   required
                 />
               </div>
-
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Business Size
@@ -698,7 +698,7 @@ Would you like specific details about any of these areas?`;
                   <option value="large">Large (51+ employees)</option>
                 </select>
               </div>
-
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Top Business Challenges (Select up to 3)
@@ -713,7 +713,7 @@ Would you like specific details about any of these areas?`;
                           if (e.target.checked) {
                             if (merchantProfile.challenges.length < 3) {
                               setMerchantProfile(prev => ({
-                                ...prev,
+                                ...prev, 
                                 challenges: [...prev.challenges, challenge]
                               }));
                             }
@@ -751,7 +751,7 @@ Would you like specific details about any of these areas?`;
                     <option value="suburban">Suburban</option>
                     <option value="rural">Rural</option>
                   </select>
-
+                  
                   <input
                     type="text"
                     value={merchantProfile.location.region}
@@ -765,7 +765,7 @@ Would you like specific details about any of these areas?`;
                 </div>
               </div>
             </div>
-
+            
             <div className="mt-6 flex justify-end">
               <button
                 type="button"
@@ -797,7 +797,7 @@ Would you like specific details about any of these areas?`;
 
       {/* Sidebar */}
       <div
-        className={`w-64 bg-white border-r border-gray-200 flex flex-col absolute z-20 transition-all duration-300 ${
+        className={`w-64 bg-white border-r border-gray-200 flex flex-col h-screen absolute z-40 transition-all duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -839,7 +839,7 @@ Would you like specific details about any of these areas?`;
             <div className="flex items-center gap-2 mb-2">
               <Store className="w-4 h-4 text-yellow-600" />
               <span className="text-sm font-medium">Merchant Profile</span>
-              <button
+              <button 
                 onClick={() => setShowProfileSetup(true)}
                 className="ml-auto text-xs text-blue-600"
               >
@@ -868,7 +868,7 @@ Would you like specific details about any of these areas?`;
       </div>
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${
         sidebarOpen ? 'ml-64' : 'ml-0'
       }`}>
         {/* Chat Area */}
@@ -911,9 +911,9 @@ Would you like specific details about any of these areas?`;
                     >
                       {msg.mode && msg.sender === 'user' && (
                         <div className="text-xs text-gray-500 mb-1">
-                          {msg.mode === 'image' ? 'Image generation' :
-                           msg.mode === 'deep-think' ? 'Deep thinking' :
-                           msg.mode === 'search' ? 'Web search' :
+                          {msg.mode === 'image' ? 'Image generation' : 
+                           msg.mode === 'deep-think' ? 'Deep thinking' : 
+                           msg.mode === 'search' ? 'Web search' : 
                            msg.mode === 'merchant-guidance' ? 'Merchant guidance' : 'Chat'}
                         </div>
                       )}
@@ -924,9 +924,9 @@ Would you like specific details about any of these areas?`;
                             <span className="text-sm">{msg.file.name}</span>
                           </div>
                           {msg.file.type.startsWith('image/') && (
-                            <img
-                              src={msg.file.preview}
-                              alt="Preview"
+                            <img 
+                              src={msg.file.preview} 
+                              alt="Preview" 
                               className="mt-2 max-w-full max-h-40 rounded"
                             />
                           )}
@@ -934,9 +934,9 @@ Would you like specific details about any of these areas?`;
                       )}
                       {msg.isImage ? (
                         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-                          <img
-                            src={msg.imageUrl}
-                            alt="Generated content"
+                          <img 
+                            src={msg.imageUrl} 
+                            alt="Generated content" 
                             className="w-full"
                           />
                           <div className="p-3 text-sm">
@@ -974,8 +974,8 @@ Would you like specific details about any of these areas?`;
                   <div className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-3 rounded-2xl">
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                     <span className="text-gray-700">
-                      {activeMode === 'image' ? 'Generating image...' :
-                       activeMode === 'deep-think' ? 'Deep thinking...' :
+                      {activeMode === 'image' ? 'Generating image...' : 
+                       activeMode === 'deep-think' ? 'Deep thinking...' : 
                        activeMode === 'search' ? 'Searching...' :
                        activeMode === 'merchant-guidance' ? 'Preparing merchant guidance...' : 'Thinking...'}
                     </span>
@@ -995,8 +995,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('chat')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'chat'
-                    ? 'bg-blue-100 text-blue-600'
+                  activeMode === 'chat' 
+                    ? 'bg-blue-100 text-blue-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -1005,8 +1005,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('deep-think')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'deep-think'
-                    ? 'bg-purple-100 text-purple-600'
+                  activeMode === 'deep-think' 
+                    ? 'bg-purple-100 text-purple-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -1016,8 +1016,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('search')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'search'
-                    ? 'bg-green-100 text-green-600'
+                  activeMode === 'search' 
+                    ? 'bg-green-100 text-green-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -1027,8 +1027,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('image')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'image'
-                    ? 'bg-orange-100 text-orange-600'
+                  activeMode === 'image' 
+                    ? 'bg-orange-100 text-orange-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -1038,8 +1038,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('merchant-guidance')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'merchant-guidance'
-                    ? 'bg-yellow-100 text-yellow-600'
+                  activeMode === 'merchant-guidance' 
+                    ? 'bg-yellow-100 text-yellow-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -1049,8 +1049,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setShowFilterPanel(true)}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  merchantFilters.businessType
-                    ? 'bg-yellow-100 text-yellow-600'
+                  merchantFilters.businessType 
+                    ? 'bg-yellow-100 text-yellow-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -1069,8 +1069,8 @@ Would you like specific details about any of these areas?`;
                     <File className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">{filePreview.name}</span>
                   </div>
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     onClick={() => setFilePreview(null)}
                     className="text-gray-500 hover:text-gray-700"
                   >
@@ -1079,8 +1079,8 @@ Would you like specific details about any of these areas?`;
                 </div>
               )}
               <div className="flex items-end p-2">
-                <input
-                  type="file"
+                <input 
+                  type="file" 
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
@@ -1111,8 +1111,8 @@ Would you like specific details about any of these areas?`;
                   type="button"
                   onClick={toggleRecording}
                   className={`p-2 rounded-lg mr-2 ${
-                    isRecording
-                      ? 'bg-red-100 text-red-600 animate-pulse'
+                    isRecording 
+                      ? 'bg-red-100 text-red-600 animate-pulse' 
                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -1145,14 +1145,14 @@ Would you like specific details about any of these areas?`;
               <ShoppingBag className="w-5 h-5 text-yellow-600" />
               Merchant Filters
             </h2>
-            <button
+            <button 
               onClick={() => setShowFilterPanel(false)}
               className="text-gray-500 hover:text-gray-700"
             >
               ×
             </button>
           </div>
-
+          
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1174,7 +1174,7 @@ Would you like specific details about any of these areas?`;
                 <option value="manufacturer">Manufacturer</option>
               </select>
             </div>
-
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Product Category
@@ -1190,7 +1190,7 @@ Would you like specific details about any of these areas?`;
                 placeholder="e.g. fashion, electronics, food"
               />
             </div>
-
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Location
@@ -1206,16 +1206,16 @@ Would you like specific details about any of these areas?`;
                 placeholder="City or region"
               />
             </div>
-
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Business Challenges
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  'Marketing',
-                  'Inventory',
-                  'Staffing',
+                  'Marketing', 
+                  'Inventory', 
+                  'Staffing', 
                   'Online Sales',
                   'Customer Retention',
                   'Pricing'
@@ -1240,7 +1240,7 @@ Would you like specific details about any of these areas?`;
               </div>
             </div>
           </div>
-
+          
           <div className="mt-6 flex justify-end gap-2">
             <button
               onClick={() => {
