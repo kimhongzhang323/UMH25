@@ -110,6 +110,7 @@ export default function Chatbot() {
   const [recognition, setRecognition] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatHistory, setChatHistory] = useState(sampleChatHistory);
+  const [isNewChat, setIsNewChat] = useState(false); // Add this line
   const [currentChatId, setCurrentChatId] = useState(null);
   const [examplePrompts, setExamplePrompts] = useState([
     "How do I grow my business?",
@@ -201,15 +202,11 @@ export default function Chatbot() {
   }, [messages, currentChatId]);
 
   // Handlers
-  const loadChat = (chatId) => {
-    const chat = chatHistory.find(c => c.id === chatId);
-    if (chat) {
-      setMessages(chat.messages);
-      setCurrentChatId(chatId);
-    }
-  };
+  // Removed duplicate loadChat function
 
-  const newChat = () => {
+  // Update your newChat function to set this state
+const newChat = () => {
+    setIsNewChat(true);
     setMessages([
       {
         id: '1',
@@ -224,21 +221,17 @@ export default function Chatbot() {
     setCurrentChatId(null);
   };
 
-  const saveChatToHistory = () => {
-    if (messages.length <= 1) return;
-    
-    const newChat = {
-      id: `chat${Date.now()}`,
-      title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
-      preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
-      timestamp: new Date(),
-      messages: [...messages]
-    };
-
-    setChatHistory(prev => [newChat, ...prev]);
-    setCurrentChatId(newChat.id);
+  // Update your loadChat function to reset the new chat state
+  const loadChat = (chatId) => {
+    setIsNewChat(false);
+    const chat = chatHistory.find(c => c.id === chatId);
+    if (chat) {
+      setMessages(chat.messages);
+      setCurrentChatId(chatId);
+    }
   };
 
+  // Update your handleSubmit function to reset isNewChat when saving
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -258,7 +251,6 @@ export default function Chatbot() {
     setTimeout(() => {
       let responseText;
       
-      // Generate response based on merchant profile if available
       if (merchantProfile.merchantType) {
         responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
       } else {
@@ -280,6 +272,7 @@ export default function Chatbot() {
       
       if (!currentChatId) {
         saveChatToHistory();
+        setIsNewChat(false); // Reset new chat state after saving
       } else {
         setChatHistory(prev => 
           prev.map(chat => 
@@ -297,6 +290,35 @@ export default function Chatbot() {
       }
     }, 1500);
   };
+
+  // Define the formatDate function before using it in JSX
+const formatDate = (date) => {
+  const now = new Date();
+  const diff = now - date;
+  const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return date.toLocaleDateString();
+};
+
+  const saveChatToHistory = () => {
+    if (messages.length <= 1) return;
+    
+    const newChat = {
+      id: `chat${Date.now()}`,
+      title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
+      preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
+      timestamp: new Date(),
+      messages: [...messages]
+    };
+
+    setChatHistory(prev => [newChat, ...prev]);
+    setCurrentChatId(newChat.id);
+  };
+
+  // Removed duplicate handleSubmit function
 
   const generateFakeResponse = (userInput, mode) => {
     const responses = {
@@ -507,17 +529,6 @@ Would you like specific details about any of these areas?`;
     fileInputRef.current.click();
   };
 
-  const formatDate = (date) => {
-    const now = new Date();
-    const diff = now - date;
-    const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
-  };
-
   const renderExamplePrompts = () => (
     <div className="text-center mt-10">
       <h2 className="text-xl font-semibold mb-4">What can I help with?</h2>
@@ -582,6 +593,17 @@ Would you like specific details about any of these areas?`;
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
+          {/* New chat tab - shown when isNewChat is true */}
+          {isNewChat && (
+            <button
+              className={`w-full text-left p-3 rounded-lg mb-2 bg-gray-100 transition-colors`}
+            >
+              <div className="font-medium text-gray-900 truncate">New Chat</div>
+              <div className="text-sm text-gray-500 truncate">Getting started...</div>
+              <div className="text-xs text-gray-400 mt-1">Just now</div>
+            </button>
+          )}
+          
           {chatHistory.length > 0 ? (
             <>
               {chatHistory.map((chat) => (
@@ -599,9 +621,11 @@ Would you like specific details about any of these areas?`;
               ))}
             </>
           ) : (
-            <div className="p-2 text-sm text-gray-500 text-center">
-              No previous chats
-            </div>
+            !isNewChat && ( // Only show "No previous chats" if there's no new chat either
+              <div className="p-2 text-sm text-gray-500 text-center">
+                No previous chats
+              </div>
+            )
           )}
         </div>
         {/* Merchant Profile Quick View if profile exists */}
