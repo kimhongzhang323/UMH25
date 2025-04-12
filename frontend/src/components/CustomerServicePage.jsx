@@ -239,9 +239,9 @@ const CustomerServicePage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex grow bg-gray-50 w-full">
       {/* Sidebar */}
-      <div className="w-80 border-r border-gray-200 bg-white">
+      <div className="w-80 border-r border-gray-200 bg-white h-full">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">Customer Messages</h2>
           <div className="mt-4 flex items-center justify-between">
@@ -259,7 +259,7 @@ autoReplyEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
           </div>
         </div>
 
-        <div className="overflow-y-auto h-[calc(100vh-120px)]">
+        <div className="overflow-y-auto ">
           {chats.map(chat => (
             <div
               key={chat.id}
@@ -303,7 +303,7 @@ chat.status === 'resolved' ? 'bg-gray-300' : 'bg-green-500'
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         {activeChat ? (
           <>
             {/* Chat Header */}
@@ -447,7 +447,7 @@ message.sender === 'customer'
       </div>
 
       {/* AI Settings Panel (would be a modal in real implementation) */}
-      <div className="w-80 border-l border-gray-200 bg-white p-4">
+      <div className="w-80 border-l border-gray-200 bg-white p-4 h-full">
         <h3 className="font-medium text-lg mb-4">AI Assistant Settings</h3>
 
         <div className="space-y-6">
