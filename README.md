@@ -11,8 +11,7 @@
 5. [AI Services Integration](#ai-services-integration)  
 6. [Customization](#customization)  
 7. [Deployment](#deployment)  
-8. [Roadmap](#roadmap)  
-9. [License & Contact](#license--contact)  
+8. [License & Contact](#license--contact)  
 
 ---
 
@@ -280,19 +279,6 @@ docker build -t mex-ai-backend .
 | **Vercel** | Static frontend + Serverless functions |  
 | **AWS** | EC2 (backend) + S3 (frontend) |  
 | **On-Prem** | Kubernetes cluster with GPU nodes |  
-
----
-
-<a name="roadmap"></a>
-## **8. Roadmap**  
-
-**Q3 2024**  
-- [ ] Voice interface integration  
-- [ ] WhatsApp Business API bridge  
-
-**Q4 2024**  
-- [ ] Localized model variants (Thai/Vietnamese)  
-- [ ] Hardware-optimized inference  
 
 ---
 
