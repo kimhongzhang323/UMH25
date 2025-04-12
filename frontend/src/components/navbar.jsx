@@ -197,7 +197,7 @@ export default function Navbar() {
               <div className="hidden md:flex space-x-6">
                 <a 
                   href="/" 
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
                 >
                   <Home className="mr-2 h-4 w-4" />
                   Home
