@@ -1,169 +1,188 @@
-# KFC Analytics Dashboard with AI Merchant Features
+# **Grab MEX AI Assistant**  
+### *Empowering Southeast Asian Merchants with AI-Driven Economic Growth*  
 
-## Overview
+---
 
-The Grab HEX Assistant Dashboard is a comprehensive business intelligence tool designed to help merchant owners and managers optimize operations, increase sales, and improve customer satisfaction through data-driven insights and AI-powered recommendations.
+## **Overview**  
+The **Grab MEX AI Assistant** is an intelligent, chat-based business advisor designed to help merchants across Southeast Asia optimize their operations, increase sales, and make data-driven decisions. Leveraging **Generative AI**, it provides **real-time insights, personalized recommendations, and automated alerts**—helping merchants scale their businesses efficiently.  
 
-## Key Features
+Built with **React.js, Tailwind CSS, and AI-powered analytics**, this dashboard integrates seamlessly with Grab’s merchant ecosystem, offering:  
+✅ **Automated Sales & Inventory Reports**  
+✅ **AI-Powered Business Recommendations**  
+✅ **Multilingual & Colloquial Support**  
+✅ **Anomaly Detection & Proactive Alerts**  
 
-### 📊 Real-time Analytics
-- Sales performance tracking
-- Order volume trends
-- Customer behavior insights
-- Peak hour identification
+---
 
-### 🤖 AI-Powered Merchant Tools
-- **Sales Forecasting**: Predicts future sales with confidence intervals
-- **Menu Optimization**: Recommends best-performing items and combos
-- **Anomaly Detection**: Alerts for inventory, staffing, and sales anomalies
-- **Customer Insights**: Segmentation and sentiment analysis
-- **AI Assistant**: Chat-based interface for business queries
+## **Key Features**  
 
-### 📈 Data Visualization
-- Interactive charts and graphs
-- Customizable time periods
-- Exportable reports
+### **📊 Real-Time Business Insights**  
+- **Sales Performance Tracking** – Monitor daily/weekly revenue trends  
+- **Peak Hour Analysis** – Identify best times for promotions  
+- **Customer Behavior Insights** – Understand buying patterns  
+- **Inventory Alerts** – Prevent stockouts or overstocking  
 
-## Technology Stack
+### **🤖 AI-Powered Merchant Guidance**  
+- **Personalized Recommendations** – Tailored to business type (F&B, Retail, Services)  
+- **Menu Optimization** – AI suggests best-performing items & combos  
+- **Competitive Benchmarking** – Compare performance with similar merchants  
+- **Sales Forecasting** – Predict future demand with confidence intervals  
 
-- **Frontend**: React.js with Tailwind CSS
-- **Charts**: Custom React chart components
-- **AI Integration**: Simulated AI (can connect to real AI services)
-- **State Management**: React Hooks
-- **Build Tool**: Vite or Create-React-App
+### **💬 Intuitive Chat Interface**  
+- **Natural Language Queries** – Ask questions like:  
+  - *"Why did my sales drop yesterday?"*  
+  - *"What’s the best promo to run this weekend?"*  
+- **Multilingual Support** – Works in English, Bahasa, Thai, Vietnamese, and more  
+- **Visual Summaries** – Charts & graphs for easy understanding  
 
-## Installation
+### **⚠️ Anomaly Detection & Alerts**  
+- **Unusual Sales Dips** – Get notified of sudden changes  
+- **Low Inventory Warnings** – Avoid stockouts before they happen  
+- **Staffing Recommendations** – Optimize shifts based on demand  
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repo/UMH25.git
-   ```
+---
 
-2. Install dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
+## **Technology Stack**  
+| Category       | Technology |
+|---------------|------------|
+| **Frontend**  | React.js, Tailwind CSS |
+| **Charts**    | Recharts, Chart.js |
+| **AI**        | OpenAI API (or custom LLM) |
+| **State Mgmt**| React Hooks, Zustand |
+| **Backend** (Simulated) | Mock Service Worker (MSW) |
+| **Build Tool**| Vite |
 
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
+---
 
-4. Open your browser to:
-   ```
-   http://localhost:3000
-   ```
+## **Installation & Setup**  
 
-## Configuration
+### **1. Clone the Repository**  
+```bash
+git clone https://github.com/grab-tech/mex-ai-assistant.git
+cd mex-ai-assistant
+```
 
-Create a `.env` file in the root directory with your configuration:
+### **2. Install Dependencies**  
+```bash
+npm install
+```
 
+### **3. Configure Environment Variables**  
+Create a `.env` file:  
 ```env
-REACT_APP_API_BASE_URL=https://your-api-endpoint.com
-# Add other environment variables as needed
+VITE_OPENAI_API_KEY=your_api_key_here  # For real AI integration
+VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
-## Connecting to Real Data Sources
-
-To connect to actual backend services:
-
-1. Implement API calls in `src/api.js`
-2. Replace mock data in `Dashboard.js` with real API calls
-3. Configure WebSocket for real-time updates
-
-Example API integration:
-```javascript
-// Replace mock data fetch with real API call
-useEffect(() => {
-  const fetchData = async () => {
-    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/dashboard`);
-    const data = await response.json();
-    setDashboardData(data);
-  };
-  fetchData();
-}, []);
+### **4. Run the Development Server**  
+```bash
+npm run dev
 ```
+Open **[http://localhost:3000](http://localhost:3000)** to view the dashboard.  
 
-## AI Services Integration
+---
 
-To connect to real AI services:
+## **Data Integration (Real vs. Mock)**  
+### **Option 1: Mock Data (Default)**  
+- Uses **simulated merchant transactions** (`src/mock/data.json`)  
+- No backend required  
 
-1. **Sales Predictions**: Integrate with TensorFlow Serving or AWS Forecast
-2. **Menu Optimization**: Connect to custom recommendation engines
-3. **Chat Assistant**: Implement Dialogflow or custom LLM API
-
-Example AI service call:
+### **Option 2: Connect to Real APIs**  
+Replace mock API calls in `src/api/merchantService.js`:  
 ```javascript
-const fetchAIPredictions = async () => {
-  const response = await fetch(`${process.env.REACT_APP_AI_SERVICE}/predict`, {
-    method: 'POST',
-    body: JSON.stringify({ historicalData: dashboardData })
-  });
-  const predictions = await response.json();
-  setSalesPredictions(predictions);
+// Real API Example
+export const fetchSalesData = async (merchantId) => {
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/sales/${merchantId}`);
+  return response.json();
 };
 ```
 
-## Customization
+---
 
-### Theming
-Modify colors in `tailwind.config.js`:
+## **AI Service Integration**  
+To enable **real AI insights**, configure:  
+
+### **1. OpenAI (GPT-4) for Chat & Recommendations**  
 ```javascript
-module.exports = {
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+});
+
+const getAISuggestion = async (query) => {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "user", content: query }],
+  });
+  return response.choices[0].message.content;
+};
+```
+
+### **2. Custom AI Models (Optional)**  
+- **Sales Forecasting** → TensorFlow.js / AWS Forecast  
+- **Inventory Optimization** → Python backend (Flask/FastAPI)  
+
+---
+
+## **Customization**  
+### **1. Theming (KFC/Grab Branding)**  
+Modify `tailwind.config.js`:  
+```javascript
+export default {
   theme: {
     extend: {
       colors: {
-        'kfc-red': '#E4002B',
-        'kfc-blue': '#005FAB',
+        primary: "#00B14F", // Grab Green
+        secondary: "#FFC72C", // KFC Yellow
       },
     },
   },
-}
+};
 ```
 
-### Adding New Metrics
-1. Create new chart components in `src/charts/`
-2. Add to dashboard state
-3. Create new visualization panels
+### **2. Adding New Metrics**  
+1. **Create a new chart component** (`src/components/charts/NewMetric.jsx`)  
+2. **Add to dashboard state** (`src/store/dashboardStore.js`)  
+3. **Embed in the UI**  
 
-## Deployment
+---
 
-Build for production:
+## **Deployment**  
+### **1. Build for Production**  
 ```bash
 npm run build
 ```
 
-Deploy the `build` folder to your preferred hosting service:
-- Vercel
-- Netlify
-- AWS S3
-- Firebase Hosting
+### **2. Deploy to**  
+- **Vercel** (`vercel deploy`)  
+- **AWS S3** (Static Hosting)  
+- **Firebase Hosting**  
 
-## Roadmap
+---
 
-- [ ] Real API integration
-- [ ] Advanced AI model training
-- [ ] Mobile app version
-- [ ] Multi-location support
-- [ ] Staff performance tracking
+## **Roadmap**  
+- [ ] **Multilingual Chat Expansion** (Thai, Vietnamese, Bahasa)  
+- [ ] **WhatsApp/Telegram Integration**  
+- [ ] **Voice Assistant (for hands-free use)**  
+- [ ] **Advanced Predictive Analytics**  
 
-## Contributing
+---
 
-Contributions are welcome! Please follow these steps:
+## **Why This Matters**  
+✅ **Economic Empowerment** – Helps small merchants compete like big businesses  
+✅ **AI for Good** – Democratizes access to advanced analytics  
+✅ **Scalable Across SEA** – Works for Grab’s diverse merchant base  
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+---
 
-## License
+## **License**  
+MIT License. See **[LICENSE](LICENSE)** for details.  
 
-Distributed under the MIT License. See `LICENSE` for more information.
+## **Contact**  
+- **Grab Tech Team** → tech-innovation@grab.com  
+- **GitHub Repo** → [github.com/grab-tech/mex-ai-assistant](https://github.com/grab-tech/mex-ai-assistant)  
 
-## Contact
+---
 
-Project Maintainer - [Your Name](mailto:your.email@example.com)
-
-Project Link: [https://github.com/your-repo/kfc-analytics-dashboard](https://github.com/your-repo/kfc-analytics-dashboard)
+### **🚀 Let’s Build the Future of Merchant Growth with AI!**
