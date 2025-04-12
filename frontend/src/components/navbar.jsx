@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users,Settings,Warehouse } from 'lucide-react';
+import { Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users,Settings,Warehouse,DollarSign } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -97,7 +97,7 @@ export default function Navbar() {
               alt="Grab logo" 
             />
             <span className="ml-3 text-xl font-semibold text-gray-900">
-              HEX Assistant
+              MEX Assistant
             </span>
           </div>
           <button 
@@ -148,6 +148,14 @@ export default function Navbar() {
                   Inventory
           </a>
           <a 
+                  href="/sales-income" 
+                  className="flex items-center pb-1 pr-3 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
+                  onClick={toggleMobileMenu}
+                >
+                  <DollarSign className="mr-3 h-5 w-5" />
+                  Sales
+          </a>
+          <a 
             href="/profile" 
             className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
           >
@@ -160,7 +168,7 @@ export default function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <nav className="relative w-full top-0 z-30 bg-white border-b border-gray-100 shadow-sm">
+      <nav className="sticky w-full top-0 z-30 bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left side - Logo and Navigation */}
@@ -181,7 +189,7 @@ export default function Navbar() {
                   alt="Grab logo" 
                 />
                 <span className="ml-3 text-xl font-semibold text-gray-900 hidden md:block">
-                  HEX Assistant
+                  MEX Assistant
                 </span>
               </div>
 
@@ -189,21 +197,21 @@ export default function Navbar() {
               <div className="hidden md:flex space-x-6">
                 <a 
                   href="/" 
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
                 >
                   <Home className="mr-2 h-4 w-4" />
                   Home
                 </a>
                 <a 
                   href="/chat" 
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
+                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
                 >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Chat
                 </a>
                 <a 
                   href="/orders" 
-                  className="flex items-center pb-1 pr-3 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
+                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
                   onClick={toggleMobileMenu}
                 >
                   <Map className="mr-3 h-5 w-5" />
@@ -219,11 +227,19 @@ export default function Navbar() {
                 </a>
                 <a 
                   href="/inventory" 
-                  className="flex items-center pb-1 pr-3 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
+                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
                   onClick={toggleMobileMenu}
                 >
                   <Warehouse className="mr-3 h-5 w-5" />
                   Inventory
+                </a>
+                <a 
+                  href="/sales-income" 
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
+                  onClick={toggleMobileMenu}
+                >
+                  <DollarSign className="mr-3 h-5 w-5" />
+                  Sales
                 </a>
                 <a 
                   href="/profile" 
