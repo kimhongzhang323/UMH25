@@ -148,8 +148,8 @@ const OrdersMapView = () => {
       const query = filters.searchQuery.toLowerCase();
       if (
         !order.customer.toLowerCase().includes(query) &&
-        !order.address.toLowerCase().includes(query) &&
-        !order.items.some(item => item.toLowerCase().includes(query))
+          !order.address.toLowerCase().includes(query) &&
+          !order.items.some(item => item.toLowerCase().includes(query))
       ) {
         return false;
       }
@@ -334,37 +334,37 @@ const OrdersMapView = () => {
             {filteredOrders.length === 0 ? (
               <div className="text-center py-8 text-gray-500">No orders match your filters</div>
             ) : (
-              <div className="space-y-3">
-                {filteredOrders.map(order => (
-                  <div key={order.id} className="border border-gray-200 rounded-lg p-3 hover:shadow-md">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Order #{order.id}</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
-                        {getStatusText(order.status)}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-1" />
-                        {order.customer}
+                <div className="space-y-3">
+                  {filteredOrders.map(order => (
+                    <div key={order.id} className="border border-gray-200 rounded-lg p-3 hover:shadow-md">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">Order #{order.id}</span>
+                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
+                          {getStatusText(order.status)}
+                        </span>
                       </div>
-                      <div className="truncate">{order.address}</div>
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {order.deliveryTime}
+                      <div className="text-sm text-gray-600 mt-1">
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 mr-1" />
+                          {order.customer}
+                        </div>
+                        <div className="truncate">{order.address}</div>
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-1" />
+                          {order.deliveryTime}
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center text-sm">
+                        <ShoppingBag className="h-4 w-4 mr-1" />
+                        {order.items.length} items
+                      </div>
+                      <div className="mt-2 text-right font-medium">
+                        RM{order.total.toFixed(2)}
                       </div>
                     </div>
-                    <div className="mt-2 flex items-center text-sm">
-                      <ShoppingBag className="h-4 w-4 mr-1" />
-                      {order.items.length} items
-                    </div>
-                    <div className="mt-2 text-right font-medium">
-                      RM{order.total.toFixed(2)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
           </div>
         </div>
       </div>
