@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router'; // Corrected import
+import { BrowserRouter, Route, Routes } from 'react-router-dom'; // Corrected import
 import './styles/index.css';
 import Chatbot from './components/Chatbot.jsx';
 import Dashboard from './components/Dashboard.jsx';
