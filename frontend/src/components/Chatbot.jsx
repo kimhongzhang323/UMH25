@@ -635,7 +635,7 @@ Would you like specific details about any of these areas?`;
 
   // Render
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex">
+    <div className="bg-gray-50 text-gray-900 flex h-full">
       {/* Merchant Profile Setup */}
       {activeMode === 'merchant-guidance' && showProfileSetup && (
         <div className="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-6 max-w-sm w-full z-50">
@@ -797,7 +797,7 @@ Would you like specific details about any of these areas?`;
 
       {/* Sidebar */}
       <div
-        className={`w-64 bg-white border-r border-gray-200 flex flex-col h-screen absolute z-40 transition-all duration-300 ${
+        className={`w-64 bg-white border-r border-gray-200 flex flex-col absolute z-20 transition-all duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -868,7 +868,7 @@ Would you like specific details about any of these areas?`;
       </div>
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
         sidebarOpen ? 'ml-64' : 'ml-0'
       }`}>
         {/* Chat Area */}
