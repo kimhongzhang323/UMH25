@@ -10,6 +10,7 @@ import OrdersMapView from './components/OrdersMapView';
 import CustomerServicePage from './components/CustomerServicePage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import InventoryPage from './components/InventoryPage.jsx';
+import SalesIncomePage from './components/SalesIncomePage.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="customer-service" element={<CustomerServicePage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="inventory" element={<InventoryPage />} />
+          <Route path="sales-income" element={<SalesIncomePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
