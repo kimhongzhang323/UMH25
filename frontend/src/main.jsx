@@ -7,6 +7,9 @@ import Dashboard from './components/Dashboard.jsx';
 import { DefaultLayout } from './default_layout.jsx';
 import 'leaflet/dist/leaflet.css';
 import OrdersMapView from './components/OrdersMapView';
+import CustomerServicePage from './components/CustomerServicePage.jsx';
+import ProfilePage from './components/ProfilePage.jsx';
+import InventoryPage from './components/InventoryPage.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -16,6 +19,9 @@ createRoot(document.getElementById('root')).render(
           <Route index element={<Dashboard />} />
           <Route path="chat" element={<Chatbot />} />
           <Route path="orders" element={<OrdersMapView />} />
+          <Route path="customer-service" element={<CustomerServicePage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="inventory" element={<InventoryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
