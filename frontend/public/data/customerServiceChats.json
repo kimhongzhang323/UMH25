@@ -1,0 +1,91 @@
+[
+  {
+    "id": 1,
+    "customer": "Ahmad bin Ali",
+    "avatar": "https://randomuser.me/api/portraits/men/1.jpg",
+    "lastMessage": "My order was missing 2 items",
+    "status": "pending",
+    "unread": true,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
+        "time": "2025-04-10T14:30:00",
+        "read": true
+      },
+      {
+        "id": 2,
+        "sender": "system",
+        "text": "Thank you for reaching out. I apologize for the missing items in your order.",
+        "time": "2025-04-10T14:32:00",
+        "read": true,
+        "aiGenerated": "autoReplyEnabled"
+      },
+      {
+        "id": 3,
+        "sender": "customer",
+        "text": "This is very disappointing. I was hosting guests and had to make alternative arrangements",
+        "time": "2025-04-10T14:35:00",
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "customer": "Siti Nurhaliza",
+    "avatar": "https://randomuser.me/api/portraits/women/2.jpg",
+    "lastMessage": "How long does delivery take to Bangsar?",
+    "status": "resolved",
+    "unread": false,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Hi, how long does delivery usually take to Bangsar area?",
+        "time": "2025-04-09T12:15:00",
+        "read": true
+      },
+      {
+        "id": 2,
+        "sender": "system",
+        "text": "Our standard delivery time to Bangsar is 30-45 minutes during regular hours.",
+        "time": "2025-04-09T12:16:00",
+        "read": true,
+        "aiGenerated": true
+      },
+      {
+        "id": 3,
+        "sender": "customer",
+        "text": "Thank you!",
+        "time": "2025-04-09T12:17:00",
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "customer": "Rajesh Kumar",
+    "avatar": "https://randomuser.me/api/portraits/men/3.jpg",
+    "lastMessage": "Is the Hot & Spicy Chicken very spicy?",
+    "status": "pending",
+    "unread": true,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "I want to try the Hot & Spicy Chicken but I have low spice tolerance. How spicy is it?",
+        "time": "2025-04-10T09:45:00",
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "customer": "Jennifer Lim",
+    "avatar": "https://randomuser.me/api/portraits/women/4.jpg",
+    "lastMessage": "Can I get a refund for wrong order?",
+    "status": "pending",
+    "unread": false
+  }
+]
