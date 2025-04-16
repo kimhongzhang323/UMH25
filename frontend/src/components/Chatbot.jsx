@@ -321,13 +321,7 @@ const formatDate = (date) => {
   // Removed duplicate handleSubmit function
 
   const generateFakeResponse = (userInput, mode) => {
-    const responses = {
-      chat: `I understand you said: "${userInput}". This is a standard response from your HEX assistant.`,
-      'deep-think': `Deep analysis of "${userInput}":\n\n1. First point of consideration...\n2. Second perspective...\n3. Potential implications...\n\nThis is a more thorough response than standard chat mode.`,
-      search: `Search results for "${userInput}":\n\n1. First relevant result (example.com)\n2. Second source (example.org)\n3. Additional information (example.net)`,
-      image: `Here's the generated image based on: "${userInput}"`
-    };
-    return responses[mode] || responses.chat;
+    return "fake shit"
   };
 
   const generatePersonalizedMerchantResponse = (query, profile) => {
