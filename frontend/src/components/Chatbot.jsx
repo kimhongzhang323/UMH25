@@ -1,20 +1,20 @@
 // Imports
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Loader2, 
-  Sparkles, 
-  Plus, 
-  Menu, 
-  Image, 
-  Search, 
-  File, 
-  Brain, 
-  Mic, 
-  MicOff, 
-  Store, 
+import {
+  Send,
+  Bot,
+  User,
+  Loader2,
+  Sparkles,
+  Plus,
+  Menu,
+  Image,
+  Search,
+  File,
+  Brain,
+  Mic,
+  MicOff,
+  Store,
   ShoppingBag,
   ChevronLeft,
   ChevronRight,
@@ -189,9 +189,9 @@ export default function Chatbot() {
     if (currentChatId) {
       setChatHistory((prev) =>
         prev.map((chat) =>
-          chat.id === currentChatId ? { 
-            ...chat, 
-            messages, 
+          chat.id === currentChatId ? {
+            ...chat,
+            messages,
             title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || chat.title,
             preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
             timestamp: new Date()
@@ -250,40 +250,40 @@ const newChat = () => {
 
     setTimeout(() => {
       let responseText;
-      
+
       if (merchantProfile.merchantType) {
         responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
       } else {
         responseText = generateFakeResponse(input, activeMode);
       }
-      
+
       const botMsg = {
         id: (Date.now() + 1).toString(),
         text: responseText,
         sender: 'bot',
         timestamp: new Date(),
         isImage: activeMode === 'image',
-        imageUrl: activeMode === 'image' ? 
+        imageUrl: activeMode === 'image' ?
           `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}` : null
       };
 
       setMessages(prev => [...prev, botMsg]);
       setLoading(false);
-      
+
       if (!currentChatId) {
         saveChatToHistory();
         setIsNewChat(false); // Reset new chat state after saving
       } else {
-        setChatHistory(prev => 
-          prev.map(chat => 
-            chat.id === currentChatId 
+        setChatHistory(prev =>
+          prev.map(chat =>
+            chat.id === currentChatId
               ? {
-                ...chat, 
+                ...chat,
                 messages: [...chat.messages, userMsg, botMsg],
                 title: userMsg.text.substring(0, 30) || chat.title,
                 preview: botMsg.text.substring(0, 50) || 'New conversation',
                 timestamp: new Date()
-              } 
+              }
               : chat
           )
         );
@@ -305,7 +305,7 @@ const formatDate = (date) => {
 
   const saveChatToHistory = () => {
     if (messages.length <= 1) return;
-    
+
     const newChat = {
       id: `chat${Date.now()}`,
       title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
@@ -332,7 +332,7 @@ const formatDate = (date) => {
 
   const generatePersonalizedMerchantResponse = (query, profile) => {
     const lowercaseQuery = query.toLowerCase();
-    
+
     const getMaturityBasedAdvice = () => {
       const challengeCount = profile.challenges.length;
       if (challengeCount <= 1) return "emerging";
@@ -366,17 +366,17 @@ const formatDate = (date) => {
       switch(location.marketType) {
         case 'urban':
           return `dense urban market penetration, focusing on convenience and quick service${
-            profile.merchantType === 'physical' ? ', leveraging high foot traffic areas' : 
+            profile.merchantType === 'physical' ? ', leveraging high foot traffic areas' :
             ', targeting mobile-first urban consumers'
           }`;
         case 'suburban':
           return `community-centric approach, focusing on family-oriented marketing${
-            profile.merchantType === 'physical' ? ' and local shopping center presence' : 
+            profile.merchantType === 'physical' ? ' and local shopping center presence' :
             ' and suburban lifestyle alignment'
           }`;
         case 'rural':
           return `wider geographic coverage strategy, emphasizing reliability and community trust${
-            profile.merchantType === 'physical' ? ', being a destination business' : 
+            profile.merchantType === 'physical' ? ', being a destination business' :
             'focusing on delivery reliability and rural customer service'
           }`;
         default: return 'balanced market approach across different location types';
@@ -389,15 +389,15 @@ const formatDate = (date) => {
         profile.location.marketType || 'mixed'
       } market selling ${profile.productType}, here's your tailored marketing strategy:
 
-1. **Location-Based Strategy**: 
+1. **Location-Based Strategy**:
    - Market Type: ${profile.location.marketType || 'Not specified'}
    - Approach: ${getLocationStrategy()}
    - Regional Focus: ${profile.location.region ? `Optimize for ${profile.location.region} market preferences` : 'General market approach'}
 
-2. **Channel Focus**: 
+2. **Channel Focus**:
    - Primary: ${getChannelStrategy()}
-   - Business Stage: ${getMaturityBasedAdvice() === 'emerging' ? 'Focus on building brand awareness' : 
-                     getMaturityBasedAdvice() === 'growing' ? 'Expand market reach' : 
+   - Business Stage: ${getMaturityBasedAdvice() === 'emerging' ? 'Focus on building brand awareness' :
+                     getMaturityBasedAdvice() === 'growing' ? 'Expand market reach' :
                      'Strengthen market position'}
 
 3. **Local Targeting**:
@@ -417,7 +417,7 @@ const formatDate = (date) => {
                       profile.location.marketType === 'rural' ? 'Regional authority building' :
                       'Market-appropriate expansion'}`;
     }
-    
+
     // Pricing Strategy
     if (lowercaseQuery.includes('pricing') || lowercaseQuery.includes('price')) {
       return `For your ${profile.businessSize} business selling ${profile.productType} as a ${profile.merchantType}, here's my pricing guidance:
@@ -432,7 +432,7 @@ const formatDate = (date) => {
 
 Would you like a more detailed pricing strategy for a specific product line?`;
     }
-    
+
     // Inventory Management
     if (lowercaseQuery.includes('inventory') || lowercaseQuery.includes('stock') || lowercaseQuery.includes('supply chain')) {
       return `For your ${profile.productType} inventory management as a ${profile.merchantType}, here are tailored recommendations:
@@ -447,7 +447,7 @@ Would you like a more detailed pricing strategy for a specific product line?`;
 
 Would you like specific supplier recommendations for your ${profile.productType} products?`;
     }
-    
+
     // Customer Retention
     if (lowercaseQuery.includes('customer') || lowercaseQuery.includes('client') || lowercaseQuery.includes('retention')) {
       return `For your ${profile.merchantType} business, here are personalized customer retention strategies:
@@ -462,7 +462,7 @@ Would you like specific supplier recommendations for your ${profile.productType}
 
 Would you like me to help design a specific customer retention campaign?`;
     }
-    
+
     // Default response with enhanced personalization
     return `For your ${profile.merchantType} business selling ${profile.productType}, here's my tailored guidance:
 
@@ -558,8 +558,8 @@ Would you like specific details about any of these areas?`;
     return (
       <span className={`flex items-center gap-1 text-${color}-600`}>
         {icon}
-        {activeMode === 'deep-think' ? 'Deep Think' : 
-         activeMode === 'search' ? 'Search' : 
+        {activeMode === 'deep-think' ? 'Deep Think' :
+         activeMode === 'search' ? 'Search' :
          activeMode === 'image' ? 'Image' : 'Chat'}
       </span>
     );
@@ -603,7 +603,7 @@ Would you like specific details about any of these areas?`;
               <div className="text-xs text-gray-400 mt-1">Just now</div>
             </button>
           )}
-          
+
           {chatHistory.length > 0 ? (
             <>
               {chatHistory.map((chat) => (
@@ -634,7 +634,7 @@ Would you like specific details about any of these areas?`;
             <div className="flex items-center gap-2 mb-2">
               <Store className="w-4 h-4 text-yellow-600" />
               <span className="text-sm font-medium">Merchant Profile</span>
-              <button 
+              <button
                 onClick={() => setShowFilterPanel(true)}
                 className="ml-auto text-xs text-blue-600"
               >
@@ -707,8 +707,8 @@ Would you like specific details about any of these areas?`;
                     >
                       {msg.mode && msg.sender === 'user' && (
                         <div className="text-xs text-gray-500 mb-1">
-                          {msg.mode === 'image' ? 'Image generation' : 
-                           msg.mode === 'deep-think' ? 'Deep thinking' : 
+                          {msg.mode === 'image' ? 'Image generation' :
+                           msg.mode === 'deep-think' ? 'Deep thinking' :
                            msg.mode === 'search' ? 'Web search' : 'Chat'}
                         </div>
                       )}
@@ -719,9 +719,9 @@ Would you like specific details about any of these areas?`;
                             <span className="text-sm">{msg.file.name}</span>
                           </div>
                           {msg.file.type.startsWith('image/') && (
-                            <img 
-                              src={msg.file.preview} 
-                              alt="Preview" 
+                            <img
+                              src={msg.file.preview}
+                              alt="Preview"
                               className="mt-2 max-w-full max-h-40 rounded"
                             />
                           )}
@@ -729,9 +729,9 @@ Would you like specific details about any of these areas?`;
                       )}
                       {msg.isImage ? (
                         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-                          <img 
-                            src={msg.imageUrl} 
-                            alt="Generated content" 
+                          <img
+                            src={msg.imageUrl}
+                            alt="Generated content"
                             className="w-full"
                           />
                           <div className="p-3 text-sm">
@@ -769,8 +769,8 @@ Would you like specific details about any of these areas?`;
                   <div className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-3 rounded-2xl">
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                     <span className="text-gray-700">
-                      {activeMode === 'image' ? 'Generating image...' : 
-                       activeMode === 'deep-think' ? 'Deep thinking...' : 
+                      {activeMode === 'image' ? 'Generating image...' :
+                       activeMode === 'deep-think' ? 'Deep thinking...' :
                        activeMode === 'search' ? 'Searching...' : 'Thinking...'}
                     </span>
                   </div>
@@ -789,8 +789,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('chat')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'chat' 
-                    ? 'bg-blue-100 text-blue-600' 
+                  activeMode === 'chat'
+                    ? 'bg-blue-100 text-blue-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -799,8 +799,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('deep-think')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'deep-think' 
-                    ? 'bg-purple-100 text-purple-600' 
+                  activeMode === 'deep-think'
+                    ? 'bg-purple-100 text-purple-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -810,8 +810,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('search')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'search' 
-                    ? 'bg-green-100 text-green-600' 
+                  activeMode === 'search'
+                    ? 'bg-green-100 text-green-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -821,8 +821,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('image')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'image' 
-                    ? 'bg-orange-100 text-orange-600' 
+                  activeMode === 'image'
+                    ? 'bg-orange-100 text-orange-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -832,8 +832,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setShowFilterPanel(true)}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  merchantProfile.merchantType 
-                    ? 'bg-yellow-100 text-yellow-600' 
+                  merchantProfile.merchantType
+                    ? 'bg-yellow-100 text-yellow-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -852,8 +852,8 @@ Would you like specific details about any of these areas?`;
                     <File className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">{filePreview.name}</span>
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setFilePreview(null)}
                     className="text-gray-500 hover:text-gray-700"
                   >
@@ -862,8 +862,8 @@ Would you like specific details about any of these areas?`;
                 </div>
               )}
               <div className="flex items-end p-2">
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
@@ -894,8 +894,8 @@ Would you like specific details about any of these areas?`;
                   type="button"
                   onClick={toggleRecording}
                   className={`p-2 rounded-lg mr-2 ${
-                    isRecording 
-                      ? 'bg-red-100 text-red-600 animate-pulse' 
+                    isRecording
+                      ? 'bg-red-100 text-red-600 animate-pulse'
                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -931,14 +931,14 @@ Would you like specific details about any of these areas?`;
                   <Store className="w-5 h-5 text-yellow-600" />
                   Merchant Profile & Insights Configuration
                 </h2>
-                <button 
+                <button
                   onClick={() => setShowFilterPanel(false)}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   ×
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto pr-2">
                 <form onSubmit={(e) => {
                   e.preventDefault();
@@ -969,7 +969,7 @@ Would you like specific details about any of these areas?`;
                             <option value="grocery">Grocery/Convenience</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Main Product Categories
@@ -985,7 +985,7 @@ Would you like specific details about any of these areas?`;
                             placeholder="e.g. fast food, electronics, beauty products"
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Business Size
@@ -1032,7 +1032,7 @@ Would you like specific details about any of these areas?`;
                             <option value="transport">Transport Hub</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Country/Region
@@ -1065,7 +1065,7 @@ Would you like specific details about any of these areas?`;
                       <h3 className="font-medium text-gray-800 mb-3">Business Focus Areas</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          'Sales growth', 
+                          'Sales growth',
                           'Customer retention',
                           'Marketing effectiveness',
                           'Inventory management',
@@ -1084,7 +1084,7 @@ Would you like specific details about any of these areas?`;
                                 if (e.target.checked) {
                                   if (merchantProfile.challenges.length < 3) {
                                     setMerchantProfile(prev => ({
-                                      ...prev, 
+                                      ...prev,
                                       challenges: [...prev.challenges, challenge]
                                     }));
                                   }
@@ -1131,7 +1131,7 @@ Would you like specific details about any of these areas?`;
                             <option value="my">Burmese (မြန်မာဘာသာ)</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Preferred Insight Format
@@ -1197,7 +1197,7 @@ Would you like specific details about any of these areas?`;
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Inventory System Integration
@@ -1214,7 +1214,7 @@ Would you like specific details about any of these areas?`;
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-6 flex justify-end gap-2">
                     <button
                       type="button"
