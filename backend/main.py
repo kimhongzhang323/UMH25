@@ -1,36 +1,80 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from sentence_transformers import SentenceTransformer
+# from transformers import AutoTokenizer, AutoModelForCausalLM # Comment out real imports
+# from sentence_transformers import SentenceTransformer # Comment out real imports
 import torch
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import io
 import csv
+import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="Llama RAG API with CSV Support",
-    description="Retrieval-Augmented Generation API using Llama from Hugging Face with CSV data integration",
+    title="Llama RAG API with CSV Support (Mocked)",
+    description="Retrieval-Augmented Generation API using mocked Llama for testing",
     version="1.0.0"
 )
 
+origins = [
+    "http://localhost:5173",
+    "https://localhost:5174"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = origins,
+    allow_credentials = True,
+    allow_methods = ["GET", "POST", "PUT", "DELETE"]
+)
+
+
 # Configuration
-MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Replace with your preferred Llama model
-EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
+MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Keep for reference
+EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2" # Keep for reference
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 MAX_NEW_TOKENS = 512
 TEMPERATURE = 0.7
 CSV_CHUNK_SIZE = 1000  # Number of rows to process at a time for large CSVs
 
-# Load models
-try:
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
-    embedding_model = SentenceTransformer(EMBEDDING_MODEL, device=DEVICE)
-except Exception as e:
-    raise RuntimeError(f"Failed to load models: {str(e)}")
+# Load models (mocked for testing)
+TESTING = True
+
+if not TESTING:
+    try:
+        from transformers import AutoTokenizer, AutoModelForCausalLM
+        from sentence_transformers import SentenceTransformer
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
+        embedding_model = SentenceTransformer(EMBEDDING_MODEL, device=DEVICE)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load models: {str(e)}")
+else:
+    print("Running in TESTING mode: Using mock models.")
+    class MockTokenizer:
+        def __init__(self, model_name):
+            self.model_name = model_name
+        def __call__(self, prompt, return_tensors="pt"):
+            return {"input_ids": torch.tensor([[1, 2, 3]])} # Dummy input IDs
+        def decode(self, output_ids, skip_special_tokens=True):
+            return "Mock Llama Response"
+    class MockModel:
+        def __init__(self, model_name):
+            self.model_name = model_name
+        def generate(self, input_ids, max_new_tokens, temperature, do_sample):
+            return torch.tensor([[4, 5, 6]]) # Dummy output IDs
+    class MockEmbeddingModel:
+        def __init__(self, model_name, device):
+            self.model_name = model_name
+            self.device = device
+        def encode(self, text):
+            return np.array([0.1, 0.2, 0.3]) # Dummy embedding
+
+    tokenizer = MockTokenizer(MODEL_NAME)
+    model = MockModel(MODEL_NAME)
+    embedding_model = MockEmbeddingModel(EMBEDDING_MODEL, DEVICE)
 
 class Query(BaseModel):
     question: str
@@ -54,7 +98,7 @@ class DocumentStore:
         self.documents = []
         self.embeddings = None
         self.document_ids = []
-    
+
     def add_document(self, document: Document):
         self.documents.append(document)
         text_embedding = embedding_model.encode(document.text)
@@ -63,13 +107,13 @@ class DocumentStore:
         else:
             self.embeddings = np.vstack([self.embeddings, text_embedding])
         self.document_ids.append(document.metadata.get("id", len(self.documents)))
-    
+
     def retrieve_relevant(self, query: str, top_k: int = 3) -> List[str]:
         query_embedding = embedding_model.encode(query).reshape(1, -1)
         similarities = cosine_similarity(query_embedding, self.embeddings)[0]
         top_indices = similarities.argsort()[-top_k:][::-1]
         return [self.documents[i].text for i in top_indices]
-    
+
     def clear_csv_documents(self):
         """Remove all documents that came from CSV sources"""
         indices_to_keep = [i for i, doc in enumerate(self.documents) if doc.source != "csv"]
@@ -86,7 +130,7 @@ def process_csv_row(row: dict, config: CSVConfig) -> Document:
     """Convert a CSV row into a Document"""
     # Combine specified text columns
     text = " ".join(str(row[col]) for col in config.text_columns if col in row)
-    
+
     # Extract metadata
     metadata = {}
     if config.id_column and config.id_column in row:
@@ -95,24 +139,24 @@ def process_csv_row(row: dict, config: CSVConfig) -> Document:
         for col in config.metadata_columns:
             if col in row:
                 metadata[col] = row[col]
-    
+
     return Document(text=text, metadata=metadata, source="csv")
 
 def generate_prompt(question: str, context: List[str] = None) -> str:
     if context:
         context_str = "\n".join([f"Context {i+1}: {c}" for i, c in enumerate(context)])
         return f"""Answer the following question based on the provided context.
-        
+
         {context_str}
-        
+
         Question: {question}
-        
+
         Answer:"""
     else:
         return f"""Answer the following question.
-        
+
         Question: {question}
-        
+
         Answer:"""
 
 @app.post("/query")
@@ -121,10 +165,10 @@ async def query_llama(query: Query):
         # Retrieve relevant documents if no context provided and use_csv_context is True
         if not query.context and query.use_csv_context:
             query.context = document_store.retrieve_relevant(query.question)
-        
+
         # Generate prompt
         prompt = generate_prompt(query.question, query.context)
-        
+
         # Tokenize and generate
         inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)
         outputs = model.generate(
@@ -133,11 +177,11 @@ async def query_llama(query: Query):
             temperature=query.temperature,
             do_sample=True
         )
-        
+
         # Decode and clean up response
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         response = response.split("Answer:")[-1].strip()
-        
+
         return {
             "response": response,
             "context_used": query.context,
@@ -160,26 +204,26 @@ async def upload_csv(
             id_column=id_column,
             metadata_columns=[col.strip() for col in metadata_columns.split(",")] if metadata_columns else None
         )
-        
+
         # Clear existing CSV documents
         document_store.clear_csv_documents()
-        
+
         # Process CSV in chunks for memory efficiency
         contents = await file.read()
         csv_text = io.StringIO(contents.decode('utf-8'))
-        
+
         # Detect if file has header
         sniffer = csv.Sniffer()
         has_header = sniffer.has_header(csv_text.read(1024))
         csv_text.seek(0)
-        
+
         # Read CSV
         df_chunks = pd.read_csv(
             csv_text,
             chunksize=CSV_CHUNK_SIZE,
             header=0 if has_header else None
         )
-        
+
         total_rows = 0
         for chunk in df_chunks:
             # Convert each row to a document
@@ -187,7 +231,7 @@ async def upload_csv(
                 document = process_csv_row(row.to_dict(), config)
                 document_store.add_document(document)
             total_rows += len(chunk)
-        
+
         return {
             "status": "success",
             "message": f"CSV processed successfully. Added {total_rows} documents.",
@@ -214,6 +258,110 @@ async def get_document_count():
         "total_documents": len(document_store.documents),
         "csv_documents": sum(1 for doc in document_store.documents if doc.source == "csv")
     }
+
+@app.get("/customer-service-chats")
+async def get_customer_service_chats():
+    chats = [
+  {
+    "id": 1,
+    "customer": "Ahmad bin Ali",
+    "avatar": "https://randomuser.me/api/portraits/men/1.jpg",
+    "lastMessage": "My order was missing 2 items",
+    "status": "pending",
+    "unread": True,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
+        "time": "2025-04-10T14:30:00",
+        "read": True
+      },
+      {
+        "id": 2,
+        "sender": "system",
+        "text": "Thank you for reaching out. I apologize for the missing items in your order.",
+        "time": "2025-04-10T14:32:00",
+        "read": True,
+        "aiGenerated": "autoReplyEnabled"
+      },
+      {
+        "id": 3,
+        "sender": "customer",
+        "text": "This is very disappointing. I was hosting guests and had to make alternative arrangements",
+        "time": "2025-04-10T14:35:00",
+        "read": True
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "customer": "Siti Nurhaliza",
+    "avatar": "https://randomuser.me/api/portraits/women/2.jpg",
+    "lastMessage": "How long does delivery take to Bangsar?",
+    "status": "resolved",
+    "unread": False,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Hi, how long does delivery usually take to Bangsar area?",
+        "time": "2025-04-09T12:15:00",
+        "read": True
+      },
+      {
+        "id": 2,
+        "sender": "system",
+        "text": "Our standard delivery time to Bangsar is 30-45 minutes during regular hours.",
+        "time": "2025-04-09T12:16:00",
+        "read": True,
+        "aiGenerated": True
+      },
+      {
+        "id": 3,
+        "sender": "customer",
+        "text": "Thank you!",
+        "time": "2025-04-09T12:17:00",
+        "read": True
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "customer": "Rajesh Kumar",
+    "avatar": "https://randomuser.me/api/portraits/men/3.jpg",
+    "lastMessage": "Is the Hot & Spicy Chicken very spicy?",
+    "status": "pending",
+    "unread": True,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "I want to try the Hot & Spicy Chicken but I have low spice tolerance. How spicy is it?",
+        "time": "2025-04-10T09:45:00",
+        "read": True
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "customer": "Jennifer Lim",
+    "avatar": "https://randomuser.me/api/portraits/women/4.jpg",
+    "lastMessage": "Can I get a refund for the wrong order?",
+    "status": "pending",
+    "unread": False,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Can I get a refund for the wrong order?",
+        "time": "2025-04-09T12:15:00",
+        "read": True
+      }
+    ]
+  }
+]
+    return chats
 
 if __name__ == "__main__":
     import uvicorn
