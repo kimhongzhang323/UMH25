@@ -105,3 +105,9 @@ async def get_chats():
   }
 ]
     return chats
+
+# Endpoint to receive payload from frontend
+@router.post("/send-payload")
+async def send_payload(payload: dict):
+    print("Payload received")
+    return {"status" : "success"}

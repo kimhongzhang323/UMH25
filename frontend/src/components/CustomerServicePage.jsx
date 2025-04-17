@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiSend, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle } from 'react-icons/fi'; // Added FiLoader, FiAlertCircle
 
-const MOCK_CHATS_URL = 'http://127.0.0.1:8000/customer-service/chats';
-const API_ENDPOINT = '/api/ai-auto-reply'; // Adjust if your backend runs elsewhere (e.g., http://localhost:3001/api/ai-auto-reply)
+const API_BASE_URL = "http://127.0.0.1:8000/customer-service"
+const MOCK_CHATS_URL = `${API_BASE_URL}/chats`
+const SEND_PAYLOAD_URL = `${API_BASE_URL}/send-payload`
 
 const CustomerServicePage = () => {
   // State for chat settings
@@ -72,7 +73,7 @@ const CustomerServicePage = () => {
     };
 
     try {
-      const response = await fetch(API_ENDPOINT, {
+      const response = await fetch(SEND_PAYLOAD_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -207,7 +208,7 @@ const CustomerServicePage = () => {
           // For now, let's assume AI replies to CUSTOMER messages,
           // so we don't call triggerAIResponse here.
           // If AI should suggest based on merchant text, call it here.
-          // triggerAIResponse(activeChatId);
+          triggerAIResponse(activeChatId);
         }
       })
       .catch(err => {
@@ -233,7 +234,7 @@ const CustomerServicePage = () => {
     if (selectedChat && autoReplyEnabled && selectedChat.messages?.length > 0) {
       const lastMessage = selectedChat.messages[selectedChat.messages.length - 1];
       if (lastMessage.sender === 'customer' && !lastMessage.read) { // Example condition
-        // triggerAIResponse(chatId); // Decide if AI should reply on select
+        triggerAIResponse(chatId);
       }
     }
   };
@@ -433,11 +434,100 @@ const CustomerServicePage = () => {
         )}
       </div>
 
-      {/* AI Settings Panel (Keep as placeholder or implement as modal) */}
-      <div className="w-80 border-l border-gray-200 bg-white p-4 hidden xl:block"> {/* Hide on smaller screens */}
+      {/* AI Settings Panel (would be a modal in real implementation) */}
+      <div className="w-80 border-l border-gray-200 bg-white p-4">
         <h3 className="font-medium text-lg mb-4">AI Assistant Settings</h3>
-        {/* ... Settings content (toggle, speed, tone, common responses) ... */}
-        {/* Make "Common Responses" buttons insert text into currentMessage state */}
+        <div className="space-y-6">
+          <div>
+            <label className="flex items-center justify-between cursor-pointer">
+              <span className="text-gray-700">Enable Auto-Reply</span>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={autoReplyEnabled}
+                  onChange={handleToggleAutoReply}
+                />
+                <div className={`block w-14 h-8 rounded-full ${autoReplyEnabled ? 'bg-purple-600' : 'bg-gray-300'
+                  }`}></div>
+                <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${autoReplyEnabled ? 'transform translate-x-6' : ''
+                  }`}></div>
+              </div>
+            </label>
+            <p className="text-sm text-gray-500 mt-1">
+              When enabled, the AI will automatically respond to customer messages
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">Response Speed</label>
+            <div className="flex space-x-2">
+              {['fast', 'medium', 'slow'].map((speed) => (
+                <button
+                  key={speed}
+                  onClick={() => setAiResponseSpeed(speed)}
+                  className={`px-3 py-1 rounded-full text-sm ${aiResponseSpeed === speed
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-gray-100 text-gray-800'
+                    }`}
+                >
+                  {speed.charAt(0).toUpperCase() + speed.slice(1)}
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              {aiResponseSpeed === 'fast'
+                ? 'AI will respond immediately (may be less thoughtful)'
+                : aiResponseSpeed === 'medium'
+                  ? 'AI will take a moment to craft responses'
+                  : 'AI will take longer for more detailed responses'}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">Response Tone</label>
+            <div className="flex space-x-2">
+              {['professional', 'friendly', 'formal'].map((tone) => (
+                <button
+                  key={tone}
+                  onClick={() => setAiTone(tone)}
+                  className={`px-3 py-1 rounded-full text-sm ${aiTone === tone
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-gray-100 text-gray-800'
+                    }`}
+                >
+                  {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              {aiTone === 'professional'
+                ? 'Balanced, business-appropriate responses'
+                : aiTone === 'friendly'
+                  ? 'Casual, conversational tone'
+                  : 'Very polite and structured responses'}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">Common Responses</label>
+            <div className="space-y-2">
+              {[
+                'Apology for missing items',
+                'Delivery time inquiry',
+                'Menu recommendations',
+                'Refund request'
+              ].map((response) => (
+                <button
+                  key={response}
+                  className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm"
+                >
+                  {response}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Style tag for typing animation */}
