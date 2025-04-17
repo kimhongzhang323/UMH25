@@ -248,6 +248,8 @@ const newChat = () => {
     setInput('');
     setLoading(true);
 
+    fetch(import.meta.env.BACKEND_URL)
+
     setTimeout(() => {
       let responseText;
 
