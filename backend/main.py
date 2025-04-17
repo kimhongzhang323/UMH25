@@ -1,32 +1,220 @@
-import os
-from dotenv import load_dotenv
-
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
+from typing import List, Optional
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from sentence_transformers import SentenceTransformer
+import torch
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+import io
+import csv
 
-load_dotenv()
-MOCK_AI = os.getenv("MOCK_AI")
+app = FastAPI(
+    title="Llama RAG API with CSV Support",
+    description="Retrieval-Augmented Generation API using Llama from Hugging Face with CSV data integration",
+    version="1.0.0"
+)
 
-# Import mock AI APIs if just testing backend
-if MOCK_AI == "true":
-    from mock_ai import generate_text, generate_image
-else:
-    from llm import generate_text
-    from image_gen import generate_image
+# Configuration
+MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Replace with your preferred Llama model
+EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+MAX_NEW_TOKENS = 512
+TEMPERATURE = 0.7
+CSV_CHUNK_SIZE = 1000  # Number of rows to process at a time for large CSVs
 
-app = FastAPI()
+# Load models
+try:
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
+    embedding_model = SentenceTransformer(EMBEDDING_MODEL, device=DEVICE)
+except Exception as e:
+    raise RuntimeError(f"Failed to load models: {str(e)}")
 
+class Query(BaseModel):
+    question: str
+    context: Optional[List[str]] = None
+    max_tokens: Optional[int] = MAX_NEW_TOKENS
+    temperature: Optional[float] = TEMPERATURE
+    use_csv_context: Optional[bool] = True  # Whether to use CSV data in RAG
 
-class Prompt(BaseModel):
-    prompt: str
+class CSVConfig(BaseModel):
+    text_columns: List[str]  # Columns to use for text content
+    id_column: Optional[str] = None  # Optional unique identifier column
+    metadata_columns: Optional[List[str]] = None  # Columns to include as metadata
 
+class Document(BaseModel):
+    text: str
+    metadata: Optional[dict] = None
+    source: Optional[str] = "csv"  # Track source of document
 
-@app.post("/text")
-def text_response(data: Prompt):
-    return {"response": generate_text(data.prompt)}
+class DocumentStore:
+    def __init__(self):
+        self.documents = []
+        self.embeddings = None
+        self.document_ids = []
 
+    def add_document(self, document: Document):
+        self.documents.append(document)
+        text_embedding = embedding_model.encode(document.text)
+        if self.embeddings is None:
+            self.embeddings = text_embedding.reshape(1, -1)
+        else:
+            self.embeddings = np.vstack([self.embeddings, text_embedding])
+        self.document_ids.append(document.metadata.get("id", len(self.documents)))
 
-@app.post("/image")
-def image_response(data: Prompt):
-    path = generate_image(data.prompt)
-    return {"image_url": f"/static/{path}"}
+    def retrieve_relevant(self, query: str, top_k: int = 3) -> List[str]:
+        query_embedding = embedding_model.encode(query).reshape(1, -1)
+        similarities = cosine_similarity(query_embedding, self.embeddings)[0]
+        top_indices = similarities.argsort()[-top_k:][::-1]
+        return [self.documents[i].text for i in top_indices]
+
+    def clear_csv_documents(self):
+        """Remove all documents that came from CSV sources"""
+        indices_to_keep = [i for i, doc in enumerate(self.documents) if doc.source != "csv"]
+        self.documents = [self.documents[i] for i in indices_to_keep]
+        if len(indices_to_keep) > 0:
+            self.embeddings = self.embeddings[indices_to_keep]
+        else:
+            self.embeddings = None
+        self.document_ids = [self.document_ids[i] for i in indices_to_keep]
+
+document_store = DocumentStore()
+
+def process_csv_row(row: dict, config: CSVConfig) -> Document:
+    """Convert a CSV row into a Document"""
+    # Combine specified text columns
+    text = " ".join(str(row[col]) for col in config.text_columns if col in row)
+
+    # Extract metadata
+    metadata = {}
+    if config.id_column and config.id_column in row:
+        metadata["id"] = row[config.id_column]
+    if config.metadata_columns:
+        for col in config.metadata_columns:
+            if col in row:
+                metadata[col] = row[col]
+
+    return Document(text=text, metadata=metadata, source="csv")
+
+def generate_prompt(question: str, context: List[str] = None) -> str:
+    if context:
+        context_str = "\n".join([f"Context {i+1}: {c}" for i, c in enumerate(context)])
+        return f"""Answer the following question based on the provided context.
+
+        {context_str}
+
+        Question: {question}
+
+        Answer:"""
+    else:
+        return f"""Answer the following question.
+
+        Question: {question}
+
+        Answer:"""
+
+@app.post("/query")
+async def query_llama(query: Query):
+    try:
+        # Retrieve relevant documents if no context provided and use_csv_context is True
+        if not query.context and query.use_csv_context:
+            query.context = document_store.retrieve_relevant(query.question)
+
+        # Generate prompt
+        prompt = generate_prompt(query.question, query.context)
+
+        # Tokenize and generate
+        inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)
+        outputs = model.generate(
+            inputs.input_ids,
+            max_new_tokens=query.max_tokens,
+            temperature=query.temperature,
+            do_sample=True
+        )
+
+        # Decode and clean up response
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        response = response.split("Answer:")[-1].strip()
+
+        return {
+            "response": response,
+            "context_used": query.context,
+            "context_source": "csv" if query.use_csv_context else "user_provided"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/upload_csv")
+async def upload_csv(
+    file: UploadFile = File(...),
+    text_columns: str = "",  # Comma-separated list of columns
+    id_column: Optional[str] = None,
+    metadata_columns: Optional[str] = None  # Comma-separated list
+):
+    try:
+        # Parse CSV configuration
+        config = CSVConfig(
+            text_columns=[col.strip() for col in text_columns.split(",") if col.strip()],
+            id_column=id_column,
+            metadata_columns=[col.strip() for col in metadata_columns.split(",")] if metadata_columns else None
+        )
+
+        # Clear existing CSV documents
+        document_store.clear_csv_documents()
+
+        # Process CSV in chunks for memory efficiency
+        contents = await file.read()
+        csv_text = io.StringIO(contents.decode('utf-8'))
+
+        # Detect if file has header
+        sniffer = csv.Sniffer()
+        has_header = sniffer.has_header(csv_text.read(1024))
+        csv_text.seek(0)
+
+        # Read CSV
+        df_chunks = pd.read_csv(
+            csv_text,
+            chunksize=CSV_CHUNK_SIZE,
+            header=0 if has_header else None
+        )
+
+        total_rows = 0
+        for chunk in df_chunks:
+            # Convert each row to a document
+            for _, row in chunk.iterrows():
+                document = process_csv_row(row.to_dict(), config)
+                document_store.add_document(document)
+            total_rows += len(chunk)
+
+        return {
+            "status": "success",
+            "message": f"CSV processed successfully. Added {total_rows} documents.",
+            "columns_used": config.text_columns,
+            "metadata_columns": config.metadata_columns
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/csv_columns")
+async def get_csv_columns(file: UploadFile = File(...)):
+    """Endpoint to preview CSV columns"""
+    try:
+        contents = await file.read()
+        csv_text = io.StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(csv_text, nrows=1)  # Just read header
+        return {"columns": list(df.columns)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/document_count")
+async def get_document_count():
+    return {
+        "total_documents": len(document_store.documents),
+        "csv_documents": sum(1 for doc in document_store.documents if doc.source == "csv")
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
