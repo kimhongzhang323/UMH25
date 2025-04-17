@@ -102,7 +102,7 @@ async def get_chats():
         "read": True
       }
     ]
-  }
+  },
 ]
     return chats
 
