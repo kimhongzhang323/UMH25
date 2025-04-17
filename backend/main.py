@@ -1,7 +1,18 @@
+import os
+from dotenv import load_dotenv
+
 from fastapi import FastAPI
 from pydantic import BaseModel
-from llm import generate_text
-from image_gen import generate_image
+
+load_dotenv()
+MOCK_AI = os.getenv("MOCK_AI")
+
+# Import mock AI APIs if just testing backend
+if MOCK_AI == "true":
+    from mock_ai import generate_text, generate_image
+else:
+    from llm import generate_text
+    from image_gen import generate_image
 
 app = FastAPI()
 
