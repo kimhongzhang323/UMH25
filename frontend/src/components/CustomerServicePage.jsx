@@ -136,46 +136,46 @@ const CustomerServicePage = () => {
       settings: { tone: aiTone, speed: aiResponseSpeed } // Include settings
     };
 
-    try {
-      const response = await fetch(AI_REPLY_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+          // Mock AI response for testing
+    // try {
+    //   const response = await fetch(AI_REPLY_API_URL, {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(payload),
+    //   });
 
-      if (!response.ok) {
-          const errorData = await response.text(); // Try to get error details
-          throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
-      }
+    //   if (!response.ok) {
+    //       const errorData = await response.text(); // Try to get error details
+    //       throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
+    //   }
 
-      const result = await response.json();
+    //   const result = await response.json();
 
-      // Mock AI response for testing
       // Add the AI's response message to the chat
-      if (result.aiResponse && result.aiResponse.text) {
-        addMessageToChat(result.chatId, {
-          sender: result.aiResponse.sender || 'system', // Default sender if not provided
-          text: result.aiResponse.text,
-          time: result.aiResponse.time || new Date().toISOString(),
-          aiGenerated: true
-        });
-      } else {
-          console.warn("AI response received but no text content found:", result);
-      }
-    } catch (error) {
-      console.error("Error triggering AI response:", error);
-      // TODO: Show error in UI (e.g., add an error message to the chat)
-      addMessageToChat(chatId, {
-          sender: 'system',
-          text: `⚠️ AI Error: ${error.message}`,
-          time: new Date().toISOString(),
-          aiGenerated: false, // Mark as system error, not AI response
-          isError: true // Custom flag for styling?
-      });
-    } finally {
-      // Ensure typing indicator is turned off for this chat
-      setIsAiTyping(prev => ({ ...prev, [chatId]: false }));
-    }
+    //   if (result.aiResponse && result.aiResponse.text) {
+    //     addMessageToChat(result.chatId, {
+    //       sender: result.aiResponse.sender || 'system', // Default sender if not provided
+    //       text: result.aiResponse.text,
+    //       time: result.aiResponse.time || new Date().toISOString(),
+    //       aiGenerated: true
+    //     });
+    //   } else {
+    //       console.warn("AI response received but no text content found:", result);
+    //   }
+    // } catch (error) {
+    //   console.error("Error triggering AI response:", error);
+    //   // TODO: Show error in UI (e.g., add an error message to the chat)
+    //   addMessageToChat(chatId, {
+    //       sender: 'system',
+    //       text: `⚠️ AI Error: ${error.message}`,
+    //       time: new Date().toISOString(),
+    //       aiGenerated: false, // Mark as system error, not AI response
+    //       isError: true // Custom flag for styling?
+    //   });
+    // } finally {
+    //   // Ensure typing indicator is turned off for this chat
+    //   setIsAiTyping(prev => ({ ...prev, [chatId]: false }));
+    // }
   }, [chats, autoReplyEnabled, aiTone, aiResponseSpeed, isAiTyping, addMessageToChat]); // Dependencies
 
   // Send a message from the merchant
@@ -202,18 +202,17 @@ const CustomerServicePage = () => {
     // --- Simulate/Actual Backend Send ---
     // Replace this promise with your actual API call to send the merchant's message
     new Promise((resolve, reject) => {
-        // Example: Use fetch to send the message
-        // fetch(`${API_BASE_URL}/customer-service/chats/${activeChatId}/messages`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json', /* Add Auth headers */ },
-        //     body: JSON.stringify({ text: messageTextToSend, sender: 'merchant' })
-        // })
-        // .then(response => {
-        //     if (!response.ok) throw new Error('Failed to send message');
-        //     return response.json();
-        // })
-        // .then(resolve) // Resolve on success
-        // .catch(reject); // Reject on failure
+        fetch(`${API_BASE_URL}/customer-service/chats/${activeChatId}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', /* Add Auth headers */ },
+            body: JSON.stringify({ text: messageTextToSend, sender: 'merchant' })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to send message');
+            return response.json();
+        })
+        .then(resolve) // Resolve on success
+        .catch(reject); // Reject on failure
 
         // --- Simulation ---
         console.log("Simulating sending merchant message to backend:", messageTextToSend);
