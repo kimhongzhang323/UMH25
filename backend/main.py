@@ -112,7 +112,17 @@ def generate_prompt(question: str, context: List[str] = None) -> str:
         return f"""Answer the following question.
 
         Question: {question}
-
+        
+        {context_str}
+        
+        Question: {question}
+        
+        Answer:"""
+    else:
+        return f"""Answer the following question.
+        
+        Question: {question}
+        
         Answer:"""
 
 @app.post("/query")
@@ -138,6 +148,10 @@ async def query_llama(query: Query):
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         response = response.split("Answer:")[-1].strip()
 
+        # Decode and clean up response
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        response = response.split("Answer:")[-1].strip()
+        
         return {
             "response": response,
             "context_used": query.context,
@@ -167,6 +181,14 @@ async def upload_csv(
         # Process CSV in chunks for memory efficiency
         contents = await file.read()
         csv_text = io.StringIO(contents.decode('utf-8'))
+
+        # Clear existing CSV documents
+        document_store.clear_csv_documents()
+        
+        # Process CSV in chunks for memory efficiency
+        contents = await file.read()
+        csv_text = io.StringIO(contents.decode('utf-8'))
+        
 
         # Detect if file has header
         sniffer = csv.Sniffer()
