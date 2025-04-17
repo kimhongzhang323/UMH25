@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiSend, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle } from 'react-icons/fi'; // Added FiLoader, FiAlertCircle
 
-// Assuming mock data is in public/mockChats.json
-const MOCK_CHATS_URL = 'http://127.0.0.1:8000/customer-service-chats';
+const MOCK_CHATS_URL = 'http://127.0.0.1:8000/customer-service/chats';
 const API_ENDPOINT = '/api/ai-auto-reply'; // Adjust if your backend runs elsewhere (e.g., http://localhost:3001/api/ai-auto-reply)
 
 const CustomerServicePage = () => {

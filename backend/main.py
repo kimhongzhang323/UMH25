@@ -11,6 +11,7 @@ import io
 import csv
 import os
 from fastapi.middleware.cors import CORSMiddleware
+import customer_service
 
 app = FastAPI(
     title="Llama RAG API with CSV Support (Mocked)",
@@ -30,6 +31,7 @@ app.add_middleware(
     allow_methods = ["GET", "POST", "PUT", "DELETE"]
 )
 
+app.include_router(customer_service.router)
 
 # Configuration
 MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Keep for reference
@@ -259,109 +261,6 @@ async def get_document_count():
         "csv_documents": sum(1 for doc in document_store.documents if doc.source == "csv")
     }
 
-@app.get("/customer-service-chats")
-async def get_customer_service_chats():
-    chats = [
-  {
-    "id": 1,
-    "customer": "Ahmad bin Ali",
-    "avatar": "https://randomuser.me/api/portraits/men/1.jpg",
-    "lastMessage": "My order was missing 2 items",
-    "status": "pending",
-    "unread": True,
-    "messages": [
-      {
-        "id": 1,
-        "sender": "customer",
-        "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
-        "time": "2025-04-10T14:30:00",
-        "read": True
-      },
-      {
-        "id": 2,
-        "sender": "system",
-        "text": "Thank you for reaching out. I apologize for the missing items in your order.",
-        "time": "2025-04-10T14:32:00",
-        "read": True,
-        "aiGenerated": "autoReplyEnabled"
-      },
-      {
-        "id": 3,
-        "sender": "customer",
-        "text": "This is very disappointing. I was hosting guests and had to make alternative arrangements",
-        "time": "2025-04-10T14:35:00",
-        "read": True
-      }
-    ]
-  },
-  {
-    "id": 2,
-    "customer": "Siti Nurhaliza",
-    "avatar": "https://randomuser.me/api/portraits/women/2.jpg",
-    "lastMessage": "How long does delivery take to Bangsar?",
-    "status": "resolved",
-    "unread": False,
-    "messages": [
-      {
-        "id": 1,
-        "sender": "customer",
-        "text": "Hi, how long does delivery usually take to Bangsar area?",
-        "time": "2025-04-09T12:15:00",
-        "read": True
-      },
-      {
-        "id": 2,
-        "sender": "system",
-        "text": "Our standard delivery time to Bangsar is 30-45 minutes during regular hours.",
-        "time": "2025-04-09T12:16:00",
-        "read": True,
-        "aiGenerated": True
-      },
-      {
-        "id": 3,
-        "sender": "customer",
-        "text": "Thank you!",
-        "time": "2025-04-09T12:17:00",
-        "read": True
-      }
-    ]
-  },
-  {
-    "id": 3,
-    "customer": "Rajesh Kumar",
-    "avatar": "https://randomuser.me/api/portraits/men/3.jpg",
-    "lastMessage": "Is the Hot & Spicy Chicken very spicy?",
-    "status": "pending",
-    "unread": True,
-    "messages": [
-      {
-        "id": 1,
-        "sender": "customer",
-        "text": "I want to try the Hot & Spicy Chicken but I have low spice tolerance. How spicy is it?",
-        "time": "2025-04-10T09:45:00",
-        "read": True
-      }
-    ]
-  },
-  {
-    "id": 4,
-    "customer": "Jennifer Lim",
-    "avatar": "https://randomuser.me/api/portraits/women/4.jpg",
-    "lastMessage": "Can I get a refund for the wrong order?",
-    "status": "pending",
-    "unread": False,
-    "messages": [
-      {
-        "id": 1,
-        "sender": "customer",
-        "text": "Can I get a refund for the wrong order?",
-        "time": "2025-04-09T12:15:00",
-        "read": True
-      }
-    ]
-  }
-]
-    return chats
 
 if __name__ == "__main__":
     import uvicorn
