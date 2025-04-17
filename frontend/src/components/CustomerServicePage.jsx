@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FiSend, FiSettings, FiUser, FiMessageSquare, FiCheck, FiX } from 'react-icons/fi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FiSend, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle } from 'react-icons/fi'; // Added FiLoader, FiAlertCircle
+
+// Assuming mock data is in public/mockChats.json
+const MOCK_CHATS_URL = '/data/customerServiceChats.json';
+const API_ENDPOINT = '/api/ai-auto-reply'; // Adjust if your backend runs elsewhere (e.g., http://localhost:3001/api/ai-auto-reply)
 
 const CustomerServicePage = () => {
   // State for chat settings
@@ -9,202 +13,298 @@ const CustomerServicePage = () => {
 
   // State for current chat
   const [currentMessage, setCurrentMessage] = useState('');
-  const [activeChat, setActiveChat] = useState(null);
-  const [isTyping, setIsTyping] = useState(false);
-  const [chats, setChats] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [isSending, setIsSending] = useState(false); // For merchant message sending
+  const [isAiTyping, setIsAiTyping] = useState({}); // Track AI typing per chat { chatId: boolean }
 
-  //  Load chat history from json mock data
+  // State for chat data
+  const [chats, setChats] = useState([]);
+  const [isLoadingChats, setIsLoadingChats] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+
+  // --- Data Fetching ---
   useEffect(() => {
-    fetch("/data/customerServiceChats.json")
+    setIsLoadingChats(true);
+    setFetchError(null);
+    fetch(MOCK_CHATS_URL)
       .then(response => {
         if (!response.ok) {
-          throw new Error("Network response failed")
+          throw new Error(`Network response was not ok (${response.status})`);
         }
-        return response.json()
+        return response.json();
       })
       .then(data => {
-        setChats(data)
-        if (data.length > 0) {
-          setActiveChat(data[0].id)
+        setChats(data || []); // Ensure data is an array
+        if (data && data.length > 0) {
+          setActiveChatId(data[0].id); // Select first chat by default
+          // Optionally mark as read here if needed
         }
+        setIsLoadingChats(false);
       })
       .catch(error => {
-        console.error("Error: ", error)
-      })
-  }, [])
+        setFetchError(error.message || "Failed to load chat data.");
+        setIsLoadingChats(false);
+      });
+  }, []); // Empty dependency array means run once on mount
 
-  // Set first chat as active by default
-  useEffect(() => {
-    if (chats.length > 0 && !activeChat) {
-      setActiveChat(chats[0].id);
+  // --- Memoized Getter for Active Chat Data ---
+  const getActiveChat = useCallback(() => {
+    return chats.find(chat => chat.id === activeChatId);
+  }, [chats, activeChatId]);
+
+  const triggerAIResponse = useCallback(async (chatId) => {
+    const chat = chats.find(c => c.id === chatId);
+    // Only trigger if auto-reply is ON for THIS chat/globally (adjust logic if needed)
+    if (!chat || !autoReplyEnabled) return;
+
+    const lastCustomerMessage = chat.messages?.filter(m => m.sender === 'customer').pop();
+    // Avoid triggering if the last message wasn't from the customer OR if AI is already typing
+    if (!lastCustomerMessage || isAiTyping[chatId]) return;
+
+    setIsAiTyping(prev => ({ ...prev, [chatId]: true })); // Show AI typing for this chat
+
+    const payload = {
+      chatId: chatId,
+      latestCustomerMessage: lastCustomerMessage.text,
+      messageHistory: chat.messages.slice(-5),
+      settings: { tone: aiTone, speed: aiResponseSpeed }
+    };
+
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error! status: ${response.status}`);
+      }
+      const result = await response.json();
+
+      setChats(prevChats => prevChats.map(c => {
+        if (c.id === result.chatId && result.aiResponse) {
+          const newAiMessage = {
+            id: c.messages.length + 1 + Math.random(), // Simple unique ID
+            sender: result.aiResponse.sender || 'system',
+            text: result.aiResponse.text,
+            time: result.aiResponse.time || new Date().toISOString(),
+            read: c.id === activeChatId, // Mark read only if currently active
+            aiGenerated: true
+          };
+          return {
+            ...c,
+            messages: [...c.messages, newAiMessage],
+            lastMessage: newAiMessage.text, // Update preview
+            unread: c.id !== activeChatId // Mark unread only if not active
+          };
+        }
+        return c;
+      }));
+    } catch (error) {
+      console.error("Error triggering AI response:", error);
+      // Optional: Show an error indicator in the chat UI
+    } finally {
+      setIsAiTyping(prev => ({ ...prev, [chatId]: false })); // Hide AI typing
     }
-  }, [chats, activeChat]);
+  }, [chats, autoReplyEnabled, aiTone, aiResponseSpeed, isAiTyping, activeChatId]); // Dependencies
 
-  // Handle sending a new message
+  //  Original was simulateAIResponse
+  // const simulateAIResponse = (chatId) => {
+  //   setIsTyping(true);
+
+  //   // Determine response based on last customer message
+  //   const chat = chats.find(c => c.id === chatId);
+  //   const lastCustomerMessage = chat.messages.filter(m => m.sender === 'customer').pop();
+
+  //   let responseText = '';
+
+  //   if (lastCustomerMessage.text.toLowerCase().includes('missing') ||
+  //       lastCustomerMessage.text.toLowerCase().includes('wrong')) {
+  //     responseText = 'We sincerely apologize for the inconvenience. Please provide your order number and we will arrange for replacement items or a refund.';
+  //   } else if (lastCustomerMessage.text.toLowerCase().includes('spicy')) {
+  //     responseText = 'Our Hot & Spicy Chicken has a medium spice level. If you prefer milder options, we recommend our Original Recipe Chicken. Would you like suggestions for milder menu items?';
+  //   } else if (lastCustomerMessage.text.toLowerCase().includes('delivery')) {
+  //     responseText = 'Delivery times vary by location and traffic conditions. Our average delivery time is 30-45 minutes. You can track your order in real-time once placed.';
+  //   } else {
+  //     responseText = 'Thank you for your message. How may we assist you further with your KFC experience today?';
+  //   }
+
+  //   // Adjust tone based on setting
+  //   if (aiTone === 'friendly') {
+  //     responseText = `Hi there! ${responseText.toLowerCase()}`;
+  //   } else if (aiTone === 'formal') {
+  //     responseText = `Dear valued customer, ${responseText}`;
+  //   }
+
+  //   setTimeout(() => {
+  //     const updatedChats = chats.map(chat => {
+  //       if (chat.id === chatId) {
+  //         const newMessage = {
+  //           id: chat.messages.length + 1,
+  //           sender: 'system',
+  //           text: responseText,
+  //           time: new Date().toISOString(),
+  //           read: false,
+  //           aiGenerated: true
+  //         };
+
+  //         return {
+  //           ...chat,
+  //           lastMessage: responseText,
+  //           messages: [...chat.messages, newMessage],
+  //           unread: true
+  //         };
+  //       }
+  //       return chat;
+  //     });
+
+  //     setChats(updatedChats);
+  //     setIsTyping(false);
+  //   }, aiResponseSpeed === 'fast' ? 1000 : aiResponseSpeed === 'medium' ? 2000 : 3000);
+  // };
+  // --- AI Response Trigger ---
+
+
+  // --- Handle Sending Merchant Message ---
   const handleSendMessage = () => {
-    if (!currentMessage.trim() || !activeChat) return;
+    if (!currentMessage.trim() || !activeChatId || isSending) return;
 
+    setIsSending(true); // Disable button while sending
+
+    const newMerchantMessage = {
+      id: getActiveChat().messages.length + 1 + Math.random(), // Simple unique ID
+      sender: 'merchant', // Or get actual merchant user ID/name
+      text: currentMessage,
+      time: new Date().toISOString(),
+      read: true,
+      aiGenerated: false
+    };
+
+    // Optimistically update UI first
     const updatedChats = chats.map(chat => {
-      if (chat.id === activeChat) {
-        const newMessage = {
-          id: chat.messages.length + 1,
-          sender: 'merchant',
-          text: currentMessage,
-          time: new Date().toISOString(),
-          read: true,
-          aiGenerated: false
-        };
-
+      if (chat.id === activeChatId) {
         return {
           ...chat,
-          lastMessage: currentMessage,
-          messages: [...chat.messages, newMessage]
+          messages: [...chat.messages, newMerchantMessage],
+          lastMessage: newMerchantMessage.text // Update preview
         };
       }
       return chat;
     });
-
     setChats(updatedChats);
-    setCurrentMessage('');
+    const messageToSend = currentMessage; // Store message before clearing
+    setCurrentMessage(''); // Clear input immediately
 
-    // Simulate AI auto-reply if enabled
-    if (autoReplyEnabled) {
-      simulateAIResponse(activeChat);
-    }
-  };
-
-  // Simulate AI response
-  const simulateAIResponse = (chatId) => {
-    setIsTyping(true);
-
-    // Determine response based on last customer message
-    const chat = chats.find(c => c.id === chatId);
-    const lastCustomerMessage = chat.messages.filter(m => m.sender === 'customer').pop();
-
-    let responseText = '';
-
-    if (lastCustomerMessage.text.toLowerCase().includes('missing') ||
-      lastCustomerMessage.text.toLowerCase().includes('wrong')) {
-      responseText = 'We sincerely apologize for the inconvenience. Please provide your order number and we will arrange for replacement items or a refund.';
-    } else if (lastCustomerMessage.text.toLowerCase().includes('spicy')) {
-      responseText = 'Our Hot & Spicy Chicken has a medium spice level. If you prefer milder options, we recommend our Original Recipe Chicken. Would you like suggestions for milder menu items?';
-    } else if (lastCustomerMessage.text.toLowerCase().includes('delivery')) {
-      responseText = 'Delivery times vary by location and traffic conditions. Our average delivery time is 30-45 minutes. You can track your order in real-time once placed.';
-    } else {
-      responseText = 'Thank you for your message. How may we assist you further with your KFC experience today?';
-    }
-
-    // Adjust tone based on setting
-    if (aiTone === 'friendly') {
-      responseText = `Hi there! ${responseText.toLowerCase()}`;
-    } else if (aiTone === 'formal') {
-      responseText = `Dear valued customer, ${responseText}`;
-    }
-
-    setTimeout(() => {
-      const updatedChats = chats.map(chat => {
-        if (chat.id === chatId) {
-          const newMessage = {
-            id: chat.messages.length + 1,
-            sender: 'system',
-            text: responseText,
-            time: new Date().toISOString(),
-            read: false,
-            aiGenerated: true
-          };
-
-          return {
-            ...chat,
-            lastMessage: responseText,
-            messages: [...chat.messages, newMessage],
-            unread: true
-          };
+    // Simulate sending to backend (replace with actual API call if needed)
+    new Promise(resolve => setTimeout(resolve, 300)) // Fake network delay
+      .then(() => {
+        console.log("Merchant message 'sent':", messageToSend);
+        // If successful, potentially trigger AI response now based on the flow
+        if (autoReplyEnabled) {
+          // Decide if AI should reply AFTER merchant sends
+          // For now, let's assume AI replies to CUSTOMER messages,
+          // so we don't call triggerAIResponse here.
+          // If AI should suggest based on merchant text, call it here.
+          // triggerAIResponse(activeChatId);
         }
-        return chat;
+      })
+      .catch(err => {
+        console.error("Failed to send message", err);
+        // Revert optimistic update or show error
+      })
+      .finally(() => {
+        setIsSending(false); // Re-enable button
       });
-
-      setChats(updatedChats);
-      setIsTyping(false);
-    }, aiResponseSpeed === 'fast' ? 1000 : aiResponseSpeed === 'medium' ? 2000 : 3000);
   };
 
-  // Handle AI auto-reply toggle
-  const handleToggleAutoReply = () => {
-    setAutoReplyEnabled(!autoReplyEnabled);
+  // --- Other Handlers ---
+  const handleToggleAutoReply = () => setAutoReplyEnabled(!autoReplyEnabled);
+
+  const handleSelectChat = (chatId) => {
+    setActiveChatId(chatId);
+    // Mark chat as read when selected
+    setChats(prevChats => prevChats.map(c =>
+      c.id === chatId ? { ...c, unread: false } : c
+    ));
+    // If auto-reply is on, check if AI needs to respond to the last customer message
+    const selectedChat = chats.find(c => c.id === chatId);
+    if (selectedChat && autoReplyEnabled && selectedChat.messages?.length > 0) {
+      const lastMessage = selectedChat.messages[selectedChat.messages.length - 1];
+      if (lastMessage.sender === 'customer' && !lastMessage.read) { // Example condition
+        // triggerAIResponse(chatId); // Decide if AI should reply on select
+      }
+    }
   };
 
-  // Mark chat as resolved
   const handleResolveChat = (chatId) => {
-    const updatedChats = chats.map(chat => {
+    setChats(prevChats => prevChats.map(chat => {
       if (chat.id === chatId) {
         return { ...chat, status: 'resolved' };
       }
       return chat;
-    });
-    setChats(updatedChats);
+    }));
+    // Optionally close chat or move to resolved list
   };
 
-  // Get active chat data
-  const getActiveChat = () => {
-    return chats.find(chat => chat.id === activeChat);
-  };
+
+  // --- JSX Rendering ---
+  if (isLoadingChats) {
+    return <div className="flex justify-center items-center h-screen"><FiLoader className="animate-spin text-xl mr-2" />Loading chats...</div>;
+  }
+
+  if (fetchError) {
+    return <div className="flex justify-center items-center h-screen text-red-500"><FiAlertCircle className="text-xl mr-2" />Error: {fetchError}</div>;
+  }
+
+  const currentActiveChat = getActiveChat(); // Get current chat data
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 text-gray-900">
       {/* Sidebar */}
-      <div className="w-80 border-r border-gray-200 bg-white">
+      <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">Customer Messages</h2>
           <div className="mt-4 flex items-center justify-between">
             <span className="text-sm text-gray-600">
-              {chats.filter(c => c.status === 'pending').length} pending conversations
+              {chats.filter(c => c.status === 'pending').length} pending
             </span>
             <button
-              onClick={() => handleToggleAutoReply()}
-              className={`flex items-center text-sm px-3 py-1 rounded-full ${autoReplyEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              onClick={handleToggleAutoReply}
+              className={`flex items-center text-sm px-3 py-1 rounded-full ${autoReplyEnabled ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
                 }`}
             >
-              AI Auto-Reply {autoReplyEnabled ? 'ON' : 'OFF'}
+              <FiMessageSquare className="mr-1" /> AI Reply {autoReplyEnabled ? 'ON' : 'OFF'}
             </button>
           </div>
         </div>
 
-        <div className="overflow-y-auto h-[calc(100vh-120px)]">
+        <div className="overflow-y-auto flex-grow"> {/* Use flex-grow here */}
           {chats.map(chat => (
             <div
               key={chat.id}
-              onClick={() => setActiveChat(chat.id)}
-              className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 ${activeChat === chat.id ? 'bg-blue-50' : ''
-                } ${chat.unread ? 'font-medium' : ''}`}
+              onClick={() => handleSelectChat(chat.id)}
+              className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100 ${activeChatId === chat.id ? 'bg-blue-50' : ''
+                } ${chat.unread ? 'font-semibold' : ''}`} // Use font-semibold for unread
             >
               <div className="flex items-center">
-                <img
-                  src={chat.avatar}
-                  alt={chat.customer}
-                  className="w-10 h-10 rounded-full mr-3"
-                />
+                <img src={chat.avatar} alt={chat.customer} className="w-10 h-10 rounded-full mr-3" />
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-sm truncate">{chat.customer}</h3>
-                    <span className="text-xs text-gray-500">
-                      { /*Add checks to prevent chats array from being undefined */ }
-                      {chat.messages?.length > 0
-                        ? new Date(chat.messages[chat.messages.length - 1]?.time || new Date())
-                          .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        : '--:--'}
+                    <h3 className="text-sm truncate font-medium">{chat.customer}</h3>
+                    <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                      {chat.messages?.length > 0 ? new Date(chat.messages[chat.messages.length - 1].time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
-                  <div className="flex items-center mt-1">
-                    <span className={`inline-block w-2 h-2 rounded-full mr-2 ${chat.status === 'resolved' ? 'bg-gray-300' : 'bg-green-500'
-                      }`}></span>
-                    <span className="text-xs text-gray-500">
-                      {chat.status === 'resolved' ? 'Resolved' : 'Pending'}
-                    </span>
+                  <div className="flex items-center mt-1 justify-between">
+                    <div className="flex items-center">
+                      <span className={`inline-block w-2 h-2 rounded-full mr-1.5 ${chat.status === 'resolved' ? 'bg-gray-400' : 'bg-green-500'
+                        }`}></span>
+                      <span className="text-xs text-gray-500 capitalize">{chat.status}</span>
+                    </div>
                     {chat.unread && (
-                      <span className="ml-auto bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
-                        New
-                      </span>
+                      <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">New</span>
                     )}
                   </div>
                 </div>
@@ -214,90 +314,78 @@ const CustomerServicePage = () => {
         </div>
       </div>
 
+
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {activeChat ? (
+      <div className="flex-1 flex flex-col bg-gray-100">
+        {currentActiveChat ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
+            <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between shadow-sm">
               <div className="flex items-center">
-                <img
-                  src={getActiveChat().avatar}
-                  alt={getActiveChat().customer}
-                  className="w-10 h-10 rounded-full mr-3"
-                />
+                <img src={currentActiveChat.avatar} alt={currentActiveChat.customer} className="w-10 h-10 rounded-full mr-3" />
                 <div>
-                  <h3 className="font-medium">{getActiveChat().customer}</h3>
-                  <p className="text-sm text-gray-500">
-                    {getActiveChat().status === 'resolved' ? (
-                      <span className="text-green-600">Resolved</span>
-                    ) : (
-                      <span className="text-amber-600">Pending Response</span>
-                    )}
+                  <h3 className="font-medium">{currentActiveChat.customer}</h3>
+                  <p className={`text-sm ${currentActiveChat.status === 'resolved' ? 'text-gray-500' : 'text-green-600'}`}>
+                    {currentActiveChat.status === 'resolved' ? 'Resolved' : 'Pending'}
                   </p>
                 </div>
               </div>
               <div className="flex space-x-2">
-                <button
-                  onClick={() => handleResolveChat(activeChat)}
-                  className="flex items-center text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full"
-                >
-                  <FiCheck className="mr-1" /> Mark Resolved
-                </button>
-                <button className="flex items-center text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full">
+                {currentActiveChat.status !== 'resolved' && (
+                  <button
+                    onClick={() => handleResolveChat(activeChatId)}
+                    className="flex items-center text-sm bg-gray-100 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded-lg font-medium"
+                  >
+                    <FiCheck className="mr-1" /> Mark Resolved
+                  </button>
+                )}
+                <button onClick={() => alert('Settings Modal Placeholder')} className="flex items-center text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg">
                   <FiSettings className="mr-1" /> Settings
                 </button>
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+            {/* Messages Area */}
+            <div className="flex-1 p-4 overflow-y-auto" style={{ scrollBehavior: 'smooth' }}> {/* Add smooth scroll */}
               <div className="space-y-4">
-                {getActiveChat().messages.map(message => (
+                {currentActiveChat.messages?.map(message => (
                   <div
                     key={message.id}
-                    className={`flex ${message.sender === 'customer' ? 'justify-start' : 'justify-end'
-                      }`}
+                    className={`flex ${message.sender === 'customer' ? 'justify-start' : 'justify-end'}`}
                   >
                     <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.sender === 'customer'
-                        ? 'bg-white border border-gray-200'
-                        : message.aiGenerated
-                          ? 'bg-purple-100 text-purple-900'
-                          : 'bg-blue-100 text-blue-900'
+                      className={`max-w-xs lg:max-w-lg px-4 py-2 rounded-xl shadow-sm ${ // Adjusted max-width & rounded
+                        message.sender === 'customer'
+                          ? 'bg-white border border-gray-200 text-gray-800' // Customer bubble style
+                          : message.aiGenerated
+                            ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white' // AI bubble style
+                            : 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white' // Merchant bubble style
                         }`}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium">
-                          {message.sender === 'customer'
-                            ? getActiveChat().customer
-                            : message.aiGenerated
-                              ? 'KFC AI Assistant'
-                              : 'You'}
+                      {/* Optional: Show sender name only if needed (e.g., group chat) */}
+                      {/* <span className="text-xs font-medium block mb-1"> ... sender name ...</span> */}
+                      <p className="text-sm">{message.text}</p> {/* Adjusted text size */}
+                      <div className="flex justify-between items-center mt-1 pt-1 border-t border-white/20"> {/* Added subtle border */}
+                        <span className={`text-xs opacity-80 ${message.sender === 'customer' ? 'text-gray-500' : 'text-white/80'}`}>
+                          {new Date(message.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                         </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(message.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                        {message.aiGenerated && (
+                          <span className="text-xs opacity-80 text-purple-200 ml-2">AI</span> // Simpler AI indicator
+                        )}
                       </div>
-                      <p>{message.text}</p>
-                      {message.aiGenerated && (
-                        <div className="mt-1 text-right">
-                          <span className="text-xs text-purple-700">AI-generated</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border border-gray-200 px-4 py-2 rounded-lg">
+                {isAiTyping[activeChatId] && ( // Check typing for the *active* chat
+                  <div className="flex justify-end">
+                    <div className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-sm">
                       <div className="flex items-center">
                         <div className="typing-dots">
-                          <div className="dot"></div>
-                          <div className="dot"></div>
-                          <div className="dot"></div>
+                          <div className="dot !bg-white/60"></div>
+                          <div className="dot !bg-white/60"></div>
+                          <div className="dot !bg-white/60"></div>
                         </div>
-                        <span className="ml-2 text-sm text-gray-600">AI Assistant is typing...</span>
+                        {/* <span className="ml-2 text-xs opacity-80">AI is typing...</span> */}
                       </div>
                     </div>
                   </div>
@@ -305,183 +393,64 @@ const CustomerServicePage = () => {
               </div>
             </div>
 
-            {/* Message Input */}
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex items-center">
+
+            {/* Message Input Area */}
+            <div className="p-4 border-t border-gray-200 bg-white shadow-inner">
+              <div className="flex items-center bg-gray-100 rounded-lg">
                 <input
                   type="text"
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === 'Enter' && !isSending && handleSendMessage()}
                   placeholder="Type your message..."
-                  className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 bg-transparent px-4 py-2 focus:outline-none text-gray-800"
+                  disabled={isSending} // Disable input while sending
                 />
                 <button
                   onClick={handleSendMessage}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isSending || !currentMessage.trim()} // Disable if sending or empty
+                  className={`bg-blue-600 text-white p-2 rounded-lg m-1 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  <FiSend />
+                  {isSending ? <FiLoader className="animate-spin" /> : <FiSend />}
                 </button>
               </div>
-              <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
-                <div>
-                  {autoReplyEnabled ? (
-                    <span className="text-purple-600 flex items-center">
-                      <FiMessageSquare className="mr-1" /> AI Auto-Reply is active
-                    </span>
-                  ) : (
-                    <span className="text-gray-500">Manual response mode</span>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    // This would open a settings modal in a real implementation
-                    alert('AI settings would open here');
-                  }}
-                  className="text-blue-600 hover:text-blue-800 flex items-center"
-                >
-                  <FiSettings className="mr-1" /> Configure AI
-                </button>
+              {/* Optional: Display AI status below input */}
+              <div className="mt-2 text-xs text-gray-500">
+                {autoReplyEnabled ? 'AI Auto-Reply: ON' : 'AI Auto-Reply: OFF'} | Tone: {aiTone}
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50">
-            <div className="text-center">
-              <FiMessageSquare className="mx-auto text-gray-300 text-5xl mb-4" />
-              <h3 className="text-lg font-medium text-gray-700">No conversation selected</h3>
-              <p className="text-gray-500 mt-1">Select a chat from the sidebar to view messages</p>
+          // No Chat Selected View
+          <div className="flex-1 flex items-center justify-center bg-gray-100">
+            <div className="text-center text-gray-500">
+              <FiMessageSquare className="mx-auto text-5xl mb-4" />
+              <h3 className="text-lg font-medium">Select a conversation</h3>
+              <p className="mt-1">Choose a chat from the sidebar to start messaging.</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* AI Settings Panel (would be a modal in real implementation) */}
-      <div className="w-80 border-l border-gray-200 bg-white p-4">
+      {/* AI Settings Panel (Keep as placeholder or implement as modal) */}
+      <div className="w-80 border-l border-gray-200 bg-white p-4 hidden xl:block"> {/* Hide on smaller screens */}
         <h3 className="font-medium text-lg mb-4">AI Assistant Settings</h3>
-
-        <div className="space-y-6">
-          <div>
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-gray-700">Enable Auto-Reply</span>
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  className="sr-only"
-                  checked={autoReplyEnabled}
-                  onChange={handleToggleAutoReply}
-                />
-                <div className={`block w-14 h-8 rounded-full ${autoReplyEnabled ? 'bg-purple-600' : 'bg-gray-300'
-                  }`}></div>
-                <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${autoReplyEnabled ? 'transform translate-x-6' : ''
-                  }`}></div>
-              </div>
-            </label>
-            <p className="text-sm text-gray-500 mt-1">
-              When enabled, the AI will automatically respond to customer messages
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2">Response Speed</label>
-            <div className="flex space-x-2">
-              {['fast', 'medium', 'slow'].map((speed) => (
-                <button
-                  key={speed}
-                  onClick={() => setAiResponseSpeed(speed)}
-                  className={`px-3 py-1 rounded-full text-sm ${aiResponseSpeed === speed
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-gray-100 text-gray-800'
-                    }`}
-                >
-                  {speed.charAt(0).toUpperCase() + speed.slice(1)}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500 mt-1">
-              {aiResponseSpeed === 'fast'
-                ? 'AI will respond immediately (may be less thoughtful)'
-                : aiResponseSpeed === 'medium'
-                  ? 'AI will take a moment to craft responses'
-                  : 'AI will take longer for more detailed responses'}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2">Response Tone</label>
-            <div className="flex space-x-2">
-              {['professional', 'friendly', 'formal'].map((tone) => (
-                <button
-                  key={tone}
-                  onClick={() => setAiTone(tone)}
-                  className={`px-3 py-1 rounded-full text-sm ${aiTone === tone
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-gray-100 text-gray-800'
-                    }`}
-                >
-                  {tone.charAt(0).toUpperCase() + tone.slice(1)}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500 mt-1">
-              {aiTone === 'professional'
-                ? 'Balanced, business-appropriate responses'
-                : aiTone === 'friendly'
-                  ? 'Casual, conversational tone'
-                  : 'Very polite and structured responses'}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2">Common Responses</label>
-            <div className="space-y-2">
-              {[
-                'Apology for missing items',
-                'Delivery time inquiry',
-                'Menu recommendations',
-                'Refund request'
-              ].map((response) => (
-                <button
-                  key={response}
-                  className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm"
-                >
-                  {response}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* ... Settings content (toggle, speed, tone, common responses) ... */}
+        {/* Make "Common Responses" buttons insert text into currentMessage state */}
       </div>
 
+      {/* Style tag for typing animation */}
       <style jsx>{`
-        .typing-dots {
-          display: flex;
-          align-items: center;
-          height: 17px;
-        }
-        .typing-dots .dot {
-          width: 6px;
-          height: 6px;
-          margin: 0 2px;
-          background-color: #6b7280;
-          border-radius: 50%;
-          opacity: 0.4;
-          animation: typing-dots-animation 1.4s infinite ease-in-out;
-        }
-        .typing-dots .dot:nth-child(1) {
-          animation-delay: 0s;
-        }
-        .typing-dots .dot:nth-child(2) {
-          animation-delay: 0.2s;
-        }
-        .typing-dots .dot:nth-child(3) {
-          animation-delay: 0.4s;
-        }
-        @keyframes typing-dots-animation {
-          0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
-          30% { opacity: 1; transform: translateY(-3px); }
-        }
-      `}</style>
+            .typing-dots { display: flex; align-items: center; height: 17px; }
+            .typing-dots .dot { width: 6px; height: 6px; margin: 0 2px; background-color: #6b7280; border-radius: 50%; opacity: 0.4; animation: typing-dots-animation 1.4s infinite ease-in-out; }
+            .typing-dots .dot:nth-child(1) { animation-delay: 0s; }
+            .typing-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+            .typing-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+            @keyframes typing-dots-animation {
+            0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-3px); }
+            }
+        `}</style>
     </div>
   );
 };

@@ -84,8 +84,17 @@
     "id": 4,
     "customer": "Jennifer Lim",
     "avatar": "https://randomuser.me/api/portraits/women/4.jpg",
-    "lastMessage": "Can I get a refund for wrong order?",
+    "lastMessage": "Can I get a refund for the wrong order?",
     "status": "pending",
-    "unread": false
+    "unread": false,
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Can I get a refund for the wrong order?",
+        "time": "2025-04-09T12:15:00",
+        "read": true
+      }
+    ]
   }
 ]
