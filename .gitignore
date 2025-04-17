@@ -1,1 +1,5 @@
-/data
+/data/items.csv
+/data/keywords.csv
+/data/merchant.csv
+/data/transaction_data.csv
+/data/transaction_items.csv
