@@ -11,6 +11,7 @@ import CustomerServicePage from './components/CustomerServicePage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import InventoryPage from './components/InventoryPage.jsx';
 import SalesIncomePage from './components/SalesIncomePage.jsx';
+import ReportsPage from './components/Reports.jsx'; // Corrected import
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="profile" element={<ProfilePage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="sales-income" element={<SalesIncomePage />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
