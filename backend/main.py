@@ -1,36 +1,82 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from sentence_transformers import SentenceTransformer
+# from transformers import AutoTokenizer, AutoModelForCausalLM # Comment out real imports
+# from sentence_transformers import SentenceTransformer # Comment out real imports
 import torch
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import io
 import csv
+import os
+from fastapi.middleware.cors import CORSMiddleware
+import customer_service
 
 app = FastAPI(
-    title="Llama RAG API with CSV Support",
-    description="Retrieval-Augmented Generation API using Llama from Hugging Face with CSV data integration",
+    title="Llama RAG API with CSV Support (Mocked)",
+    description="Retrieval-Augmented Generation API using mocked Llama for testing",
     version="1.0.0"
 )
 
+origins = [
+    "http://localhost:5173",
+    "http://localhost:5174"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = origins,
+    allow_credentials = True,
+    allow_methods = ["GET", "POST", "PUT", "DELETE"]
+)
+
+app.include_router(customer_service.router)
+
 # Configuration
-MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Replace with your preferred Llama model
-EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
+MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Keep for reference
+EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2" # Keep for reference
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 MAX_NEW_TOKENS = 512
 TEMPERATURE = 0.7
 CSV_CHUNK_SIZE = 1000  # Number of rows to process at a time for large CSVs
 
-# Load models
-try:
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
-    embedding_model = SentenceTransformer(EMBEDDING_MODEL, device=DEVICE)
-except Exception as e:
-    raise RuntimeError(f"Failed to load models: {str(e)}")
+# Load models (mocked for testing)
+TESTING = True
+
+if not TESTING:
+    try:
+        from transformers import AutoTokenizer, AutoModelForCausalLM
+        from sentence_transformers import SentenceTransformer
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
+        embedding_model = SentenceTransformer(EMBEDDING_MODEL, device=DEVICE)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load models: {str(e)}")
+else:
+    print("Running in TESTING mode: Using mock models.")
+    class MockTokenizer:
+        def __init__(self, model_name):
+            self.model_name = model_name
+        def __call__(self, prompt, return_tensors="pt"):
+            return {"input_ids": torch.tensor([[1, 2, 3]])} # Dummy input IDs
+        def decode(self, output_ids, skip_special_tokens=True):
+            return "Mock Llama Response"
+    class MockModel:
+        def __init__(self, model_name):
+            self.model_name = model_name
+        def generate(self, input_ids, max_new_tokens, temperature, do_sample):
+            return torch.tensor([[4, 5, 6]]) # Dummy output IDs
+    class MockEmbeddingModel:
+        def __init__(self, model_name, device):
+            self.model_name = model_name
+            self.device = device
+        def encode(self, text):
+            return np.array([0.1, 0.2, 0.3]) # Dummy embedding
+
+    tokenizer = MockTokenizer(MODEL_NAME)
+    model = MockModel(MODEL_NAME)
+    embedding_model = MockEmbeddingModel(EMBEDDING_MODEL, DEVICE)
 
 class Query(BaseModel):
     question: str
@@ -112,17 +158,11 @@ def generate_prompt(question: str, context: List[str] = None) -> str:
         return f"""Answer the following question.
 
         Question: {question}
-        
+
         {context_str}
-        
+
         Question: {question}
-        
-        Answer:"""
-    else:
-        return f"""Answer the following question.
-        
-        Question: {question}
-        
+
         Answer:"""
 
 @app.post("/query")
@@ -148,10 +188,6 @@ async def query_llama(query: Query):
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         response = response.split("Answer:")[-1].strip()
 
-        # Decode and clean up response
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        response = response.split("Answer:")[-1].strip()
-        
         return {
             "response": response,
             "context_used": query.context,
@@ -184,11 +220,10 @@ async def upload_csv(
 
         # Clear existing CSV documents
         document_store.clear_csv_documents()
-        
+
         # Process CSV in chunks for memory efficiency
         contents = await file.read()
         csv_text = io.StringIO(contents.decode('utf-8'))
-        
 
         # Detect if file has header
         sniffer = csv.Sniffer()
@@ -236,6 +271,7 @@ async def get_document_count():
         "total_documents": len(document_store.documents),
         "csv_documents": sum(1 for doc in document_store.documents if doc.source == "csv")
     }
+
 
 if __name__ == "__main__":
     import uvicorn
