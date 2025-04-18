@@ -1,0 +1,101 @@
+month,merchant_id,total_sales,order_count,merchant_name,city_id,rank
+May 2023,0c6e4,156759.18,1042,Sandwich Express,6,1
+May 2023,d4f0a,113449.9,828,Pasta Mania,2,2
+May 2023,b0a4f,108444.47,658,Gourmet Express,5,3
+May 2023,2b5d7,88943.05,643,Bagel House,4,4
+May 2023,3b7f0,84502.29,437,Donut Palace,2,5
+May 2023,5c1f8,76726.61,578,Burger Factory,5,6
+May 2023,7c1a9,72100.25,615,Fried Chicken Hub,8,7
+May 2023,9d5f2,71153.71,536,Chili Express,2,8
+May 2023,7a8e0,69886.45,474,Thai Delight,2,9
+May 2023,9c8e2,63676.22,388,Pie Town,5,10
+May 2023,0e1b3,63013.83,417,Chicken Shack,2,11
+May 2023,f7d1a,60380.35,409,Pancit Hub,8,12
+May 2023,3f7e4,59629.17,603,Pizza Express,3,13
+May 2023,8f7c2,57661.67,410,Pancit Palace,2,14
+May 2023,f1c7a,57529.23,429,Thai Orchid,5,15
+May 2023,4a7c1,56805.87,371,Poke Express,5,16
+May 2023,5b3d8,56161.74,444,Veggie Delight,8,17
+May 2023,2f7b5,55521.78,340,Ramen House,8,18
+May 2023,5e0b4,55178.82,358,Tapas Express,2,19
+May 2023,1f5b7,54714.23,527,Mediterranean Grill,5,20
+May 2023,c5a8e,53415.8,362,Korean BBQ,2,21
+May 2023,8f2a6,52555.92,361,Sushi Haven,4,22
+May 2023,3d9c8,51943.33,279,Teriyaki Express,8,23
+May 2023,5d9e3,51607.28,400,Waffle World,2,24
+May 2023,9f6b0,50923.23,350,Salad King,2,25
+May 2023,0c2d7,49501.27,273,Fried Chicken Express,4,26
+May 2023,8b7a3,48543.85,343,Pie Paradise,2,27
+May 2023,7e2d8,48232.85,398,Teriyaki Bowl,8,28
+May 2023,c9f0b,48159.26,387,Smoothie King,5,29
+May 2023,a6c9f,47605.33,314,Seafood Bay,8,30
+May 2023,2a1c4,47127.0,370,BBQ Corner,2,31
+May 2023,8d5f9,46452.04,265,Wings Express,2,32
+May 2023,2a3e9,46393.3,445,Tapas Corner,1,33
+May 2023,b7a3e,46237.26,278,Noodle Corner,2,34
+May 2023,7c5b9,45641.11,365,Pizza Palace,5,35
+May 2023,6c3f2,44131.38,258,Wings Spot,5,36
+May 2023,a5c3b,43599.8,327,Taco Town,5,37
+May 2023,5b8d2,43580.75,365,Sushi Stop,2,38
+May 2023,e9a1c,43272.69,339,Donut Den,8,39
+May 2023,e3b2d,42987.0,328,Waffle House,8,40
+May 2023,b0e7f,42141.71,349,Dumpling World,2,41
+May 2023,e8b3c,41810.33,326,Taco Delight,5,42
+May 2023,6f5a0,41112.24,382,Pizza Spot,1,43
+May 2023,7f4d2,40910.79,371,Rice Bowl House,2,44
+May 2023,9f4a2,40303.9,362,Burrito Express,8,45
+May 2023,5e7b2,40232.63,251,Smoothie Bar,2,46
+May 2023,e8c2b,40112.96,279,BBQ Nation,5,47
+May 2023,b4a8f,39965.61,377,Burrito Bar,2,48
+May 2023,1a5f4,39807.71,334,Shawarma Shack,5,49
+May 2023,4d9f1,39799.89,327,Salad Bowl,5,50
+May 2023,9b4c2,38837.58,263,Fish & Chips Co.,1,51
+May 2023,a1b5e,38791.11,337,Steak Corner,4,52
+May 2023,c5e2a,38756.29,226,Curry Corner,5,53
+May 2023,1c2e6,37980.34,281,Shawarma Express,7,54
+May 2023,6a0c3,37129.06,338,Indian Curry House,5,55
+May 2023,6a9c1,37089.86,234,Falafel Stop,2,56
+May 2023,7d4e1,36663.76,225,Dim Sum Palace,5,57
+May 2023,1d4f2,35891.47,472,Pho Express,8,58
+May 2023,c8d3e,35550.4,312,Pho Haven,5,59
+May 2023,b2d8e,34553.53,271,Curry House,8,60
+May 2023,f9e4c,34477.43,294,Poke Bar,5,61
+May 2023,a3e8b,34348.97,326,Indian Spice,8,62
+May 2023,3c7e9,34189.21,267,Pancake House,6,63
+May 2023,9a8c5,33755.73,289,Veggie World,5,64
+May 2023,1a3f7,32938.66,400,Tasty Garden,8,65
+May 2023,e7a2f,31606.06,220,Crepe Delight,4,66
+May 2023,a4f0b,31199.61,189,Hot Dog Express,8,67
+May 2023,d4f7a,30873.77,315,Noodle Spot,2,68
+May 2023,6f1c4,30828.26,225,French Toast Cafe,2,69
+May 2023,2e8a5,30426.54,220,Burger Barn,8,70
+May 2023,6d8e2,30251.55,270,Salad Stop,8,71
+May 2023,b3e8f,29497.8,255,Sushi Delight,2,72
+May 2023,4a3e6,27723.87,326,Gourmet Grill,1,73
+May 2023,d1e9b,27702.11,155,Falafel Express,2,74
+May 2023,0e1f9,27376.82,219,Dim Sum Delight,2,75
+May 2023,7d3c1,27133.97,256,Taco Villa,6,76
+May 2023,8a2c6,27104.86,218,Sandwich Hub,1,77
+May 2023,f8a3d,26177.2,191,BBQ Spot,2,78
+May 2023,4f0c5,26172.01,305,Ramen Express,2,79
+May 2023,3e2b6,25321.0,303,Bagel Bros,8,80
+May 2023,0c5d8,25005.86,183,Burger Joint,8,81
+May 2023,2a9c5,24951.9,157,Curry Spot,5,82
+May 2023,f3b8d,24406.97,245,Taco Express,1,83
+May 2023,d3b6a,24392.83,201,Hot Dog Hut,1,84
+May 2023,4b1d7,24388.83,243,Pizza Haven,5,85
+May 2023,0e7a4,24041.97,294,Crepe Corner,2,86
+May 2023,6d0f7,23815.94,200,Chili House,5,87
+May 2023,a9f4e,22990.03,254,Sushi World,2,88
+May 2023,3b1c6,21760.24,232,Salad Express,5,89
+May 2023,b9e5f,20437.19,184,Fish Shack,8,90
+May 2023,7f2c1,20279.97,285,Dumpling Delight,5,91
+May 2023,4c9a2,19742.19,140,Steak Express,8,92
+May 2023,2f3d7,19682.57,197,French Bistro,5,93
+May 2023,d6e4a,18863.08,166,Rice Express,1,94
+May 2023,8e9a0,18627.47,148,Mediterranean Delight,8,95
+May 2023,4e2d1,18063.07,222,Burger Bliss,5,96
+May 2023,5f1d3,15624.04,164,Seafood Express,5,97
+May 2023,9b5a0,15621.46,217,Noodle Nest,5,98
+May 2023,2d7a9,14633.55,166,Korean Kitchen,1,99
+May 2023,b9e8c,10590.67,139,Curry Delight,8,100
