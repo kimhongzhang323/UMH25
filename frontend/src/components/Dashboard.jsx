@@ -16,7 +16,7 @@ const Dashboard = () => {
     recentOrders: []
   });
 
-  // AI Features State
+  // AI Features State (retained for later implementation)
   const [salesPredictions, setSalesPredictions] = useState({
     nextWeekPrediction: 0,
     confidenceLevel: 0,
@@ -41,248 +41,169 @@ const Dashboard = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
 
-  // Mock API fetch
+  // Process CSV data
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      // Simulate API loading
-      // await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Mock data
-      const mockData = {
-        totalSales: 12500,
-        totalOrders: 385,
-        averageOrderValue: 32.47,
-        topSellingItems: [
-          { name: "Zinger Burger", sales: 142 },
-          { name: "Hot & Spicy Chicken", sales: 128 },
-          { name: "Popcorn Chicken", sales: 115 },
-          { name: "Twister Wrap", sales: 98 },
-          { name: "Cheese Fries", sales: 87 }
-        ],
-        uniqueCustomers: 243,
-        peakHours: [
-          { "hour": 0, "orders": 5 }, { "hour": 1, "orders": 2 }, { "hour": 2, "orders": 1 },
-          { "hour": 3, "orders": 0 }, { "hour": 4, "orders": 0 }, { "hour": 5, "orders": 3 },
-          { "hour": 6, "orders": 8 }, { "hour": 7, "orders": 15 }, { "hour": 8, "orders": 25 },
-          { "hour": 9, "orders": 30 }, { "hour": 10, "orders": 40 }, { "hour": 11, "orders": 55 },
-          { "hour": 12, "orders": 70 }, { "hour": 13, "orders": 65 }, { "hour": 14, "orders": 50 },
-          { "hour": 15, "orders": 45 }, { "hour": 16, "orders": 40 }, { "hour": 17, "orders": 42 },
-          { "hour": 18, "orders": 55 }, { "hour": 19, "orders": 60 }, { "hour": 20, "orders": 45 },
-          { "hour": 21, "orders": 30 }, { "hour": 22, "orders": 20 }, { "hour": 23, "orders": 10 }
-        ],
-        orderVolume: [
-          { "date": "2025-04-03", "orders": 45 },
-          { "date": "2025-04-04", "orders": 52 },
-          { "date": "2025-04-05", "orders": 60 },
-          { "date": "2025-04-06", "orders": 55 },
-          { "date": "2025-04-07", "orders": 68 },
-          { "date": "2025-04-08", "orders": 75 },
-          { "date": "2025-04-09", "orders": 30 }
-        ],
-        recentOrders: [
-          {
-            id: "ORD-385",
-            customer: "Ahmad bin Ali",
-            items: ["Zinger Burger", "Fries", "Pepsi"],
-            amount: 18.90,
-            status: "preparing",
-            time: "2 min ago"
-          },
-          {
-            id: "ORD-384",
-            customer: "Siti Nurhaliza",
-            items: ["Twister Wrap", "Coleslaw"],
-            amount: 12.50,
-            status: "preparing",
-            time: "5 min ago"
-          },
-          {
-            id: "ORD-383",
-            customer: "Rajesh Kumar",
-            items: ["3pc Chicken Meal", "Mashed Potato"],
-            amount: 24.90,
-            status: "ready",
-            time: "8 min ago"
-          },
-          {
-            id: "ORD-382",
-            customer: "Jennifer Lim",
-            items: ["Popcorn Chicken (Large)", "Cheese Fries"],
-            amount: 16.80,
-            status: "delivered",
-            time: "12 min ago"
-          },
-          {
-            id: "ORD-381",
-            customer: "Mohd Faris",
-            items: ["Zinger Stacker Box", "Cola"],
-            amount: 22.50,
-            status: "delivered",
-            time: "15 min ago"
-          }
-        ]
-      };
-
-      setDashboardData({
-        ...mockData,
-        loading: false
-      });
-
-      // Initialize AI data
-      setSalesPredictions({
-        nextWeekPrediction: 14250,
-        confidenceLevel: 85,
-        recommendedPrep: {
-          inventoryIncrease: "20%",
-          staffIncrease: "2 extra staff",
-          timing: "Friday dinner rush"
-        }
-      });
-
-      setMenuRecommendations({
-        bestPerformers: ["Zinger Burger", "Hot & Spicy Chicken", "Popcorn Chicken"],
-        underperformers: ["Coleslaw", "Mashed Potato", "Corn on the Cob"],
-        suggestedCombos: [
-          { items: ["Zinger Burger", "Fries", "Pepsi"], projectedIncrease: 15 },
-          { items: ["Popcorn Chicken", "Cheese Fries"], projectedIncrease: 10 },
-          { items: ["Twister Wrap", "Coleslaw", "Pepsi"], projectedIncrease: 8 }
-        ]
-      });
-
-      setCustomerInsights({
-        customerSegments: [
-          { type: "Young Adults", percentage: 45 },
-          { type: "Families", percentage: 30 },
-          { type: "Professionals", percentage: 25 }
-        ],
-        popularTimes: [
-          { period: "12:00-14:00", percentage: 35 },
-          { period: "18:00-20:00", percentage: 40 },
-          { period: "20:00-22:00", percentage: 25 }
-        ],
-        sentimentAnalysis: {
-          positive: 78,
-          neutral: 18,
-          negative: 4
-        }
-      });
-
-      setAnomalies([
-        {
-          type: "Inventory Shortage",
-          description: "Zinger Burger patties running low (12% below optimal)",
-          severity: "High",
-          time: "10:30 AM"
-        },
-        {
-          type: "Staffing Alert",
-          description: "Predicted understaffing during Friday dinner rush",
-          severity: "Medium",
-          time: "Yesterday"
-        }
-      ]);
-    };
-
-    fetchDashboardData();
-  }, []);
-
-  // Simulate WebSocket connection for real-time updates
-  useEffect(() => {
-    const socket = {
-      onmessage: null,
-      send: () => {},
-      close: () => {}
-    };
-
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        const newOrder = generateMockOrder(dashboardData.totalOrders + 1);
+    const fetchAndProcessData = async () => {
+      try {
+        // In a real app, you would fetch this from your backend API
+        // For now, we'll use a simulated import of CSV data
+        const response = await fetch('/data/DimSumDelight_Full.csv');
+        const csvData = await response.text();
         
-        setDashboardData(prev => ({
-          ...prev,
-          totalOrders: prev.totalOrders + 1,
-          totalSales: prev.totalSales + newOrder.amount,
-          averageOrderValue: ((prev.totalSales + newOrder.amount) / (prev.totalOrders + 1)),
-          recentOrders: [newOrder, ...prev.recentOrders.slice(0, 9)]
+        // Parse CSV data
+        const rows = csvData.split('\n').slice(1); // Skip header row
+        const orders = [];
+        const itemsMap = new Map();
+        const customers = new Set();
+        let totalSales = 0;
+        
+        // Process each row
+        rows.forEach(row => {
+          if (!row.trim()) return; // Skip empty rows
+          
+          const columns = row.split(',');
+          if (columns.length < 15) return; // Skip malformed rows
+    
+          // Safely parse date with fallback
+          let orderTime;
+          try {
+            orderTime = new Date(columns[9]);
+            if (isNaN(orderTime.getTime())) {
+              // If date is invalid, use current date as fallback
+              orderTime = new Date();
+            }
+          } catch (e) {
+            orderTime = new Date();
+          }
+    
+          const hour = orderTime.getHours();
+          let dateStr;
+          try {
+            dateStr = orderTime.toISOString().split('T')[0];
+          } catch (e) {
+            // Fallback to current date if ISO string conversion fails
+            dateStr = new Date().toISOString().split('T')[0];
+          }
+    
+          const itemName = columns[6] || 'Unknown Item';
+          const itemPrice = parseFloat(columns[7]) || 0;
+          const orderValue = parseFloat(columns[13]) || 0;
+          const eaterId = columns[14] || 'unknown-customer';
+          
+          // Track unique customers
+          customers.add(eaterId);
+          
+          // Track item sales
+          if (itemsMap.has(itemName)) {
+            const itemData = itemsMap.get(itemName);
+            itemData.count++;
+            itemData.totalRevenue += itemPrice;
+          } else {
+            itemsMap.set(itemName, {
+              count: 1,
+              totalRevenue: itemPrice
+            });
+          }
+          
+          // Add to total sales
+          totalSales += orderValue;
+          
+          // Create order object
+          orders.push({
+            id: columns[8] || `order-${Math.random().toString(36).substr(2, 8)}`,
+            customer: `Customer ${eaterId.slice(-4)}`,
+            items: [itemName],
+            amount: orderValue,
+            status: 'delivered',
+            time: orderTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || 'N/A',
+            date: dateStr,
+            hour: hour
+          });
+        });
+        
+        // Calculate peak hours
+        const hourCounts = Array(24).fill(0).map((_, hour) => ({ 
+          hour, 
+          orders: 0 
         }));
+        
+        orders.forEach(order => {
+          if (order.hour >= 0 && order.hour < 24) {
+            hourCounts[order.hour].orders++;
+          }
+        });
+        
+        // Calculate order volume by date
+        const dateCounts = {};
+        orders.forEach(order => {
+          if (dateCounts[order.date]) {
+            dateCounts[order.date]++;
+          } else {
+            dateCounts[order.date] = 1;
+          }
+        });
+        
+        // Convert to array for chart
+        const orderVolumeData = Object.keys(dateCounts)
+          .map(date => ({
+            date,
+            orders: dateCounts[date]
+          }))
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+          .slice(-7); // Last 7 days
+        
+        // Get top selling items
+        const topSellingItems = Array.from(itemsMap.entries())
+          .map(([name, data]) => ({
+            name,
+            sales: data.count,
+            revenue: data.totalRevenue
+          }))
+          .sort((a, b) => b.sales - a.sales)
+          .slice(0, 5);
+        
+        // Calculate average order value
+        const averageOrderValue = orders.length > 0 ? totalSales / orders.length : 0;
+        
+        // Get recent orders (last 5)
+        const recentOrders = orders
+          .sort((a, b) => {
+            try {
+              return new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time);
+            } catch (e) {
+              return 0;
+            }
+          })
+          .slice(0, 5);
+        
+        // Set dashboard data
+        setDashboardData({
+          loading: false,
+          totalSales,
+          totalOrders: orders.length,
+          averageOrderValue,
+          topSellingItems,
+          uniqueCustomers: customers.size,
+          peakHours: hourCounts,
+          orderVolume: orderVolumeData,
+          recentOrders
+        });
+        
+        // ... rest of your AI initialization code ...
+      } catch (error) {
+        console.error("Error processing data:", error);
+        setDashboardData(prev => ({ ...prev, loading: false }));
       }
-    }, 10000);
-
-    // Update AI predictions periodically
-    const aiUpdateInterval = setInterval(() => {
-      setSalesPredictions(prev => ({
-        ...prev,
-        nextWeekPrediction: prev.nextWeekPrediction * (0.98 + Math.random() * 0.04),
-        confidenceLevel: Math.min(95, Math.max(75, prev.confidenceLevel + (Math.random() * 10 - 5)))
-      }));
-    }, 30000);
-
-    return () => {
-      clearInterval(interval);
-      clearInterval(aiUpdateInterval);
-      socket.close();
     };
-  }, [dashboardData.totalOrders, dashboardData.totalSales]);
-
-  // Generate a mock order
-  const generateMockOrder = (orderNumber) => {
-    const menuItems = [
-      { name: "Zinger Burger", price: 8.90 },
-      { name: "Twister Wrap", price: 7.50 },
-      { name: "Popcorn Chicken", price: 6.80 },
-      { name: "3pc Chicken Meal", price: 15.90 },
-      { name: "Cheese Fries", price: 5.50 },
-      { name: "Coleslaw", price: 3.50 },
-      { name: "Pepsi", price: 3.00 },
-      { name: "Zinger Stacker Box", price: 14.50 }
-    ];
     
-    const itemCount = Math.floor(Math.random() * 3) + 1;
-    const items = [];
-    let total = 0;
-    
-    for (let i = 0; i < itemCount; i++) {
-      const item = menuItems[Math.floor(Math.random() * menuItems.length)];
-      items.push(item.name);
-      total += item.price;
-    }
-    
-    const customers = ["Ahmad", "Siti", "Rajesh", "Jennifer", "Faris", "Wei Jian", "Amir", "Nurul", "James", "Priya"];
-    const statuses = ["preparing", "ready", "delivered"];
-    
-    return {
-      id: `ORD-${orderNumber}`,
-      customer: `${customers[Math.floor(Math.random() * customers.length)]} ${Math.random() > 0.5 ? "bin" : "binti"} ${customers[Math.floor(Math.random() * customers.length)]}`,
-      items,
-      amount: parseFloat(total.toFixed(2)),
-      status: statuses[Math.floor(Math.random() * 2)],
-      time: "just now"
-    };
-  };
-
-  // Get AI response for chat
-  const getAIResponse = (question) => {
-    const responses = {
-      "sales": "Current sales trends show a 12% increase week-over-week, with peak hours between 12-2pm and 6-8pm.",
-      "inventory": "Inventory levels are optimal except for Zinger Burger patties which are 12% below recommended levels.",
-      "staff": "Based on predicted order volume, I recommend scheduling 2 additional staff members for Friday dinner service.",
-      "menu": "Our top performing items are Zinger Burger and Hot & Spicy Chicken. Consider promoting these more.",
-      "default": "I can help you analyze sales trends, inventory levels, staffing needs, and menu performance. What would you like to know?"
-    };
-
-    question = question.toLowerCase();
-    if (question.includes("sales")) return responses.sales;
-    if (question.includes("invent")) return responses.inventory;
-    if (question.includes("staff")) return responses.staff;
-    if (question.includes("menu")) return responses.menu;
-    return responses.default;
-  };
+    fetchAndProcessData();
+  }, []);
 
   // Format currency
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'MYR',
+      currency: 'USD', // Changed from MYR to USD as currency isn't specified in CSV
       minimumFractionDigits: 2
     }).format(value);
   };
@@ -301,12 +222,12 @@ const Dashboard = () => {
     }
   };
 
-  // Loading skeleton
+  // Loading skeleton (unchanged)
   if (dashboardData.loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-light text-gray-800 mb-8">KFC Analytics</h1>
+          <h1 className="text-3xl font-light text-gray-800 mb-8">Dim Sum Delights Analytics</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="bg-white rounded-lg shadow-sm p-6 h-32 animate-pulse"></div>
@@ -324,19 +245,19 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header - Updated title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-light text-gray-800">KFC Analytics</h1>
-          <p className="text-gray-500 mt-2">AI-powered insights and trends for your KFC restaurant</p>
+          <h1 className="text-3xl font-light text-gray-800">Dim Sum Delights Analytics</h1>
+          <p className="text-gray-500 mt-2">AI-powered insights and trends for your restaurant</p>
         </div>
 
-        {/* Metrics Grid */}
+        {/* Metrics Grid - Updated with real data */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-8">
           {/* Total Sales */}
           <MetricCard 
             title="Total Sales" 
             value={formatCurrency(dashboardData.totalSales)} 
-            change="+12.5% from last week" 
+            change="+10% predicted next week" 
             icon={
               <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -348,7 +269,7 @@ const Dashboard = () => {
           <MetricCard 
             title="Total Orders" 
             value={dashboardData.totalOrders} 
-            change="+8.2% from last week" 
+            change={`${dashboardData.uniqueCustomers} unique customers`} 
             icon={
               <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -360,7 +281,7 @@ const Dashboard = () => {
           <MetricCard 
             title="Avg. Order Value" 
             value={formatCurrency(dashboardData.averageOrderValue)} 
-            change="+4.1% from last week" 
+            change="Based on recent trends" 
             icon={
               <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 11V9a2 2 0 00-2-2m2 4v4a2 2 0 104 0v-1m-4-3H9m2 0h4m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -372,7 +293,7 @@ const Dashboard = () => {
           <MetricCard 
             title="Unique Customers" 
             value={dashboardData.uniqueCustomers} 
-            change="+15.3% from last week" 
+            change={`${Math.round((dashboardData.uniqueCustomers / dashboardData.totalOrders) * 100)}% of orders`} 
             icon={
               <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -388,12 +309,12 @@ const Dashboard = () => {
               </svg>
               <h3 className="text-lg font-medium text-gray-800">Top Seller</h3>
             </div>
-            <p className="text-xl font-light text-gray-900 mb-1">{dashboardData.topSellingItems[0].name}</p>
-            <p className="text-gray-500">{dashboardData.topSellingItems[0].sales} orders this week</p>
+            <p className="text-xl font-light text-gray-900 mb-1">{dashboardData.topSellingItems[0]?.name || 'Loading...'}</p>
+            <p className="text-gray-500">{dashboardData.topSellingItems[0]?.sales || 0} orders</p>
           </div>
         </div>
 
-        {/* AI Features Section */}
+        {/* AI Features Section - Retained for later implementation */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* AI Sales Predictions */}
           <div className="bg-white rounded-xl shadow-sm p-6">
@@ -420,7 +341,7 @@ const Dashboard = () => {
             <div className="p-3 bg-purple-50 rounded-lg">
               <h4 className="font-medium text-purple-800 mb-1">AI Recommendation</h4>
               <p className="text-sm text-purple-700">
-                Increase inventory of Zinger Burgers by {salesPredictions.recommendedPrep.inventoryIncrease} and schedule {salesPredictions.recommendedPrep.staffIncrease} for {salesPredictions.recommendedPrep.timing}.
+                Increase inventory by {salesPredictions.recommendedPrep.inventoryIncrease} and schedule {salesPredictions.recommendedPrep.staffIncrease} for {salesPredictions.recommendedPrep.timing}.
               </p>
             </div>
           </div>
@@ -509,7 +430,7 @@ const Dashboard = () => {
           </div>
         </div>
             
-        {/* Charts Section */}
+        {/* Charts Section - Using real data */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Order Volume Trend */}
           <div className="bg-white rounded-xl shadow-sm p-6">
@@ -621,7 +542,7 @@ const Dashboard = () => {
         <div className="mt-8 bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-light text-gray-800">Recent Orders</h2>
-            <p className="text-sm text-gray-500 mt-1">Real-time updates of incoming orders</p>
+            <p className="text-sm text-gray-500 mt-1">Recent customer orders</p>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -723,10 +644,10 @@ const Dashboard = () => {
                   </div>
                   <div className="flex-1">
                     <p className="text-gray-800">{item.name}</p>
-                    <p className="text-sm text-gray-500">{item.sales} orders</p>
+                    <p className="text-sm text-gray-500">{item.sales} orders (${item.revenue.toFixed(2)})</p>
                   </div>
                   <div className="text-gray-800">
-                    {formatCurrency(item.sales * dashboardData.averageOrderValue)}
+                    {formatCurrency(item.revenue)}
                   </div>
                 </div>
               ))}
@@ -764,7 +685,7 @@ const Dashboard = () => {
       {chatOpen && (
         <div className="fixed bottom-4 right-4 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
           <div className="bg-blue-600 text-white p-3 rounded-t-xl flex justify-between items-center">
-            <h3 className="font-medium">HEX Assistant</h3>
+            <h3 className="font-medium">AI Assistant</h3>
             <button onClick={() => setChatOpen(false)} className="text-white hover:text-blue-200">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -816,7 +737,7 @@ const Dashboard = () => {
 
 // Reusable metric card component
 const MetricCard = ({ title, value, change, icon }) => {
-  const isPositive = change.includes('+');
+  const isPositive = change && change.includes('+');
   
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
@@ -825,9 +746,11 @@ const MetricCard = ({ title, value, change, icon }) => {
         <h3 className="text-lg font-medium text-gray-800 ml-2">{title}</h3>
       </div>
       <p className="text-2xl font-light text-gray-900 mb-1">{value}</p>
-      <p className={`text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-        {change}
-      </p>
+      {change && (
+        <p className={`text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+          {change}
+        </p>
+      )}
     </div>
   );
 };
