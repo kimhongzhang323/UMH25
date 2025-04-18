@@ -1,20 +1,20 @@
 // Imports
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Loader2, 
-  Sparkles, 
-  Plus, 
-  Menu, 
-  Image, 
-  Search, 
-  File, 
-  Brain, 
-  Mic, 
-  MicOff, 
-  Store, 
+import {
+  Send,
+  Bot,
+  User,
+  Loader2,
+  Sparkles,
+  Plus,
+  Menu,
+  Image,
+  Search,
+  File,
+  Brain,
+  Mic,
+  MicOff,
+  Store,
   ShoppingBag,
   ChevronLeft,
   ChevronRight,
@@ -189,9 +189,9 @@ export default function Chatbot() {
     if (currentChatId) {
       setChatHistory((prev) =>
         prev.map((chat) =>
-          chat.id === currentChatId ? { 
-            ...chat, 
-            messages, 
+          chat.id === currentChatId ? {
+            ...chat,
+            messages,
             title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || chat.title,
             preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
             timestamp: new Date()
@@ -248,42 +248,44 @@ const newChat = () => {
     setInput('');
     setLoading(true);
 
+    fetch(import.meta.env.BACKEND_URL)
+
     setTimeout(() => {
       let responseText;
-      
+
       if (merchantProfile.merchantType) {
         responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
       } else {
         responseText = generateFakeResponse(input, activeMode);
       }
-      
+
       const botMsg = {
         id: (Date.now() + 1).toString(),
         text: responseText,
         sender: 'bot',
         timestamp: new Date(),
         isImage: activeMode === 'image',
-        imageUrl: activeMode === 'image' ? 
+        imageUrl: activeMode === 'image' ?
           `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}` : null
       };
 
       setMessages(prev => [...prev, botMsg]);
       setLoading(false);
-      
+
       if (!currentChatId) {
         saveChatToHistory();
         setIsNewChat(false); // Reset new chat state after saving
       } else {
-        setChatHistory(prev => 
-          prev.map(chat => 
-            chat.id === currentChatId 
+        setChatHistory(prev =>
+          prev.map(chat =>
+            chat.id === currentChatId
               ? {
-                ...chat, 
+                ...chat,
                 messages: [...chat.messages, userMsg, botMsg],
                 title: userMsg.text.substring(0, 30) || chat.title,
                 preview: botMsg.text.substring(0, 50) || 'New conversation',
                 timestamp: new Date()
-              } 
+              }
               : chat
           )
         );
@@ -305,7 +307,7 @@ const formatDate = (date) => {
 
   const saveChatToHistory = () => {
     if (messages.length <= 1) return;
-    
+
     const newChat = {
       id: `chat${Date.now()}`,
       title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
@@ -321,169 +323,11 @@ const formatDate = (date) => {
   // Removed duplicate handleSubmit function
 
   const generateFakeResponse = (userInput, mode) => {
-    const responses = {
-      chat: `I understand you said: "${userInput}". This is a standard response from your HEX assistant.`,
-      'deep-think': `Deep analysis of "${userInput}":\n\n1. First point of consideration...\n2. Second perspective...\n3. Potential implications...\n\nThis is a more thorough response than standard chat mode.`,
-      search: `Search results for "${userInput}":\n\n1. First relevant result (example.com)\n2. Second source (example.org)\n3. Additional information (example.net)`,
-      image: `Here's the generated image based on: "${userInput}"`
-    };
-    return responses[mode] || responses.chat;
+    return "fake shit"
   };
 
   const generatePersonalizedMerchantResponse = (query, profile) => {
-    const lowercaseQuery = query.toLowerCase();
-    
-    const getMaturityBasedAdvice = () => {
-      const challengeCount = profile.challenges.length;
-      if (challengeCount <= 1) return "emerging";
-      if (challengeCount <= 2) return "growing";
-      return "established";
-    };
-
-    const getChannelStrategy = () => {
-      switch(profile.merchantType) {
-        case 'physical': return 'local SEO, community events, and foot traffic optimization';
-        case 'online': return 'social media marketing, email campaigns, and marketplace optimization';
-        case 'b2b': return 'LinkedIn marketing, industry networking, and referral programs';
-        case 'ecommerce': return 'multi-channel selling, social commerce, and retargeting campaigns';
-        default: return 'digital marketing and customer engagement';
-      }
-    };
-
-    const getScalingStrategy = () => {
-      switch(profile.businessSize) {
-        case 'small': return 'focus on building core customer base and optimizing operations';
-        case 'medium': return 'invest in automation and expand market reach';
-        case 'large': return 'optimize supply chain and explore new market segments';
-        default: return 'sustainable growth and market expansion';
-      }
-    };
-
-    const getLocationStrategy = () => {
-      const { location } = profile;
-      if (!location.marketType) return 'location-based marketing';
-
-      switch(location.marketType) {
-        case 'urban':
-          return `dense urban market penetration, focusing on convenience and quick service${
-            profile.merchantType === 'physical' ? ', leveraging high foot traffic areas' : 
-            ', targeting mobile-first urban consumers'
-          }`;
-        case 'suburban':
-          return `community-centric approach, focusing on family-oriented marketing${
-            profile.merchantType === 'physical' ? ' and local shopping center presence' : 
-            ' and suburban lifestyle alignment'
-          }`;
-        case 'rural':
-          return `wider geographic coverage strategy, emphasizing reliability and community trust${
-            profile.merchantType === 'physical' ? ', being a destination business' : 
-            'focusing on delivery reliability and rural customer service'
-          }`;
-        default: return 'balanced market approach across different location types';
-      }
-    };
-
-    // Marketing Strategy
-    if (lowercaseQuery.includes('marketing') || lowercaseQuery.includes('promote')) {
-      return `Based on your profile as a ${profile.businessSize} ${profile.merchantType} business in a ${
-        profile.location.marketType || 'mixed'
-      } market selling ${profile.productType}, here's your tailored marketing strategy:
-
-1. **Location-Based Strategy**: 
-   - Market Type: ${profile.location.marketType || 'Not specified'}
-   - Approach: ${getLocationStrategy()}
-   - Regional Focus: ${profile.location.region ? `Optimize for ${profile.location.region} market preferences` : 'General market approach'}
-
-2. **Channel Focus**: 
-   - Primary: ${getChannelStrategy()}
-   - Business Stage: ${getMaturityBasedAdvice() === 'emerging' ? 'Focus on building brand awareness' : 
-                     getMaturityBasedAdvice() === 'growing' ? 'Expand market reach' : 
-                     'Strengthen market position'}
-
-3. **Local Targeting**:
-   - Demographics: ${profile.location.marketType === 'urban' ? 'Urban professionals and young consumers' :
-                   profile.location.marketType === 'suburban' ? 'Families and community groups' :
-                   profile.location.marketType === 'rural' ? 'Rural communities and regional customers' :
-                   'Diverse customer segments'}
-   - Competition: ${profile.location.marketType === 'urban' ? 'High competition environment' :
-                  profile.location.marketType === 'suburban' ? 'Moderate competition' :
-                  profile.location.marketType === 'rural' ? 'Limited direct competition' :
-                  'Varied competitive landscape'}
-
-4. **Growth Tactics**:
-   - ${getScalingStrategy()}
-   - Local Expansion: ${profile.location.marketType === 'urban' ? 'Dense market penetration' :
-                      profile.location.marketType === 'suburban' ? 'Community hub establishment' :
-                      profile.location.marketType === 'rural' ? 'Regional authority building' :
-                      'Market-appropriate expansion'}`;
-    }
-    
-    // Pricing Strategy
-    if (lowercaseQuery.includes('pricing') || lowercaseQuery.includes('price')) {
-      return `For your ${profile.businessSize} business selling ${profile.productType} as a ${profile.merchantType}, here's my pricing guidance:
-
-1. **Competitive Analysis**: Your pricing should reflect your position in the ${profile.merchantType} market - ${profile.challenges.includes('premium positioning') ? 'emphasize quality to justify premium pricing' : 'consider a value-based approach that highlights affordability without compromising quality'}.
-
-2. **Pricing Structure**: ${profile.businessSize === 'small' ? 'Start with simple, transparent pricing' : 'Consider tiered pricing options to capture different customer segments'}.
-
-3. **Seasonal Strategy**: In ${profile.merchantType}, consider ${profile.merchantType === 'physical' || profile.merchantType === 'online' ? 'seasonal discounting during industry-standard sale periods' : 'special bundle pricing during peak seasons'}.
-
-4. **Psychological Pricing**: Test price points that resonate with your specific customer base (e.g., $19.99 vs. $20).
-
-Would you like a more detailed pricing strategy for a specific product line?`;
-    }
-    
-    // Inventory Management
-    if (lowercaseQuery.includes('inventory') || lowercaseQuery.includes('stock') || lowercaseQuery.includes('supply chain')) {
-      return `For your ${profile.productType} inventory management as a ${profile.merchantType}, here are tailored recommendations:
-
-1. **Stocking Strategy**: As a ${profile.businessSize} business, focus on ${profile.businessSize === 'small' ? 'a curated selection of high-turnover items' : 'maintaining diverse inventory with automated reordering systems'}.
-
-2. **Seasonal Planning**: In ${profile.merchantType}, prepare for ${profile.merchantType === 'physical' ? 'seasonal collection transitions with 3-month lead times' : profile.merchantType === 'online' ? 'holiday rushes and seasonal ingredient availability' : 'industry-specific peak periods'}.
-
-3. **Supplier Relationships**: ${profile.challenges.includes('supply chain issues') ? 'Diversify your supplier network to reduce single-source risks' : 'Strengthen relationships with key suppliers for better terms'}.
-
-4. **Technology Integration**: Implement ${profile.businessSize === 'small' ? 'affordable inventory tracking software' : 'comprehensive inventory management systems integrated with your sales channels'}.
-
-Would you like specific supplier recommendations for your ${profile.productType} products?`;
-    }
-    
-    // Customer Retention
-    if (lowercaseQuery.includes('customer') || lowercaseQuery.includes('client') || lowercaseQuery.includes('retention')) {
-      return `For your ${profile.merchantType} business, here are personalized customer retention strategies:
-
-1. **Loyalty Program**: Create a ${profile.businessSize === 'small' ? 'simple points-based system' : 'tiered loyalty program with exclusive benefits'} specifically designed for ${profile.productType} repeat purchases.
-
-2. **Follow-up Communication**: Implement ${profile.businessSize === 'small' ? 'personalized thank-you emails' : 'automated but personalized communication workflows'} with care instructions specific to your ${profile.productType}.
-
-3. **Feedback Collection**: Gather product-specific feedback to improve your ${profile.productType} offerings and show customers you value their input.
-
-4. **Special Occasions**: Celebrate customer milestones with exclusive offers tailored to their previous ${profile.productType} purchases.
-
-Would you like me to help design a specific customer retention campaign?`;
-    }
-    
-    // Default response with enhanced personalization
-    return `For your ${profile.merchantType} business selling ${profile.productType}, here's my tailored guidance:
-
-1. **Business Stage Recommendations**:
-   - Current Stage: ${getMaturityBasedAdvice()}
-   - Focus Areas: ${profile.challenges.join(', ')}
-   - Next Steps: ${getScalingStrategy()}
-
-2. **Channel Optimization**:
-   - Primary Channels: ${getChannelStrategy()}
-   - Market Position: ${profile.businessSize} business advantage
-   - Growth Path: ${getMaturityBasedAdvice() === 'emerging' ? 'Build foundation' :
-                  getMaturityBasedAdvice() === 'growing' ? 'Scale operations' :
-                  'Optimize and expand'}
-
-3. **Resource Allocation**:
-   - Priority: ${profile.challenges[0] || 'General business growth'}
-   - Support Areas: ${profile.challenges.slice(1).join(', ') || 'Overall optimization'}
-   - Scale: ${profile.businessSize} business focus
-
-Would you like specific details about any of these areas?`;
+    return "womp-womp (with profile)"
   };
 
   const handleKeyDown = (e) => {
@@ -558,8 +402,8 @@ Would you like specific details about any of these areas?`;
     return (
       <span className={`flex items-center gap-1 text-${color}-600`}>
         {icon}
-        {activeMode === 'deep-think' ? 'Deep Think' : 
-         activeMode === 'search' ? 'Search' : 
+        {activeMode === 'deep-think' ? 'Deep Think' :
+         activeMode === 'search' ? 'Search' :
          activeMode === 'image' ? 'Image' : 'Chat'}
       </span>
     );
@@ -603,7 +447,7 @@ Would you like specific details about any of these areas?`;
               <div className="text-xs text-gray-400 mt-1">Just now</div>
             </button>
           )}
-          
+
           {chatHistory.length > 0 ? (
             <>
               {chatHistory.map((chat) => (
@@ -634,7 +478,7 @@ Would you like specific details about any of these areas?`;
             <div className="flex items-center gap-2 mb-2">
               <Store className="w-4 h-4 text-yellow-600" />
               <span className="text-sm font-medium">Merchant Profile</span>
-              <button 
+              <button
                 onClick={() => setShowFilterPanel(true)}
                 className="ml-auto text-xs text-blue-600"
               >
@@ -707,8 +551,8 @@ Would you like specific details about any of these areas?`;
                     >
                       {msg.mode && msg.sender === 'user' && (
                         <div className="text-xs text-gray-500 mb-1">
-                          {msg.mode === 'image' ? 'Image generation' : 
-                           msg.mode === 'deep-think' ? 'Deep thinking' : 
+                          {msg.mode === 'image' ? 'Image generation' :
+                           msg.mode === 'deep-think' ? 'Deep thinking' :
                            msg.mode === 'search' ? 'Web search' : 'Chat'}
                         </div>
                       )}
@@ -719,9 +563,9 @@ Would you like specific details about any of these areas?`;
                             <span className="text-sm">{msg.file.name}</span>
                           </div>
                           {msg.file.type.startsWith('image/') && (
-                            <img 
-                              src={msg.file.preview} 
-                              alt="Preview" 
+                            <img
+                              src={msg.file.preview}
+                              alt="Preview"
                               className="mt-2 max-w-full max-h-40 rounded"
                             />
                           )}
@@ -729,9 +573,9 @@ Would you like specific details about any of these areas?`;
                       )}
                       {msg.isImage ? (
                         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-                          <img 
-                            src={msg.imageUrl} 
-                            alt="Generated content" 
+                          <img
+                            src={msg.imageUrl}
+                            alt="Generated content"
                             className="w-full"
                           />
                           <div className="p-3 text-sm">
@@ -769,8 +613,8 @@ Would you like specific details about any of these areas?`;
                   <div className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-3 rounded-2xl">
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                     <span className="text-gray-700">
-                      {activeMode === 'image' ? 'Generating image...' : 
-                       activeMode === 'deep-think' ? 'Deep thinking...' : 
+                      {activeMode === 'image' ? 'Generating image...' :
+                       activeMode === 'deep-think' ? 'Deep thinking...' :
                        activeMode === 'search' ? 'Searching...' : 'Thinking...'}
                     </span>
                   </div>
@@ -789,8 +633,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('chat')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'chat' 
-                    ? 'bg-blue-100 text-blue-600' 
+                  activeMode === 'chat'
+                    ? 'bg-blue-100 text-blue-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -799,8 +643,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('deep-think')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'deep-think' 
-                    ? 'bg-purple-100 text-purple-600' 
+                  activeMode === 'deep-think'
+                    ? 'bg-purple-100 text-purple-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -810,8 +654,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('search')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'search' 
-                    ? 'bg-green-100 text-green-600' 
+                  activeMode === 'search'
+                    ? 'bg-green-100 text-green-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -821,8 +665,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setActiveMode('image')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'image' 
-                    ? 'bg-orange-100 text-orange-600' 
+                  activeMode === 'image'
+                    ? 'bg-orange-100 text-orange-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -832,8 +676,8 @@ Would you like specific details about any of these areas?`;
               <button
                 onClick={() => setShowFilterPanel(true)}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  merchantProfile.merchantType 
-                    ? 'bg-yellow-100 text-yellow-600' 
+                  merchantProfile.merchantType
+                    ? 'bg-yellow-100 text-yellow-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -852,8 +696,8 @@ Would you like specific details about any of these areas?`;
                     <File className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">{filePreview.name}</span>
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setFilePreview(null)}
                     className="text-gray-500 hover:text-gray-700"
                   >
@@ -862,8 +706,8 @@ Would you like specific details about any of these areas?`;
                 </div>
               )}
               <div className="flex items-end p-2">
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
@@ -894,8 +738,8 @@ Would you like specific details about any of these areas?`;
                   type="button"
                   onClick={toggleRecording}
                   className={`p-2 rounded-lg mr-2 ${
-                    isRecording 
-                      ? 'bg-red-100 text-red-600 animate-pulse' 
+                    isRecording
+                      ? 'bg-red-100 text-red-600 animate-pulse'
                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -931,14 +775,14 @@ Would you like specific details about any of these areas?`;
                   <Store className="w-5 h-5 text-yellow-600" />
                   Merchant Profile & Insights Configuration
                 </h2>
-                <button 
+                <button
                   onClick={() => setShowFilterPanel(false)}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   ×
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto pr-2">
                 <form onSubmit={(e) => {
                   e.preventDefault();
@@ -969,7 +813,7 @@ Would you like specific details about any of these areas?`;
                             <option value="grocery">Grocery/Convenience</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Main Product Categories
@@ -985,7 +829,7 @@ Would you like specific details about any of these areas?`;
                             placeholder="e.g. fast food, electronics, beauty products"
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Business Size
@@ -1032,7 +876,7 @@ Would you like specific details about any of these areas?`;
                             <option value="transport">Transport Hub</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Country/Region
@@ -1065,7 +909,7 @@ Would you like specific details about any of these areas?`;
                       <h3 className="font-medium text-gray-800 mb-3">Business Focus Areas</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          'Sales growth', 
+                          'Sales growth',
                           'Customer retention',
                           'Marketing effectiveness',
                           'Inventory management',
@@ -1084,7 +928,7 @@ Would you like specific details about any of these areas?`;
                                 if (e.target.checked) {
                                   if (merchantProfile.challenges.length < 3) {
                                     setMerchantProfile(prev => ({
-                                      ...prev, 
+                                      ...prev,
                                       challenges: [...prev.challenges, challenge]
                                     }));
                                   }
@@ -1131,7 +975,7 @@ Would you like specific details about any of these areas?`;
                             <option value="my">Burmese (မြန်မာဘာသာ)</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Preferred Insight Format
@@ -1197,7 +1041,7 @@ Would you like specific details about any of these areas?`;
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Inventory System Integration
@@ -1214,7 +1058,7 @@ Would you like specific details about any of these areas?`;
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-6 flex justify-end gap-2">
                     <button
                       type="button"

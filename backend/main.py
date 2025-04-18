@@ -159,6 +159,10 @@ def generate_prompt(question: str, context: List[str] = None) -> str:
 
         Question: {question}
 
+        {context_str}
+
+        Question: {question}
+
         Answer:"""
 
 @app.post("/query")
@@ -206,6 +210,13 @@ async def upload_csv(
             id_column=id_column,
             metadata_columns=[col.strip() for col in metadata_columns.split(",")] if metadata_columns else None
         )
+
+        # Clear existing CSV documents
+        document_store.clear_csv_documents()
+
+        # Process CSV in chunks for memory efficiency
+        contents = await file.read()
+        csv_text = io.StringIO(contents.decode('utf-8'))
 
         # Clear existing CSV documents
         document_store.clear_csv_documents()
