@@ -1,0 +1,74 @@
+{
+    "totalSales": 12500,
+    "totalOrders": 385,
+    "averageOrderValue": 32.47,
+    "topSellingItems": [
+      { "name": "Zinger Burger", "sales": 142 },
+      { "name": "Hot & Spicy Chicken", "sales": 128 },
+      { "name": "Popcorn Chicken", "sales": 115 },
+      { "name": "Twister Wrap", "sales": 98 },
+      { "name": "Cheese Fries", "sales": 87 }
+    ],
+    "uniqueCustomers": 243,
+    "peakHours": [
+      { "hour": 0, "orders": 5 }, { "hour": 1, "orders": 2 }, { "hour": 2, "orders": 1 },
+      { "hour": 3, "orders": 0 }, { "hour": 4, "orders": 0 }, { "hour": 5, "orders": 3 },
+      { "hour": 6, "orders": 8 }, { "hour": 7, "orders": 15 }, { "hour": 8, "orders": 25 },
+      { "hour": 9, "orders": 30 }, { "hour": 10, "orders": 40 }, { "hour": 11, "orders": 55 },
+      { "hour": 12, "orders": 70 }, { "hour": 13, "orders": 65 }, { "hour": 14, "orders": 50 },
+      { "hour": 15, "orders": 45 }, { "hour": 16, "orders": 40 }, { "hour": 17, "orders": 42 },
+      { "hour": 18, "orders": 55 }, { "hour": 19, "orders": 60 }, { "hour": 20, "orders": 45 },
+      { "hour": 21, "orders": 30 }, { "hour": 22, "orders": 20 }, { "hour": 23, "orders": 10 }
+    ],
+    "orderVolume": [
+      { "date": "2025-04-03", "orders": 45 },
+      { "date": "2025-04-04", "orders": 52 },
+      { "date": "2025-04-05", "orders": 60 },
+      { "date": "2025-04-06", "orders": 55 },
+      { "date": "2025-04-07", "orders": 68 },
+      { "date": "2025-04-08", "orders": 75 },
+      { "date": "2025-04-09", "orders": 30 }
+    ],
+    "recentOrders": [
+      {
+        "id": "ORD-385",
+        "customer": "Ahmad bin Ali",
+        "items": ["Zinger Burger", "Fries", "Pepsi"],
+        "amount": 18.90,
+        "status": "preparing",
+        "time": "2 min ago"
+      },
+      {
+        "id": "ORD-384",
+        "customer": "Siti Nurhaliza",
+        "items": ["Twister Wrap", "Coleslaw"],
+        "amount": 12.50,
+        "status": "preparing",
+        "time": "5 min ago"
+      },
+      {
+        "id": "ORD-383",
+        "customer": "Rajesh Kumar",
+        "items": ["3pc Chicken Meal", "Mashed Potato"],
+        "amount": 24.90,
+        "status": "ready",
+        "time": "8 min ago"
+      },
+      {
+        "id": "ORD-382",
+        "customer": "Jennifer Lim",
+        "items": ["Popcorn Chicken (Large)", "Cheese Fries"],
+        "amount": 16.80,
+        "status": "delivered",
+        "time": "12 min ago"
+      },
+      {
+        "id": "ORD-381",
+        "customer": "Mohd Faris",
+        "items": ["Zinger Stacker Box", "Cola"],
+        "amount": 22.50,
+        "status": "delivered",
+        "time": "15 min ago"
+      }
+    ]
+}

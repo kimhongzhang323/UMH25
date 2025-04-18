@@ -208,7 +208,7 @@ const CustomerServicePage = () => {
 
     // --- Simulate/Actual Backend Send ---
     // Replace this promise with your actual API call to send the merchant's message
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
       // --- Actual Backend Call (Example Structure) ---
       /*
       fetch(`${API_BASE_URL}/customer-service/chats/${activeChatId}/messages`, {
