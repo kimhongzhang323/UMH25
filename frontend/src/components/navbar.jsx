@@ -78,7 +78,7 @@ export default function Navbar() {
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 z-40 lg:hidden bg-black/30"
           onClick={toggleMobileMenu}
         ></div>
       )}
