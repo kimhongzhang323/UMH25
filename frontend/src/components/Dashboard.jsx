@@ -1,8 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import {useNavigate} from 'react-router-dom';
 import PeakHoursChart from '../charts/PeakHoursChart';
 import OrderVolumeChart from '../charts/OrderVolumeChart';
+import jsPDF from 'jspdf';
 
 const Dashboard = () => {
+  // Function to handle PDF export
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add dashboard content to PDF
+    doc.text('Dim Sum Delights Analytics Report', 10, 10);
+    doc.text(`Total Sales: ${formatCurrency(dashboardData.totalSales)}`, 10, 20);
+    doc.text(`Total Orders: ${dashboardData.totalOrders}`, 10, 30);
+    doc.text(`Average Order Value: ${formatCurrency(dashboardData.averageOrderValue)}`, 10, 40);
+    
+    // Add top selling items
+    doc.text('Top Selling Items:', 10, 50);
+    dashboardData.topSellingItems.forEach((item, index) => {
+      doc.text(`${index + 1}. ${item.name}: ${item.sales} orders`, 15, 60 + (index * 10));
+    });
+    
+    // Save the PDF
+    doc.save('dimsum-analytics-report.pdf');
+  };
+
   // State for all dashboard data
   const [dashboardData, setDashboardData] = useState({
     loading: true,
@@ -657,25 +679,36 @@ const Dashboard = () => {
           {/* Quick Actions */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-xl font-light text-gray-800 mb-6">Quick Actions</h2>
-            <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
+            <div className="space-y-5">
+              <a 
+                href="/reports" 
+                className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+              >
                 <span>View Detailed Reports</span>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
-              <button className="w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
+              </a>
+
+              <a 
+                href="#" 
+                onClick={handleExportPDF}
+                className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+              >
                 <span>Export Data</span>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-              </button>
-              <button className="w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
+              </a>
+              <a 
+                href="/inventory" 
+                className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+              >
                 <span>Manage Inventory</span>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
-              </button>
+              </a>
             </div>
           </div>
         </div>

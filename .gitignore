@@ -3,3 +3,5 @@
 /data/merchant.csv
 /data/transaction_data.csv
 /data/transaction_items.csv
+
+/node_modules
