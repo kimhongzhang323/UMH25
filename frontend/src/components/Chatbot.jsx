@@ -205,7 +205,7 @@ export default function Chatbot() {
   // Removed duplicate loadChat function
 
   // Update your newChat function to set this state
-const newChat = () => {
+  const newChat = () => {
     setIsNewChat(true);
     setMessages([
       {
@@ -294,16 +294,16 @@ const newChat = () => {
   };
 
   // Define the formatDate function before using it in JSX
-const formatDate = (date) => {
-  const now = new Date();
-  const diff = now - date;
-  const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const formatDate = (date) => {
+    const now = new Date();
+    const diff = now - date;
+    const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString();
-};
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+  };
 
   const saveChatToHistory = () => {
     if (messages.length <= 1) return;
@@ -403,29 +403,27 @@ const formatDate = (date) => {
       <span className={`flex items-center gap-1 text-${color}-600`}>
         {icon}
         {activeMode === 'deep-think' ? 'Deep Think' :
-         activeMode === 'search' ? 'Search' :
-         activeMode === 'image' ? 'Image' : 'Chat'}
+          activeMode === 'search' ? 'Search' :
+            activeMode === 'image' ? 'Image' : 'Chat'}
       </span>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex">
+    <div className="h-[calc(100vh-65px)] bg-gray-50 text-gray-900 flex">
       {/* Sidebar Toggle Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={`fixed left-4 top-16 z-50 p-2 rounded-full bg-white border border-gray-200 shadow-sm ${
-          sidebarOpen ? 'ml-64' : 'ml-0'
-        } transition-all duration-300`}
+        className={`fixed left-4 top-16 z-50 p-2 rounded-full bg-white border border-gray-200 shadow-sm ${sidebarOpen ? 'ml-64' : 'ml-0'
+          } transition-all duration-300`}
       >
         {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
       </button>
 
       {/* Sidebar */}
       <div
-        className={`fixed w-64 bg-white border-r border-gray-200 flex flex-col h-screen z-40 transition-all duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed w-64 bg-white border-r border-gray-200 flex flex-col h-[calc(100vh)] z-40 transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="p-4">
           <button
@@ -454,9 +452,8 @@ const formatDate = (date) => {
                 <button
                   key={chat.id}
                   onClick={() => loadChat(chat.id)}
-                  className={`w-full text-left p-3 rounded-lg mb-2 hover:bg-gray-100 transition-colors ${
-                    currentChatId === chat.id ? 'bg-gray-100' : ''
-                  }`}
+                  className={`w-full text-left p-3 rounded-lg mb-2 hover:bg-gray-100 transition-colors ${currentChatId === chat.id ? 'bg-gray-100' : ''
+                    }`}
                 >
                   <div className="font-medium text-gray-900 truncate">{chat.title}</div>
                   <div className="text-sm text-gray-500 truncate">{chat.preview}</div>
@@ -508,9 +505,8 @@ const formatDate = (date) => {
       </div>
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${
-        sidebarOpen ? 'ml-64' : 'ml-0'
-      }`}>
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'
+        }`}>
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="max-w-3xl mx-auto w-full p-4">
@@ -520,21 +516,18 @@ const formatDate = (date) => {
               messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`mb-6 last:mb-0 ${
-                    msg.sender === 'bot' ? 'pr-8' : 'pl-8'
-                  }`}
+                  className={`mb-6 last:mb-0 ${msg.sender === 'bot' ? 'pr-8' : 'pl-8'
+                    }`}
                 >
                   <div
-                    className={`flex gap-4 ${
-                      msg.sender === 'bot' ? 'flex-row' : 'flex-row-reverse'
-                    }`}
+                    className={`flex gap-4 ${msg.sender === 'bot' ? 'flex-row' : 'flex-row-reverse'
+                      }`}
                   >
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        msg.sender === 'bot'
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-purple-100 text-purple-600'
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender === 'bot'
+                        ? 'bg-blue-100 text-blue-600'
+                        : 'bg-purple-100 text-purple-600'
+                        }`}
                     >
                       {msg.sender === 'bot' ? (
                         <img src="/grab.png" alt="HEX Assistant" className="w-6 h-6" />
@@ -545,15 +538,14 @@ const formatDate = (date) => {
                       )}
                     </div>
                     <div
-                      className={`max-w-[calc(100%-56px)] ${
-                        msg.sender === 'bot' ? 'text-left' : 'text-right'
-                      }`}
+                      className={`max-w-[calc(100%-56px)] ${msg.sender === 'bot' ? 'text-left' : 'text-right'
+                        }`}
                     >
                       {msg.mode && msg.sender === 'user' && (
                         <div className="text-xs text-gray-500 mb-1">
                           {msg.mode === 'image' ? 'Image generation' :
-                           msg.mode === 'deep-think' ? 'Deep thinking' :
-                           msg.mode === 'search' ? 'Web search' : 'Chat'}
+                            msg.mode === 'deep-think' ? 'Deep thinking' :
+                              msg.mode === 'search' ? 'Web search' : 'Chat'}
                         </div>
                       )}
                       {msg.file && (
@@ -584,11 +576,10 @@ const formatDate = (date) => {
                         </div>
                       ) : (
                         <div
-                          className={`inline-block px-4 py-3 rounded-2xl ${
-                            msg.sender === 'bot'
-                              ? 'bg-white border border-gray-200'
-                              : 'bg-blue-600 text-white'
-                          }`}
+                          className={`inline-block px-4 py-3 rounded-2xl ${msg.sender === 'bot'
+                            ? 'bg-white border border-gray-200'
+                            : 'bg-blue-600 text-white'
+                            }`}
                         >
                           <p className="whitespace-pre-wrap">{msg.text}</p>
                         </div>
@@ -614,8 +605,8 @@ const formatDate = (date) => {
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                     <span className="text-gray-700">
                       {activeMode === 'image' ? 'Generating image...' :
-                       activeMode === 'deep-think' ? 'Deep thinking...' :
-                       activeMode === 'search' ? 'Searching...' : 'Thinking...'}
+                        activeMode === 'deep-think' ? 'Deep thinking...' :
+                          activeMode === 'search' ? 'Searching...' : 'Thinking...'}
                     </span>
                   </div>
                 </div>
@@ -632,54 +623,49 @@ const formatDate = (date) => {
             <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
               <button
                 onClick={() => setActiveMode('chat')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'chat'
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'chat'
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 Chat
               </button>
               <button
                 onClick={() => setActiveMode('deep-think')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'deep-think'
-                    ? 'bg-purple-100 text-purple-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'deep-think'
+                  ? 'bg-purple-100 text-purple-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <Brain className="w-4 h-4" />
                 Deep Think
               </button>
               <button
                 onClick={() => setActiveMode('search')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'search'
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'search'
+                  ? 'bg-green-100 text-green-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <Search className="w-4 h-4" />
                 Search
               </button>
               <button
                 onClick={() => setActiveMode('image')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  activeMode === 'image'
-                    ? 'bg-orange-100 text-orange-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'image'
+                  ? 'bg-orange-100 text-orange-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <Image className="w-4 h-4" />
                 Text to Image
               </button>
               <button
                 onClick={() => setShowFilterPanel(true)}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  merchantProfile.merchantType
-                    ? 'bg-yellow-100 text-yellow-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${merchantProfile.merchantType
+                  ? 'bg-yellow-100 text-yellow-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <ShoppingBag className="w-4 h-4" />
                 {merchantProfile.merchantType ? 'Merchant' : 'Business Profile'}
@@ -727,9 +713,9 @@ const formatDate = (date) => {
                   onKeyDown={handleKeyDown}
                   placeholder={
                     activeMode === 'image' ? 'Describe the image you want to generate...' :
-                    activeMode === 'deep-think' ? 'Ask me to think deeply about...' :
-                    activeMode === 'search' ? 'What would you like to search for?' :
-                    'Message HEX...'
+                      activeMode === 'deep-think' ? 'Ask me to think deeply about...' :
+                        activeMode === 'search' ? 'What would you like to search for?' :
+                          'Message HEX...'
                   }
                   rows="1"
                   className="flex-1 bg-transparent border-0 resize-none max-h-[200px] focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-400 p-2"
@@ -737,22 +723,20 @@ const formatDate = (date) => {
                 <button
                   type="button"
                   onClick={toggleRecording}
-                  className={`p-2 rounded-lg mr-2 ${
-                    isRecording
-                      ? 'bg-red-100 text-red-600 animate-pulse'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`p-2 rounded-lg mr-2 ${isRecording
+                    ? 'bg-red-100 text-red-600 animate-pulse'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
                 <button
                   type="submit"
                   disabled={!input.trim() || loading}
-                  className={`p-2 rounded-lg ${
-                    input.trim()
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-100 text-gray-400'
-                  } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`p-2 rounded-lg ${input.trim()
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-100 text-gray-400'
+                    } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -767,318 +751,318 @@ const formatDate = (date) => {
       </div>
 
       {/* Merchant Profile Panel */}
-        {showFilterPanel && (
-          <div className="fixed right-0 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] flex flex-col">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Store className="w-5 h-5 text-yellow-600" />
-                  Merchant Profile & Insights Configuration
-                </h2>
-                <button
-                  onClick={() => setShowFilterPanel(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ×
-                </button>
-              </div>
+      {showFilterPanel && (
+        <div className="fixed right-0 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Store className="w-5 h-5 text-yellow-600" />
+                Merchant Profile & Insights Configuration
+              </h2>
+              <button
+                onClick={() => setShowFilterPanel(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
 
-              <div className="flex-1 overflow-y-auto pr-2">
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  setShowFilterPanel(false);
-                }}>
-                  <div className="space-y-4">
-                    {/* Business Profile Section */}
-                    <div className="border-b pb-4">
-                      <h3 className="font-medium text-gray-800 mb-3">Business Profile</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Business Type
-                          </label>
-                          <select
-                            value={merchantProfile.merchantType}
-                            onChange={(e) => setMerchantProfile(prev => ({
-                              ...prev,
-                              merchantType: e.target.value
-                            }))}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="">Select Business Type</option>
-                            <option value="restaurant">Restaurant/Food Service</option>
-                            <option value="retail">Retail Store</option>
-                            <option value="service">Service Business</option>
-                            <option value="ecommerce">E-commerce</option>
-                            <option value="grocery">Grocery/Convenience</option>
-                          </select>
-                        </div>
+            <div className="flex-1 overflow-y-auto pr-2">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                setShowFilterPanel(false);
+              }}>
+                <div className="space-y-4">
+                  {/* Business Profile Section */}
+                  <div className="border-b pb-4">
+                    <h3 className="font-medium text-gray-800 mb-3">Business Profile</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Business Type
+                        </label>
+                        <select
+                          value={merchantProfile.merchantType}
+                          onChange={(e) => setMerchantProfile(prev => ({
+                            ...prev,
+                            merchantType: e.target.value
+                          }))}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select Business Type</option>
+                          <option value="restaurant">Restaurant/Food Service</option>
+                          <option value="retail">Retail Store</option>
+                          <option value="service">Service Business</option>
+                          <option value="ecommerce">E-commerce</option>
+                          <option value="grocery">Grocery/Convenience</option>
+                        </select>
+                      </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Main Product Categories
-                          </label>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Main Product Categories
+                        </label>
+                        <input
+                          type="text"
+                          value={merchantProfile.productType}
+                          onChange={(e) => setMerchantProfile(prev => ({
+                            ...prev,
+                            productType: e.target.value
+                          }))}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          placeholder="e.g. fast food, electronics, beauty products"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Business Size
+                        </label>
+                        <select
+                          value={merchantProfile.businessSize}
+                          onChange={(e) => setMerchantProfile(prev => ({
+                            ...prev,
+                            businessSize: e.target.value
+                          }))}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select Size</option>
+                          <option value="micro">Micro (1 employee)</option>
+                          <option value="small">Small (2-10 employees)</option>
+                          <option value="medium">Medium (11-50 employees)</option>
+                          <option value="large">Large (51+ employees)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location & Market Section */}
+                  <div className="border-b pb-4">
+                    <h3 className="font-medium text-gray-800 mb-3">Location & Market</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Market Type
+                        </label>
+                        <select
+                          value={merchantProfile.location.marketType}
+                          onChange={(e) => setMerchantProfile(prev => ({
+                            ...prev,
+                            location: { ...prev.location, marketType: e.target.value }
+                          }))}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select Market Type</option>
+                          <option value="urban">Urban City Center</option>
+                          <option value="suburban">Suburban Area</option>
+                          <option value="rural">Rural Area</option>
+                          <option value="tourist">Tourist Area</option>
+                          <option value="transport">Transport Hub</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Country/Region
+                        </label>
+                        <select
+                          value={merchantProfile.location.region}
+                          onChange={(e) => setMerchantProfile(prev => ({
+                            ...prev,
+                            location: { ...prev.location, region: e.target.value }
+                          }))}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select Country</option>
+                          <option value="SG">Singapore</option>
+                          <option value="MY">Malaysia</option>
+                          <option value="ID">Indonesia</option>
+                          <option value="TH">Thailand</option>
+                          <option value="VN">Vietnam</option>
+                          <option value="PH">Philippines</option>
+                          <option value="KH">Cambodia</option>
+                          <option value="MM">Myanmar</option>
+                          <option value="LA">Laos</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Business Challenges Section */}
+                  <div className="border-b pb-4">
+                    <h3 className="font-medium text-gray-800 mb-3">Business Focus Areas</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        'Sales growth',
+                        'Customer retention',
+                        'Marketing effectiveness',
+                        'Inventory management',
+                        'Staff productivity',
+                        'Cost reduction',
+                        'Digital transformation',
+                        'Delivery optimization',
+                        'Menu/pricing strategy',
+                        'Competitive positioning'
+                      ].map(challenge => (
+                        <label key={challenge} className="flex items-center text-sm">
                           <input
-                            type="text"
-                            value={merchantProfile.productType}
-                            onChange={(e) => setMerchantProfile(prev => ({
-                              ...prev,
-                              productType: e.target.value
-                            }))}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            placeholder="e.g. fast food, electronics, beauty products"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Business Size
-                          </label>
-                          <select
-                            value={merchantProfile.businessSize}
-                            onChange={(e) => setMerchantProfile(prev => ({
-                              ...prev,
-                              businessSize: e.target.value
-                            }))}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="">Select Size</option>
-                            <option value="micro">Micro (1 employee)</option>
-                            <option value="small">Small (2-10 employees)</option>
-                            <option value="medium">Medium (11-50 employees)</option>
-                            <option value="large">Large (51+ employees)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Location & Market Section */}
-                    <div className="border-b pb-4">
-                      <h3 className="font-medium text-gray-800 mb-3">Location & Market</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Market Type
-                          </label>
-                          <select
-                            value={merchantProfile.location.marketType}
-                            onChange={(e) => setMerchantProfile(prev => ({
-                              ...prev,
-                              location: { ...prev.location, marketType: e.target.value }
-                            }))}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="">Select Market Type</option>
-                            <option value="urban">Urban City Center</option>
-                            <option value="suburban">Suburban Area</option>
-                            <option value="rural">Rural Area</option>
-                            <option value="tourist">Tourist Area</option>
-                            <option value="transport">Transport Hub</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Country/Region
-                          </label>
-                          <select
-                            value={merchantProfile.location.region}
-                            onChange={(e) => setMerchantProfile(prev => ({
-                              ...prev,
-                              location: { ...prev.location, region: e.target.value }
-                            }))}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="">Select Country</option>
-                            <option value="SG">Singapore</option>
-                            <option value="MY">Malaysia</option>
-                            <option value="ID">Indonesia</option>
-                            <option value="TH">Thailand</option>
-                            <option value="VN">Vietnam</option>
-                            <option value="PH">Philippines</option>
-                            <option value="KH">Cambodia</option>
-                            <option value="MM">Myanmar</option>
-                            <option value="LA">Laos</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Business Challenges Section */}
-                    <div className="border-b pb-4">
-                      <h3 className="font-medium text-gray-800 mb-3">Business Focus Areas</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          'Sales growth',
-                          'Customer retention',
-                          'Marketing effectiveness',
-                          'Inventory management',
-                          'Staff productivity',
-                          'Cost reduction',
-                          'Digital transformation',
-                          'Delivery optimization',
-                          'Menu/pricing strategy',
-                          'Competitive positioning'
-                        ].map(challenge => (
-                          <label key={challenge} className="flex items-center text-sm">
-                            <input
-                              type="checkbox"
-                              checked={merchantProfile.challenges.includes(challenge)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  if (merchantProfile.challenges.length < 3) {
-                                    setMerchantProfile(prev => ({
-                                      ...prev,
-                                      challenges: [...prev.challenges, challenge]
-                                    }));
-                                  }
-                                } else {
+                            type="checkbox"
+                            checked={merchantProfile.challenges.includes(challenge)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                if (merchantProfile.challenges.length < 3) {
                                   setMerchantProfile(prev => ({
                                     ...prev,
-                                    challenges: prev.challenges.filter(c => c !== challenge)
+                                    challenges: [...prev.challenges, challenge]
                                   }));
                                 }
-                              }}
+                              } else {
+                                setMerchantProfile(prev => ({
+                                  ...prev,
+                                  challenges: prev.challenges.filter(c => c !== challenge)
+                                }));
+                              }
+                            }}
+                            className="mr-2"
+                          />
+                          {challenge}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Communication Preferences */}
+                  <div className="border-b pb-4">
+                    <h3 className="font-medium text-gray-800 mb-3">Communication Preferences</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Primary Language
+                        </label>
+                        <select
+                          value={merchantProfile.language}
+                          onChange={(e) => setMerchantProfile(prev => ({
+                            ...prev,
+                            language: e.target.value
+                          }))}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="en">English</option>
+                          <option value="zh">Chinese (中文)</option>
+                          <option value="ms">Malay (Bahasa Melayu)</option>
+                          <option value="id">Indonesian (Bahasa Indonesia)</option>
+                          <option value="th">Thai (ไทย)</option>
+                          <option value="vi">Vietnamese (Tiếng Việt)</option>
+                          <option value="tl">Filipino (Tagalog)</option>
+                          <option value="km">Khmer (ភាសាខ្មែរ)</option>
+                          <option value="lo">Lao (ພາສາລາວ)</option>
+                          <option value="my">Burmese (မြန်မာဘာသာ)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Preferred Insight Format
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="insightFormat"
+                              checked={merchantProfile.insightFormat === 'text'}
+                              onChange={() => setMerchantProfile(prev => ({
+                                ...prev,
+                                insightFormat: 'text'
+                              }))}
                               className="mr-2"
                             />
-                            {challenge}
+                            Text Summary
                           </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Communication Preferences */}
-                    <div className="border-b pb-4">
-                      <h3 className="font-medium text-gray-800 mb-3">Communication Preferences</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Primary Language
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="insightFormat"
+                              checked={merchantProfile.insightFormat === 'visual'}
+                              onChange={() => setMerchantProfile(prev => ({
+                                ...prev,
+                                insightFormat: 'visual'
+                              }))}
+                              className="mr-2"
+                            />
+                            Visual Charts
                           </label>
-                          <select
-                            value={merchantProfile.language}
-                            onChange={(e) => setMerchantProfile(prev => ({
-                              ...prev,
-                              language: e.target.value
-                            }))}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="en">English</option>
-                            <option value="zh">Chinese (中文)</option>
-                            <option value="ms">Malay (Bahasa Melayu)</option>
-                            <option value="id">Indonesian (Bahasa Indonesia)</option>
-                            <option value="th">Thai (ไทย)</option>
-                            <option value="vi">Vietnamese (Tiếng Việt)</option>
-                            <option value="tl">Filipino (Tagalog)</option>
-                            <option value="km">Khmer (ភាសាខ្មែរ)</option>
-                            <option value="lo">Lao (ພາສາລາວ)</option>
-                            <option value="my">Burmese (မြန်မာဘာသာ)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Preferred Insight Format
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="insightFormat"
+                              checked={merchantProfile.insightFormat === 'both'}
+                              onChange={() => setMerchantProfile(prev => ({
+                                ...prev,
+                                insightFormat: 'both'
+                              }))}
+                              className="mr-2"
+                            />
+                            Both Text and Visuals
                           </label>
-                          <div className="space-y-2">
-                            <label className="flex items-center">
-                              <input
-                                type="radio"
-                                name="insightFormat"
-                                checked={merchantProfile.insightFormat === 'text'}
-                                onChange={() => setMerchantProfile(prev => ({
-                                  ...prev,
-                                  insightFormat: 'text'
-                                }))}
-                                className="mr-2"
-                              />
-                              Text Summary
-                            </label>
-                            <label className="flex items-center">
-                              <input
-                                type="radio"
-                                name="insightFormat"
-                                checked={merchantProfile.insightFormat === 'visual'}
-                                onChange={() => setMerchantProfile(prev => ({
-                                  ...prev,
-                                  insightFormat: 'visual'
-                                }))}
-                                className="mr-2"
-                              />
-                              Visual Charts
-                            </label>
-                            <label className="flex items-center">
-                              <input
-                                type="radio"
-                                name="insightFormat"
-                                checked={merchantProfile.insightFormat === 'both'}
-                                onChange={() => setMerchantProfile(prev => ({
-                                  ...prev,
-                                  insightFormat: 'both'
-                                }))}
-                                className="mr-2"
-                              />
-                              Both Text and Visuals
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Data Integration */}
-                    <div>
-                      <h3 className="font-medium text-gray-800 mb-3">Data Integration</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Connect Transaction Data
-                          </label>
-                          <button
-                            type="button"
-                            className="w-full p-2 border border-gray-300 rounded-md text-left flex justify-between items-center"
-                          >
-                            <span>Upload CSV or Connect API</span>
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Inventory System Integration
-                          </label>
-                          <select
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="">Select Inventory System</option>
-                            <option value="grab">Grab Inventory Manager</option>
-                            <option value="manual">Manual Entry</option>
-                            <option value="other">Other System (Specify)</option>
-                          </select>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-6 flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowFilterPanel(false)}
-                      className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
-                    >
-                      Save Configuration
-                    </button>
+                  {/* Data Integration */}
+                  <div>
+                    <h3 className="font-medium text-gray-800 mb-3">Data Integration</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Connect Transaction Data
+                        </label>
+                        <button
+                          type="button"
+                          className="w-full p-2 border border-gray-300 rounded-md text-left flex justify-between items-center"
+                        >
+                          <span>Upload CSV or Connect API</span>
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Inventory System Integration
+                        </label>
+                        <select
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select Inventory System</option>
+                          <option value="grab">Grab Inventory Manager</option>
+                          <option value="manual">Manual Entry</option>
+                          <option value="other">Other System (Specify)</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
-                </form>
-              </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFilterPanel(false)}
+                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                  >
+                    Save Configuration
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 }
