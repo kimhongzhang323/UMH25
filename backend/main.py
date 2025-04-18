@@ -54,7 +54,7 @@ class DocumentStore:
         self.documents = []
         self.embeddings = None
         self.document_ids = []
-    
+
     def add_document(self, document: Document):
         self.documents.append(document)
         text_embedding = embedding_model.encode(document.text)
@@ -63,13 +63,13 @@ class DocumentStore:
         else:
             self.embeddings = np.vstack([self.embeddings, text_embedding])
         self.document_ids.append(document.metadata.get("id", len(self.documents)))
-    
+
     def retrieve_relevant(self, query: str, top_k: int = 3) -> List[str]:
         query_embedding = embedding_model.encode(query).reshape(1, -1)
         similarities = cosine_similarity(query_embedding, self.embeddings)[0]
         top_indices = similarities.argsort()[-top_k:][::-1]
         return [self.documents[i].text for i in top_indices]
-    
+
     def clear_csv_documents(self):
         """Remove all documents that came from CSV sources"""
         indices_to_keep = [i for i, doc in enumerate(self.documents) if doc.source != "csv"]
@@ -86,7 +86,7 @@ def process_csv_row(row: dict, config: CSVConfig) -> Document:
     """Convert a CSV row into a Document"""
     # Combine specified text columns
     text = " ".join(str(row[col]) for col in config.text_columns if col in row)
-    
+
     # Extract metadata
     metadata = {}
     if config.id_column and config.id_column in row:
@@ -95,13 +95,23 @@ def process_csv_row(row: dict, config: CSVConfig) -> Document:
         for col in config.metadata_columns:
             if col in row:
                 metadata[col] = row[col]
-    
+
     return Document(text=text, metadata=metadata, source="csv")
 
 def generate_prompt(question: str, context: List[str] = None) -> str:
     if context:
         context_str = "\n".join([f"Context {i+1}: {c}" for i, c in enumerate(context)])
         return f"""Answer the following question based on the provided context.
+
+        {context_str}
+
+        Question: {question}
+
+        Answer:"""
+    else:
+        return f"""Answer the following question.
+
+        Question: {question}
         
         {context_str}
         
@@ -121,10 +131,10 @@ async def query_llama(query: Query):
         # Retrieve relevant documents if no context provided and use_csv_context is True
         if not query.context and query.use_csv_context:
             query.context = document_store.retrieve_relevant(query.question)
-        
+
         # Generate prompt
         prompt = generate_prompt(query.question, query.context)
-        
+
         # Tokenize and generate
         inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)
         outputs = model.generate(
@@ -133,7 +143,11 @@ async def query_llama(query: Query):
             temperature=query.temperature,
             do_sample=True
         )
-        
+
+        # Decode and clean up response
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        response = response.split("Answer:")[-1].strip()
+
         # Decode and clean up response
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         response = response.split("Answer:")[-1].strip()
@@ -160,7 +174,14 @@ async def upload_csv(
             id_column=id_column,
             metadata_columns=[col.strip() for col in metadata_columns.split(",")] if metadata_columns else None
         )
-        
+
+        # Clear existing CSV documents
+        document_store.clear_csv_documents()
+
+        # Process CSV in chunks for memory efficiency
+        contents = await file.read()
+        csv_text = io.StringIO(contents.decode('utf-8'))
+
         # Clear existing CSV documents
         document_store.clear_csv_documents()
         
@@ -168,18 +189,19 @@ async def upload_csv(
         contents = await file.read()
         csv_text = io.StringIO(contents.decode('utf-8'))
         
+
         # Detect if file has header
         sniffer = csv.Sniffer()
         has_header = sniffer.has_header(csv_text.read(1024))
         csv_text.seek(0)
-        
+
         # Read CSV
         df_chunks = pd.read_csv(
             csv_text,
             chunksize=CSV_CHUNK_SIZE,
             header=0 if has_header else None
         )
-        
+
         total_rows = 0
         for chunk in df_chunks:
             # Convert each row to a document
@@ -187,7 +209,7 @@ async def upload_csv(
                 document = process_csv_row(row.to_dict(), config)
                 document_store.add_document(document)
             total_rows += len(chunk)
-        
+
         return {
             "status": "success",
             "message": f"CSV processed successfully. Added {total_rows} documents.",
