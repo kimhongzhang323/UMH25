@@ -110,4 +110,7 @@ async def get_chats():
 @router.post("/send-payload")
 async def send_payload(payload: dict):
     print("Payload received")
-    return {"status" : "success"}
+    return {"status" : "success",
+            "message" : "Payload received successfully",
+            "chatId" : payload["chatId"]}
+            

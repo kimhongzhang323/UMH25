@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FiSend, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle, FiX } from 'react-icons/fi';
 
 // --- Configuration ---
-const API_BASE_URL = "http://127.0.0.1:8000"; // Replace with your actual API base URL
-const CHATS_API_URL = `${API_BASE_URL}/customer-service/chats`;
-const AI_REPLY_API_URL = `${API_BASE_URL}/send-payload`; // Replace with your actual AI endpoint
+const API_BASE_URL = "http://127.0.0.1:8000/customer-service"; // Replace with your actual API base URL
+const CHATS_API_URL = `${API_BASE_URL}/chats`;
+const SEND_PAYLOAD_URL = `${API_BASE_URL}/send-payload`; // Replace with your actual AI endpoint
 
 // --- Mock Data (Replace with API data or remove if fetching all data) ---
 const commonResponseTemplates = {
@@ -136,46 +136,42 @@ const CustomerServicePage = () => {
       settings: { tone: aiTone, speed: aiResponseSpeed } // Include settings
     };
 
-          // Mock AI response for testing
-    // try {
-    //   const response = await fetch(AI_REPLY_API_URL, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(payload),
-    //   });
+    try {
+      const response = await fetch(SEND_PAYLOAD_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    //   if (!response.ok) {
-    //       const errorData = await response.text(); // Try to get error details
-    //       throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
-    //   }
+      if (!response.ok) {
+          const errorData = await response.text(); // Try to get error details
+          throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
+      }
 
-    //   const result = await response.json();
+      const result = await response.json();
 
-      // Add the AI's response message to the chat
-    //   if (result.aiResponse && result.aiResponse.text) {
-    //     addMessageToChat(result.chatId, {
-    //       sender: result.aiResponse.sender || 'system', // Default sender if not provided
-    //       text: result.aiResponse.text,
-    //       time: result.aiResponse.time || new Date().toISOString(),
-    //       aiGenerated: true
-    //     });
-    //   } else {
-    //       console.warn("AI response received but no text content found:", result);
-    //   }
-    // } catch (error) {
-    //   console.error("Error triggering AI response:", error);
-    //   // TODO: Show error in UI (e.g., add an error message to the chat)
-    //   addMessageToChat(chatId, {
-    //       sender: 'system',
-    //       text: `⚠️ AI Error: ${error.message}`,
-    //       time: new Date().toISOString(),
-    //       aiGenerated: false, // Mark as system error, not AI response
-    //       isError: true // Custom flag for styling?
-    //   });
-    // } finally {
-    //   // Ensure typing indicator is turned off for this chat
-    //   setIsAiTyping(prev => ({ ...prev, [chatId]: false }));
-    // }
+      if (result.status == "success") {
+        addMessageToChat(result.chatId, {
+          sender: 'system',
+          text: result.message,
+          aiGenerated: true
+        });
+      } else {
+          console.warn("AI response received but no text content found:", result);
+      }
+    } catch (error) {
+      console.error("Error triggering AI response:", error);
+      // TODO: Show error in UI (e.g., add an error message to the chat)
+      addMessageToChat(chatId, {
+          sender: 'system',
+          text: `⚠️ AI Error: ${error.message}`,
+          aiGenerated: false, // Mark as system error, not AI response
+          isError: true // Custom flag for styling?
+      });
+    } finally {
+      // Ensure typing indicator is turned off for this chat
+      setIsAiTyping(prev => ({ ...prev, [chatId]: false }));
+    }
   }, [chats, autoReplyEnabled, aiTone, aiResponseSpeed, isAiTyping, addMessageToChat]); // Dependencies
 
   // Send a message from the merchant
@@ -282,12 +278,10 @@ const CustomerServicePage = () => {
 
   // Use a common response template
   const handleCommonResponseClick = (text) => {
-    setCurrentMessage(prev => prev ? `${prev} ${text}` : text); // Append or set
+    setCurrentMessage(prev => text); // set
     setIsMobileSettingsOpen(false); // Close settings panel on mobile after selection
-    // Optional: Focus the input field after setting text
-    // document.querySelector('input[type="text"]')?.focus();
+    document.querySelector('input[type="text"]')?.focus();
   };
-
 
   // --- JSX Rendering ---
 
