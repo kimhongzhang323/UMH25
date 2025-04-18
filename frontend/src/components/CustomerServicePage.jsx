@@ -51,12 +51,12 @@ const CustomerServicePage = () => {
       .then(data => {
         // Ensure data is an array, add basic IDs if missing from backend
         const processedData = (data || []).map((chat, index) => ({
-           ...chat,
-           id: chat.id || `chat-${index}-${Date.now()}`, // Basic fallback ID
-           messages: (chat.messages || []).map((msg, msgIndex) => ({
-               ...msg,
-               id: msg.id || `msg-${chat.id || index}-${msgIndex}-${Date.now()}` // Basic fallback ID
-           }))
+          ...chat,
+          id: chat.id || `chat-${index}-${Date.now()}`, // Basic fallback ID
+          messages: (chat.messages || []).map((msg, msgIndex) => ({
+            ...msg,
+            id: msg.id || `msg-${chat.id || index}-${msgIndex}-${Date.now()}` // Basic fallback ID
+          }))
         }));
         setChats(processedData);
         // Automatically select the first chat if available
@@ -144,30 +144,38 @@ const CustomerServicePage = () => {
       });
 
       if (!response.ok) {
-          const errorData = await response.text(); // Try to get error details
-          throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
+        const errorData = await response.text(); // Try to get error details
+        throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
       }
 
       const result = await response.json();
 
-      if (result.status == "success") {
+      if (result.status == "success" && result.message) { // Ensure message exists
         addMessageToChat(result.chatId, {
-          sender: 'system',
+          sender: 'system', // Or 'ai' or 'merchant-ai'
           text: result.message,
           aiGenerated: true,
-          time: result.time
+          time: new Date().toISOString() // Use current time if backend doesn't provide
         });
       } else {
-          console.warn("AI response received but no text content found:", result);
+        console.warn("AI response received but no text content found or status not success:", result);
+        // Optionally add a system message indicating no AI response
+        // addMessageToChat(chatId, {
+        //   sender: 'system',
+        //   text: 'AI did not generate a response.',
+        //   time: new Date().toISOString(),
+        //   isInfo: true // Custom flag
+        // });
       }
     } catch (error) {
       console.error("Error triggering AI response:", error);
-      // TODO: Show error in UI (e.g., add an error message to the chat)
+      // Show error in UI
       addMessageToChat(chatId, {
-          sender: 'system',
-          text: `⚠️ AI Error: ${error.message}`,
-          aiGenerated: false, // Mark as system error, not AI response
-          isError: true // Custom flag for styling?
+        sender: 'system',
+        text: `⚠️ AI Error: ${error.message}`,
+        aiGenerated: false, // Mark as system error, not AI response
+        time: new Date().toISOString(),
+        isError: true // Custom flag for styling?
       });
     } finally {
       // Ensure typing indicator is turned off for this chat
@@ -186,55 +194,70 @@ const CustomerServicePage = () => {
       // ID will be added by addMessageToChat
       sender: 'merchant',
       text: currentMessage,
-      time: new Date.now().toISOString(),
+      time: new Date().toISOString(), // Use current time for sent message
       read: true, // Merchant messages are instantly "read" by them
       aiGenerated: false
     };
 
+    const messageTextToSend = currentMessage; // Store before clearing
+    setCurrentMessage(''); // Clear input immediately
+
     // Optimistically update UI
     addMessageToChat(activeChatId, newMerchantMessage);
-    const messageTextToSend = currentMessage; // Store before clearing
-    setCurrentMessage('');
+
 
     // --- Simulate/Actual Backend Send ---
     // Replace this promise with your actual API call to send the merchant's message
     new Promise((resolve, reject) => {
-        fetch(`${API_BASE_URL}/customer-service/chats/${activeChatId}/messages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', /* Add Auth headers */ },
-            body: JSON.stringify({ text: messageTextToSend, sender: 'merchant' })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to send message');
-            return response.json();
-        })
-        .then(resolve) // Resolve on success
-        .catch(reject); // Reject on failure
+      // --- Actual Backend Call (Example Structure) ---
+      /*
+      fetch(`${API_BASE_URL}/customer-service/chats/${activeChatId}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', // Add Auth headers if needed },
+          body: JSON.stringify({ text: messageTextToSend, sender: 'merchant' })
+      })
+      .then(response => {
+          if (!response.ok) throw new Error(`Failed to send message: ${response.statusText}`);
+          return response.json(); // Assuming backend returns confirmation or the saved message
+      })
+      .then(resolve) // Resolve on success
+      .catch(reject); // Reject on failure
+      */
 
-        // --- Simulation ---
-        console.log("Simulating sending merchant message to backend:", messageTextToSend);
-        setTimeout(resolve, 300); // Simulate network delay
-        // --- End Simulation ---
+      // --- Simulation ---
+      console.log("Simulating sending merchant message to backend:", messageTextToSend);
+      setTimeout(() => {
+        console.log("Merchant message 'sent' successfully (simulated).");
+        resolve(); // Simulate success
+        // You might receive the saved message with a backend ID here
+        // resolve({ id: 'backend-generated-id', ...newMerchantMessage });
+      }, 300); // Simulate network delay
+      // --- End Simulation ---
     })
-    .then(() => {
-      console.log("Merchant message 'sent' successfully (simulated).");
-      // Decide *when* to trigger AI after a merchant message.
-      // Option A: Trigger immediately (like a suggestion/follow-up based on merchant msg)
-      // if (autoReplyEnabled) { triggerAIResponse(activeChatId); }
+      .then(() => {
+        // After successfully sending the merchant message (or simulating it)
+        // Decide *when* to trigger AI after a merchant message.
+        // Option A: Trigger AI to *potentially* suggest a follow-up based on merchant's message
+        // if (autoReplyEnabled) { triggerAIResponse(activeChatId); }
 
-      // Option B: Don't trigger here. Let the AI only respond to the *next* customer message.
-      // (This is often preferred unless the AI is meant to assist the merchant directly).
-    })
-    .catch(err => {
-      console.error("Failed to send merchant message:", err);
-      // TODO: Revert optimistic update or show error in UI?
-      // Example: Add error indicator to the message, or re-add text to input
-       setCurrentMessage(messageTextToSend); // Put message back in input on failure
-       // Or find the message added optimistically and mark it as failed
-    })
-    .finally(() => {
-      setIsSending(false); // Re-enable input field
-    });
+        // Option B (More common): AI only responds to customer messages.
+        // No AI trigger needed here. The triggerAIResponse is mainly called
+        // when a new customer message arrives (simulated or from websocket/polling).
+        // In this app, it's triggered when selecting a potentially unread chat.
+
+      })
+      .catch(err => {
+        console.error("Failed to send merchant message:", err);
+        // TODO: Handle failure. Could revert the optimistic update,
+        // show an error indicator on the message, or put text back in input.
+        // Example: Put message back in input on failure (simple)
+        // setCurrentMessage(messageTextToSend);
+        // Example: Find the message and mark it as failed (more complex)
+        // find and update message in chats state
+      })
+      .finally(() => {
+        setIsSending(false); // Re-enable input field
+      });
   };
 
   // Toggle AI auto-reply setting
@@ -244,7 +267,7 @@ const CustomerServicePage = () => {
   const handleSelectChat = (chatId) => {
     if (chatId === activeChatId) return; // Don't re-process if already active
 
-    const previouslySelectedChat = getActiveChat(); // Get data before changing state
+    // const previouslySelectedChat = getActiveChat(); // Not strictly needed for this logic
     const chatToSelect = chats.find(c => c.id === chatId);
 
     setActiveChatId(chatId);
@@ -255,14 +278,20 @@ const CustomerServicePage = () => {
     ));
 
     // Check if AI should respond to the *last customer message* in the *newly selected* chat
-    if (chatToSelect && chatToSelect.messages?.length > 0 && autoReplyEnabled) {
+    // This might be useful if auto-reply was off or failed previously.
+    // More typically, AI responses happen when a *new* customer message arrives.
+    // The current implementation in useEffect already triggers AI for the first chat if applicable.
+    // This click handler could also trigger it if needed, but let's rely on the effect for now
+    // or integrate a websocket/polling mechanism to detect new customer messages.
+
+    // Minimal logic here: if selecting a chat with a customer message and auto-reply is on,
+    // and AI isn't already typing for *this* chat, consider triggering.
+    // The useEffect (scroll) might already handle this if selecting makes new content appear,
+    // but if the chat was just waiting for a response, this might be a place to trigger.
+    if (chatToSelect && chatToSelect.messages?.length > 0 && autoReplyEnabled && !isAiTyping[chatId]) {
       const lastMsg = chatToSelect.messages[chatToSelect.messages.length - 1];
-      // Trigger only if:
-      // 1. Last message is from the customer.
-      // 2. The chat *was* marked as unread before selection (implies new customer activity).
-      // 3. AI isn't already typing for this chat.
-      if (lastMsg.sender === 'customer' && chatToSelect.unread && !isAiTyping[chatId]) {
-         // We use chatToSelect.unread here because setChats update might not be immediate
+      if (lastMsg.sender === 'customer') {
+        console.log(`Triggering AI for chat ${chatId} upon selection.`);
         triggerAIResponse(chatId);
       }
     }
@@ -279,9 +308,13 @@ const CustomerServicePage = () => {
 
   // Use a common response template
   const handleCommonResponseClick = (text) => {
-    setCurrentMessage(prev => text); // set
+    setCurrentMessage(text); // Set, don't append for common responses
     setIsMobileSettingsOpen(false); // Close settings panel on mobile after selection
-    document.querySelector('input[type="text"]')?.focus();
+    // Need to ensure the input is focused after setting the value
+    // Using setTimeout to allow state update to potentially re-render input
+    setTimeout(() => {
+      document.querySelector('input[type="text"]')?.focus();
+    }, 0);
   };
 
   // --- JSX Rendering ---
@@ -303,8 +336,8 @@ const CustomerServicePage = () => {
         <h2 className="text-xl font-semibold mb-2">Error Loading Chats</h2>
         <p className="text-center max-w-md">{fetchError}</p>
         <button
-           onClick={() => window.location.reload()} // Simple reload retry
-           className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          onClick={() => window.location.reload()} // Simple reload retry
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Retry
         </button>
@@ -316,10 +349,12 @@ const CustomerServicePage = () => {
   const currentActiveChatData = getActiveChat(); // Get the data for the active chat
 
   return (
-    <div className="flex h-[calc(100vh-65px)] bg-gray-50 text-gray-900 relative font-sans box-border "> {/* Added overflow-hidden */}
+    // Added 'lg:overflow-hidden' potentially useful if content pushes boundaries before xl
+    <div className="flex h-[calc(100vh-65px)] bg-gray-50 text-gray-900 relative font-sans box-border overflow-hidden"> {/* Added overflow-hidden */}
 
       {/* --- Sidebar (Chat List) --- */}
-      <div className="w-80 border-r border-gray-200 bg-white flex flex-col flex-shrink-0">
+      {/* MODIFIED: Added hidden, xl:flex, xl:flex-col, xl:flex-shrink-0, removed initial w-1/4 */}
+      <div className="hidden xl:flex xl:flex-col xl:flex-shrink-0 xl:w-1/4 border-r border-gray-200 bg-white">
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 flex-shrink-0"> {/* Ensure header doesn't shrink */}
           <h2 className="text-xl font-semibold text-gray-800">Customer Messages</h2>
@@ -330,11 +365,10 @@ const CustomerServicePage = () => {
             <button
               onClick={handleToggleAutoReply}
               title={autoReplyEnabled ? 'Disable AI Auto-Reply' : 'Enable AI Auto-Reply'}
-              className={`flex items-center text-xs sm:text-sm px-2.5 py-1 rounded-full transition-colors duration-150 ${
-                autoReplyEnabled
+              className={`flex items-center text-xs sm:text-sm px-2.5 py-1 rounded-full transition-colors duration-150 ${autoReplyEnabled
                   ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <FiMessageSquare className="mr-1" size={14} /> AI Reply {autoReplyEnabled ? 'ON' : 'OFF'}
             </button>
@@ -348,9 +382,8 @@ const CustomerServicePage = () => {
               <div
                 key={chat.id}
                 onClick={() => handleSelectChat(chat.id)}
-                className={`p-4 border-b border-gray-100 cursor-pointer transition-colors duration-100 ${
-                  activeChatId === chat.id ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
-                } ${chat.unread ? 'font-semibold' : ''}`}
+                className={`p-4 border-b border-gray-100 cursor-pointer transition-colors duration-100 ${activeChatId === chat.id ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
+                  } ${chat.unread ? 'font-semibold' : ''}`}
                 role="button"
                 tabIndex={0}
                 onKeyPress={(e) => e.key === 'Enter' && handleSelectChat(chat.id)}
@@ -373,8 +406,8 @@ const CustomerServicePage = () => {
                     <p className="text-sm text-gray-600 truncate mt-0.5">{chat.lastMessage || 'No messages yet'}</p>
                     <div className="flex items-center mt-1.5 justify-between">
                       <div className="flex items-center">
-                         <span className={`inline-block w-2 h-2 rounded-full mr-1.5 ${chat.status === 'resolved' ? 'bg-gray-400' : 'bg-green-500'}`}></span>
-                         <span className="text-xs text-gray-500 capitalize">{chat.status || 'pending'}</span>
+                        <span className={`inline-block w-2 h-2 rounded-full mr-1.5 ${chat.status === 'resolved' ? 'bg-gray-400' : 'bg-green-500'}`}></span>
+                        <span className="text-xs text-gray-500 capitalize">{chat.status || 'pending'}</span>
                       </div>
                       {chat.unread && (
                         <span className="bg-blue-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">New</span>
@@ -385,7 +418,7 @@ const CustomerServicePage = () => {
               </div>
             ))
           ) : (
-             <div className="p-4 text-center text-gray-500">No chats found.</div>
+            <div className="p-4 text-center text-gray-500">No chats found.</div>
           )}
         </div>
       </div>
@@ -439,14 +472,13 @@ const CustomerServicePage = () => {
                 {currentActiveChatData.messages?.map(message => (
                   <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-start' : 'justify-end'}`}>
                     <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-xl shadow-sm ${
-                        message.sender === 'customer'
+                      className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-xl shadow-sm ${message.sender === 'customer'
                           ? 'bg-white border border-gray-200 text-gray-800'
                           : message.aiGenerated
                             ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
                             : 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white'
-                      } ${message.isError ? 'bg-red-100 border border-red-300 text-red-800' : ''}` // Style for errors
-                     }
+                        } ${message.isError ? 'bg-red-100 border border-red-300 text-red-800' : ''}` // Style for errors
+                      }
                     >
                       <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p> {/* Allow line breaks */}
                       <div className={`flex justify-between items-center mt-1.5 pt-1 border-t ${message.sender === 'customer' ? 'border-gray-200/50' : 'border-white/20'}`}>
@@ -471,10 +503,10 @@ const CustomerServicePage = () => {
                         <span className="text-sm mr-2">AI is typing</span>
                         {/* Simple dots */}
                         <div className="typing-dots">
-                           <div className="dot !bg-white/60"></div>
-                           <div className="dot !bg-white/60"></div>
-                           <div className="dot !bg-white/60"></div>
-                         </div>
+                          <div className="dot !bg-white/60"></div>
+                          <div className="dot !bg-white/60"></div>
+                          <div className="dot !bg-white/60"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -504,7 +536,7 @@ const CustomerServicePage = () => {
                   aria-label={isSending ? 'Sending message' : 'Send message'}
                   title={isSending ? 'Sending...' : 'Send message'}
                 >
-                  {isSending ? <FiLoader className="animate-spin" size={18}/> : <FiSend size={18}/>}
+                  {isSending ? <FiLoader className="animate-spin" size={18} /> : <FiSend size={18} />}
                 </button>
               </div>
               <div className="mt-2 text-xs text-gray-500">
@@ -527,20 +559,20 @@ const CustomerServicePage = () => {
       {/* --- AI Settings Panel (Sidebar) --- */}
       {/* Added transitions and fixed positioning for mobile */}
       <div className={`
-          w-80 bg-white p-4 border-l border-gray-200 shadow-lg flex-shrink-0 flex flex-col
-          transition-transform duration-300 ease-in-out fixed top-0 right-0 h-full z-50 transform
-          xl:static xl:h-auto xl:shadow-none xl:border-l xl:z-auto xl:transform-none
-          ${isMobileSettingsOpen ? 'translate-x-0' : 'translate-x-full'} xl:translate-x-0
-        `}
+           w-80 bg-white p-4 border-l border-gray-200 shadow-lg flex-shrink-0 flex flex-col
+           transition-transform duration-300 ease-in-out fixed top-0 right-0 h-full z-50 transform
+           xl:static xl:h-auto xl:shadow-none xl:border-l xl:z-auto xl:transform-none
+           ${isMobileSettingsOpen ? 'translate-x-0' : 'translate-x-full'} xl:translate-x-0
+         `}
       >
-         {/* Close button for mobile */}
+        {/* Close button for mobile */}
         <button
-            onClick={() => setIsMobileSettingsOpen(false)}
-            className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 xl:hidden p-1"
-            aria-label="Close settings"
-            title="Close settings"
-          >
-            <FiX size={24} />
+          onClick={() => setIsMobileSettingsOpen(false)}
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 xl:hidden p-1"
+          aria-label="Close settings"
+          title="Close settings"
+        >
+          <FiX size={24} />
         </button>
 
         <h3 className={`font-medium text-lg mb-4 pt-8 xl:pt-0 flex-shrink-0`}>AI Assistant Settings</h3>
@@ -553,17 +585,17 @@ const CustomerServicePage = () => {
               <span className="text-gray-700 text-sm font-medium">Enable Auto-Reply</span>
               <div className="relative">
                 <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={autoReplyEnabled}
-                    onChange={handleToggleAutoReply}
-                    aria-labelledby="auto-reply-label"
+                  type="checkbox"
+                  className="sr-only"
+                  checked={autoReplyEnabled}
+                  onChange={handleToggleAutoReply}
+                  aria-labelledby="auto-reply-label"
                 />
                 <div className={`block w-11 h-6 rounded-full transition-colors ${autoReplyEnabled ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
                 <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoReplyEnabled ? 'transform translate-x-5' : ''}`}></div>
               </div>
             </label>
-             <p id="auto-reply-label" className="text-xs text-gray-500 mt-1">AI will attempt to respond when applicable.</p>
+            <p id="auto-reply-label" className="text-xs text-gray-500 mt-1">AI will attempt to respond when applicable.</p>
           </div>
 
           {/* Response Speed */}
@@ -574,9 +606,8 @@ const CustomerServicePage = () => {
                 <button
                   key={speed}
                   onClick={() => setAiResponseSpeed(speed)}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${
-                    aiResponseSpeed === speed ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${aiResponseSpeed === speed ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                   aria-pressed={aiResponseSpeed === speed}
                 >
                   {speed.charAt(0).toUpperCase() + speed.slice(1)}
@@ -585,8 +616,8 @@ const CustomerServicePage = () => {
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {aiResponseSpeed === 'fast' ? 'Responds immediately (may be less thoughtful).' :
-               aiResponseSpeed === 'medium' ? 'Takes a moment to craft responses.' :
-               'Takes longer for more detailed responses.'}
+                aiResponseSpeed === 'medium' ? 'Takes a moment to craft responses.' :
+                  'Takes longer for more detailed responses.'}
             </p>
           </div>
 
@@ -598,19 +629,18 @@ const CustomerServicePage = () => {
                 <button
                   key={tone}
                   onClick={() => setAiTone(tone)}
-                   className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${
-                    aiTone === tone ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${aiTone === tone ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                   aria-pressed={aiTone === tone}
                 >
                   {tone.charAt(0).toUpperCase() + tone.slice(1)}
                 </button>
               ))}
             </div>
-             <p className="text-xs text-gray-500 mt-1">
-               {aiTone === 'professional' ? 'Balanced, business-appropriate responses.' :
-               aiTone === 'friendly' ? 'Casual, conversational tone.' :
-               'Very polite and structured responses.'}
+            <p className="text-xs text-gray-500 mt-1">
+              {aiTone === 'professional' ? 'Balanced, business-appropriate responses.' :
+                aiTone === 'friendly' ? 'Casual, conversational tone.' :
+                  'Very polite and structured responses.'}
             </p>
           </div>
 
@@ -636,42 +666,30 @@ const CustomerServicePage = () => {
       {/* Background Overlay for mobile settings */}
       {isMobileSettingsOpen && (
         <div
-            onClick={() => setIsMobileSettingsOpen(false)}
-            className="fixed inset-0 bg-black/30 z-40 xl:hidden"
-            aria-hidden="true"
+          onClick={() => setIsMobileSettingsOpen(false)}
+          className="fixed inset-0 bg-black/30 z-40 xl:hidden"
+          aria-hidden="true"
         ></div>
       )}
 
-      {/* --- Global Styles/Animations (Optional) --- */}
-      <style jsx global>{`
-        /* Improve scrollbar styling (optional) */
-        ::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #ccc;
-          border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #aaa;
-        }
+      {/* You might want a button to toggle the sidebar on smaller screens */}
+      {/* Example (place in main chat header): */}
+      {/* {!activeChatId && ( // Only show if no chat is active on mobile, preventing overlap
+            <button
+                onClick={() => {
+                    // Logic to show the sidebar on small screens
+                    // This requires additional state to control mobile sidebar visibility
+                    // For now, the sidebar is just hidden below XL
+                    alert("Toggling mobile sidebar requires extra state/logic");
+                }}
+                className="p-2 rounded-lg hover:bg-gray-200 block xl:hidden"
+                aria-label="Show Chats"
+                title="Show Chats"
+            >
+                <FiMessageSquare size={20} />
+            </button>
+        )} */}
 
-        /* Typing Animation */
-        .typing-dots { display: flex; align-items: center; height: 17px; }
-        .typing-dots .dot { width: 6px; height: 6px; margin: 0 2px; background-color: #6b7280; /* Default, overridden by !bg-white/60 */ border-radius: 50%; opacity: 0.4; animation: typing-dots-animation 1.4s infinite ease-in-out; }
-        .typing-dots .dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dots .dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typing-dots-animation {
-          0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
-          30% { opacity: 1; transform: translateY(-3px); }
-        }
-      `}</style>
     </div>
   );
 };
