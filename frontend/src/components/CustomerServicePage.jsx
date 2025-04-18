@@ -154,7 +154,8 @@ const CustomerServicePage = () => {
         addMessageToChat(result.chatId, {
           sender: 'system',
           text: result.message,
-          aiGenerated: true
+          aiGenerated: true,
+          time: result.time
         });
       } else {
           console.warn("AI response received but no text content found:", result);

@@ -110,7 +110,14 @@ async def get_chats():
 @router.post("/send-payload")
 async def send_payload(payload: dict):
     print("Payload received")
+    chat_id = payload.get("chatId")
+    latest_customer_message = payload.get("latestCustomerMessage")
+    message_history = payload.get("messageHistory")
+    response_speed = payload["settings"]["speed"]
+    ai_tone = payload["settings"]["tone"]
+
     return {"status" : "success",
             "message" : "Payload received successfully",
-            "chatId" : payload["chatId"]}
-            
+            "time": "2025-04-17:T12:00:00",
+            "chatId" : payload["chatId"]
+          }
