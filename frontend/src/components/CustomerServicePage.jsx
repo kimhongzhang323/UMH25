@@ -186,7 +186,7 @@ const CustomerServicePage = () => {
       // ID will be added by addMessageToChat
       sender: 'merchant',
       text: currentMessage,
-      time: new Date().toISOString(),
+      time: new Date.now().toISOString(),
       read: true, // Merchant messages are instantly "read" by them
       aiGenerated: false
     };

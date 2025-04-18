@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from datetime import datetime
 
 router = APIRouter(prefix="/customer-service")
 
@@ -234,7 +235,7 @@ async def get_chats():
 ]
     return chats
 
-# Endpoint to receive payload from frontend
+# Endpoint to send payload from the frontend
 @router.post("/send-payload")
 async def send_payload(payload: dict):
     print("Payload received")
@@ -244,8 +245,10 @@ async def send_payload(payload: dict):
     response_speed = payload["settings"]["speed"]
     ai_tone = payload["settings"]["tone"]
 
-    return {"status" : "success",
-            "message" : "Payload received successfully",
-            "time": "2025-04-17:T12:00:00",
-            "chatId" : payload["chatId"]
-          }
+    now_utc = datetime.utcnow().isoformat() + "Z"  # Get current UTC time in ISO 8601 format
+
+    return {"status": "success",
+            "message": "Payload received successfully",
+            "time": now_utc,
+            "chatId": payload["chatId"]
+            }
