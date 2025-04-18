@@ -354,7 +354,7 @@ const CustomerServicePage = () => {
 
       {/* --- Sidebar (Chat List) --- */}
       {/* MODIFIED: Added hidden, xl:flex, xl:flex-col, xl:flex-shrink-0, removed initial w-1/4 */}
-      <div className="hidden xl:flex xl:flex-col xl:flex-shrink-0 xl:w-1/4 border-r border-gray-200 bg-white">
+      <div className="hidden lg:flex lg:flex-col lg:flex-shrink-0 lg:w-1/4 border-r border-gray-200 bg-white">
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 flex-shrink-0"> {/* Ensure header doesn't shrink */}
           <h2 className="text-xl font-semibold text-gray-800">Customer Messages</h2>
