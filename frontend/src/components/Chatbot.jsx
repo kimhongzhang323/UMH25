@@ -525,8 +525,8 @@ export default function Chatbot() {
                   >
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender === 'bot'
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-purple-100 text-purple-600'
+                        ? 'bg-blue-100 text-blue-600'
+                        : 'bg-purple-100 text-purple-600'
                         }`}
                     >
                       {msg.sender === 'bot' ? (
@@ -577,8 +577,8 @@ export default function Chatbot() {
                       ) : (
                         <div
                           className={`inline-block px-4 py-3 rounded-2xl ${msg.sender === 'bot'
-                              ? 'bg-white border border-gray-200'
-                              : 'bg-blue-600 text-white'
+                            ? 'bg-white border border-gray-200'
+                            : 'bg-blue-600 text-white'
                             }`}
                         >
                           <p className="whitespace-pre-wrap">{msg.text}</p>
@@ -624,8 +624,8 @@ export default function Chatbot() {
               <button
                 onClick={() => setActiveMode('chat')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'chat'
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
                 Chat
@@ -633,8 +633,8 @@ export default function Chatbot() {
               <button
                 onClick={() => setActiveMode('deep-think')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'deep-think'
-                    ? 'bg-purple-100 text-purple-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-purple-100 text-purple-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
                 <Brain className="w-4 h-4" />
@@ -643,8 +643,8 @@ export default function Chatbot() {
               <button
                 onClick={() => setActiveMode('search')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'search'
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-green-100 text-green-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
                 <Search className="w-4 h-4" />
@@ -653,8 +653,8 @@ export default function Chatbot() {
               <button
                 onClick={() => setActiveMode('image')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'image'
-                    ? 'bg-orange-100 text-orange-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-orange-100 text-orange-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
                 <Image className="w-4 h-4" />
@@ -663,8 +663,8 @@ export default function Chatbot() {
               <button
                 onClick={() => setShowFilterPanel(true)}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${merchantProfile.merchantType
-                    ? 'bg-yellow-100 text-yellow-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-yellow-100 text-yellow-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
                 <ShoppingBag className="w-4 h-4" />
@@ -724,8 +724,8 @@ export default function Chatbot() {
                   type="button"
                   onClick={toggleRecording}
                   className={`p-2 rounded-lg mr-2 ${isRecording
-                      ? 'bg-red-100 text-red-600 animate-pulse'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                    ? 'bg-red-100 text-red-600 animate-pulse'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                     }`}
                 >
                   {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -734,8 +734,8 @@ export default function Chatbot() {
                   type="submit"
                   disabled={!input.trim() || loading}
                   className={`p-2 rounded-lg ${input.trim()
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-100 text-gray-400'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-100 text-gray-400'
                     } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Send className="w-5 h-5" />
