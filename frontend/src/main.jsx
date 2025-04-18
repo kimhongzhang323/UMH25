@@ -11,6 +11,7 @@ import CustomerServicePage from './components/CustomerServicePage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import InventoryPage from './components/InventoryPage.jsx';
 import SalesIncomePage from './components/SalesIncomePage.jsx';
+import ReportsPage from './components/Reports.jsx'; // Corrected import
 import Leaderboard from './components/Leaderboard.jsx';
 import PaymentPage from './components/Payment.jsx';
 import GrabAdsPage from './components/GrabAd.jsx';
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="profile" element={<ProfilePage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="sales-income" element={<SalesIncomePage />} />
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="payment" element={<PaymentPage />} />
           <Route path="ads" element={<GrabAdsPage />} />
