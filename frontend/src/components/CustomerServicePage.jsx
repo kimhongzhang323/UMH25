@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FiSend, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle, FiX } from 'react-icons/fi';
+import { FiSend, FiMenu, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle, FiX } from 'react-icons/fi';
 
 // --- Configuration ---
 const API_BASE_URL = "http://127.0.0.1:8000/customer-service"; // Replace with your actual API base URL
@@ -30,7 +30,7 @@ const CustomerServicePage = () => {
   const [isLoadingChats, setIsLoadingChats] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
-
+  const [chatsSidebarOpen, setChatsSidebarOpen] = useState(false);
   // --- Refs ---
   const messagesEndRef = useRef(null); // Ref for the marker div at the end of messages (optional usage)
   const chatContainerRef = useRef(null); // Ref for the scrollable messages container
@@ -347,14 +347,18 @@ const CustomerServicePage = () => {
 
   // Main UI
   const currentActiveChatData = getActiveChat(); // Get the data for the active chat
-
   return (
     // Added 'lg:overflow-hidden' potentially useful if content pushes boundaries before xl
     <div className="flex h-[calc(100vh-65px)] bg-gray-50 text-gray-900 relative font-sans box-border overflow-hidden"> {/* Added overflow-hidden */}
 
       {/* --- Sidebar (Chat List) --- */}
       {/* MODIFIED: Added hidden, xl:flex, xl:flex-col, xl:flex-shrink-0, removed initial w-1/4 */}
-      <div className="hidden lg:flex lg:flex-col lg:flex-shrink-0 lg:w-1/4 border-r border-gray-200 bg-white">
+      <div className={`
+  fixed inset-y-0 left-0 z-40 w-[280px] bg-white border-r border-gray-200
+  transform transition-[transform,opacity] duration-300 ease-in-out
+  lg:opacity-100 lg:translate-x-0 lg:static lg:flex lg:flex-col lg:flex-shrink-0 lg:w-1/4
+  ${chatsSidebarOpen ? 'translate-x-0' : '-translate-x-full opacity-50'}
+`}>
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 flex-shrink-0"> {/* Ensure header doesn't shrink */}
           <h2 className="text-xl font-semibold text-gray-800">Customer Messages</h2>
@@ -363,16 +367,33 @@ const CustomerServicePage = () => {
               {chats.filter(c => c.status !== 'resolved').length} active chats
             </span>
             <button
+              onClick={() => setChatsSidebarOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 lg:hidden p-1"
+              aria-label="Close sidebar"
+            >
+              <FiX size={24} />
+            </button>
+            <button
               onClick={handleToggleAutoReply}
               title={autoReplyEnabled ? 'Disable AI Auto-Reply' : 'Enable AI Auto-Reply'}
               className={`flex items-center text-xs sm:text-sm px-2.5 py-1 rounded-full transition-colors duration-150 ${autoReplyEnabled
-                  ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               <FiMessageSquare className="mr-1" size={14} /> AI Reply {autoReplyEnabled ? 'ON' : 'OFF'}
             </button>
           </div>
+
+          {/* --- Overlay for mobile sidebar --- */}
+          {chatsSidebarOpen && (
+            <div
+              onClick={() => setChatsSidebarOpen(false)}
+              className="fixed inset-0 z-30 lg:hidden"
+              aria-hidden="true"
+              style={{ pointerEvents: 'auto' }} // Ensure it captures clicks
+            ></div>
+          )}
         </div>
 
         {/* Chat List - Scrollable Area */}
@@ -431,6 +452,14 @@ const CustomerServicePage = () => {
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between shadow-sm flex-shrink-0">
               <div className="flex items-center min-w-0">
+                {/* Mobile Toggle Button */}
+                <button
+                  onClick={() => setChatsSidebarOpen(!chatsSidebarOpen)}
+                  className="p-2 rounded-lg hover:bg-gray-200 mr-2 lg:hidden"
+                  aria-label="Toggle sidebar"
+                >
+                  <FiMessageSquare size={20} />
+                </button>
                 <img
                   src={currentActiveChatData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentActiveChatData.customer)}&background=random`}
                   alt={`${currentActiveChatData.customer}'s avatar`}
@@ -473,10 +502,10 @@ const CustomerServicePage = () => {
                   <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-start' : 'justify-end'}`}>
                     <div
                       className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-xl shadow-sm ${message.sender === 'customer'
-                          ? 'bg-white border border-gray-200 text-gray-800'
-                          : message.aiGenerated
-                            ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
-                            : 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white'
+                        ? 'bg-white border border-gray-200 text-gray-800'
+                        : message.aiGenerated
+                          ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
+                          : 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white'
                         } ${message.isError ? 'bg-red-100 border border-red-300 text-red-800' : ''}` // Style for errors
                       }
                     >
