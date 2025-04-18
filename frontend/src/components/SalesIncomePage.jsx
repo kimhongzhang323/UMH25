@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { 
   FiDollarSign, 
   FiTrendingUp, 
@@ -12,6 +13,8 @@ import { Line, Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 
 const SalesIncomePage = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
+
   // State for sales data
   const [salesData, setSalesData] = useState({
     loading: true,
@@ -193,7 +196,7 @@ const SalesIncomePage = () => {
           </div>
           <div className="flex items-center space-x-2">
             <button 
-              onClick={() => setShowAdModal(true)}
+              onClick={() => navigate('/ads')} // Redirect to /ads
               className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
             >
               <FiZap className="mr-2" />
