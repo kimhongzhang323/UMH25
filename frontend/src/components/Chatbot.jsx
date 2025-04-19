@@ -260,14 +260,7 @@ export default function Chatbot() {
     })
       .then(response => response.json())
       .then(responseData => {
-        const botMsg = {
-          id: uuidV4(),
-          text: responseData.response,
-          sender: 'bot',
-          timestamp: new Date(),
-          isImage: activeMode === 'image',
-          imageUrl: activeMode === 'image' ? responseData["image_URL"] : null
-        };
+        const botMsg = responseData.response;
 
         setMessages(prev => [...prev, botMsg]);
         setLoading(false);
