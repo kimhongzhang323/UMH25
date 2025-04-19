@@ -82,7 +82,10 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
 | **Marketing Assistant** | Generate promotional content and campaign ideas | Gemini 2.0 Flash |  
 | **Competitor Analysis** | Track and analyze nearby business performance | Gemini 2.0 Flash |  
 | **Financial Forecaster** | Revenue predictions  | Gemini 2.0 Flash |  
-| **Customer Insights** | Analyze feedback and identify improvement opportunities | Gemini 2.0 Flash |  
+| **Customer Insights** | Analyze feedback and identify improvement opportunities | Gemini 2.0 Flash | 
+| **Ads Boosting** | AI-powered ad optimization with automated budget allocation and targeted audience segmentation | Gemini 2.0 Flash |
+| **Campaign Performance** | Real-time analytics and A/B testing for promotional content | Gemini 2.0 Flash |
+| **GrabAds Integration** | Direct integration with Grab's advertising platform for seamless campaign management | Gemini 2.0 Flash |  
 
 ### **⚠️ Alert System**  
 - Real-time notifications for:  
@@ -155,6 +158,8 @@ graph TD
 | `/api/chat` | POST | Chat completion with RAG |
 | `/api/sd` | POST | Image generation |
 | `/api/inventory` | GET/POST | Inventory management |
+| `/api/customer-service` | GET/POST | Customer Service API |
+| `/api/get_all_messages` | GET/POST | Messages API |
 |----------|---------|-------------|
 |             GET                  |
 |----------|---------|-------------|
@@ -214,6 +219,7 @@ cd backend && pip install -r requirements.txt
 cd backend
 
 # run AI model
+!! DONT FORGET TO RUN !!
 python rag_pipeline.py 
 
 ```
