@@ -18,5 +18,25 @@
     {
         "question": "How can we improve GrabMart?",
         "answer": "Users want: 1) More fresh produce (55%) 2) Scheduled deliveries (42%) 3) Bulk purchase options (38%)"
+    },
+    {
+        "question": "What's the user satisfaction with the app interface?",
+        "answer": "App interface satisfaction: 4.2/5. Most praised: Easy navigation (82%). Most requested improvement: Order tracking UI (34%)"
+    },
+    {
+        "question": "Most common user suggestions for GrabFood?",
+        "answer": "Top suggestions: 1) Real-time order updates (67%) 2) More dietary filters (58%) 3) Better utensil options (45%)"
+    },
+    {
+        "question": "Customer feedback on delivery partners?",
+        "answer": "Delivery partner rating average: 4.4/5. Praised: Politeness (78%), Timeliness (72%). Areas for improvement: Communication (25%)"
+    },
+    {
+        "question": "What do merchants say about the platform?",
+        "answer": "Merchant satisfaction rate: 76%. Key positives: Order accuracy (88%), Support response (71%). Pain points: Commission rates (42%)"
+    },
+    {
+        "question": "User feedback on loyalty program?",
+        "answer": "Program satisfaction: 3.9/5. Liked: Point system (82%), Rewards variety (68%). Suggested: Faster point accumulation (44%)"
     }
 ]

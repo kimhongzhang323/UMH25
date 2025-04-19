@@ -18,5 +18,113 @@
     {
         "question": "What's the peak hours for Grab rides?",
         "answer": "Morning peak: 7-9am (office commute). Evening peaks: 5-7pm (commute) and 9-11pm (nightlife)."
-    }
+    },
+    {
+        "question": "What’s the average basket size for GrabMart orders?",
+        "answer": "Average GrabMart order is $18.75, with highest AOV observed in suburbs (avg $22.30). SQL: SELECT AVG(basket_size) FROM grabmart_orders"
+      },
+      {
+        "question": "Show churn rate by customer segment",
+        "answer": "Churn rate for Gen Z is 42%, Millennials 35%, Gen X 27%. Pandas code: df.groupby('age_group')['churn'].mean()"
+      },
+      {
+        "question": "How much did GrabFood orders increase after a 20% discount promo?",
+        "answer": "Order volume increased by 26% during the promo period, with a 12% boost in AOV. SQL: SELECT SUM(orders) FROM food_orders WHERE discount = 20"
+      },
+      {
+        "question": "What's the average app session duration by user type?",
+        "answer": "Active users average 14.2 minutes per session, while dormant users average 6.8 minutes. SQL: SELECT AVG(session_duration) FROM app_sessions WHERE user_status = 'active'"
+      },
+      {
+        "question": "Which city has the highest delivery success rate?",
+        "answer": "Singapore has the highest delivery success rate at 97%, followed by Kuala Lumpur (94%) and Jakarta (92%). Pandas code: df.groupby('city')['delivery_success'].mean()"
+      },
+      {
+        "question": "What’s the correlation between loyalty tier and spend?",
+        "answer": "Platinum users have a strong correlation of 0.8 between tier and spend. SQL: SELECT CORR(spend, loyalty_tier) FROM user_data"
+      },
+      {
+        "question": "How does GrabFood usage vary by day of the week?",
+        "answer": "Weekends see a 28% higher order volume than weekdays, with Sunday being the peak day. Pandas code: df.groupby('weekday')['orders'].mean()"
+      },
+      {
+        "question": "What’s the conversion rate for app users who receive push notifications?",
+        "answer": "Push notifications increase conversion by 14%, with 48% of users completing an order within 24 hours of receiving a push. SQL: SELECT COUNT(order_id) FROM orders WHERE notification_received = TRUE"
+      },
+      {
+        "question": "How does weather impact delivery times?",
+        "answer": "Rainy weather increases delivery time by 15% on average. SQL: SELECT AVG(delivery_time) FROM orders WHERE weather = 'rainy'"
+      },
+      {
+        "question": "What's the return on investment (ROI) for referral campaigns?",
+        "answer": "Referral campaigns show a 5:1 ROI, with 19% of new users coming from referrals. SQL: SELECT SUM(referrals) / SUM(spend) FROM referral_campaigns"
+      },
+      {
+        "question": "What’s the average rating for GrabFood restaurants?",
+        "answer": "The average restaurant rating is 4.2 stars, with top-rated restaurants (4.5+) accounting for 18% of orders. SQL: SELECT AVG(rating) FROM restaurant_reviews"
+      },
+      {
+        "question": "What’s the growth rate of active drivers in the last quarter?",
+        "answer": "Active drivers increased by 8.7% from Q1 to Q2, with a notable spike in secondary cities. SQL: SELECT (COUNT(driver_id) - COUNT(driver_id) FROM drivers WHERE date > '2025-01-01') / COUNT(driver_id) AS growth_rate"
+      },
+      {
+        "question": "What’s the average time to complete a Grab ride?",
+        "answer": "The average time to complete a ride is 16.3 minutes, with longer trips observed in suburban areas (18.4 min). SQL: SELECT AVG(ride_duration) FROM rides WHERE location = 'suburban'"
+      },
+      {
+        "question": "Which cuisine has the highest order volume growth in the past month?",
+        "answer": "Italian cuisine saw a 20% growth in order volume from February to March, followed by Thai with 15%. Pandas code: df.groupby('cuisine')['order_volume'].pct_change()"
+      },
+      {
+        "question": "What’s the average conversion rate for GrabAds campaigns?",
+        "answer": "The average conversion rate for GrabAds campaigns is 4.2%, with higher success for video ads compared to static ads. SQL: SELECT AVG(conversion_rate) FROM grabads_campaigns WHERE ad_type = 'video'"
+      },
+      {
+        "question": "What’s the impact of delivery fees on order volume?",
+        "answer": "For every $1 increase in delivery fee, order volume drops by 5%. SQL: SELECT CORR(delivery_fee, order_volume) FROM orders"
+      },
+      {
+        "question": "Which day of the week has the highest order volume for GrabFood?",
+        "answer": "Saturday sees the highest order volume, contributing 19% more orders than any weekday. Pandas code: df.groupby('day_of_week')['orders'].sum()"
+      },
+      {
+        "question": "How much does GrabPay account for in total transaction volume?",
+        "answer": "GrabPay accounts for 68% of all transactions in Grab's digital wallet-enabled markets. SQL: SELECT SUM(transaction_amount) FROM transactions WHERE payment_method = 'GrabPay'"
+      },
+      {
+        "question": "How does order volume vary by app version?",
+        "answer": "Users on the latest app version (v5.2) have 11% more orders compared to previous versions. SQL: SELECT AVG(order_count) FROM orders WHERE app_version = 'v5.2'"
+      },
+      {
+        "question": "What percentage of GrabFood orders are placed after 9 PM?",
+        "answer": "19% of all GrabFood orders are placed after 9 PM, with most orders coming from city centers. SQL: SELECT COUNT(order_id) FROM orders WHERE order_time > '21:00'"
+      },
+      {
+        "question": "What’s the average number of orders per customer in their first month?",
+        "answer": "New users place an average of 3.5 orders in their first month, with 24% becoming repeat customers after 30 days. SQL: SELECT AVG(order_count) FROM user_orders WHERE user_status = 'new'"
+      },
+      {
+        "question": "What’s the retention rate for users after their 3rd order?",
+        "answer": "Retention rate after the 3rd order is 61%, significantly higher than the 40% rate for users with fewer than 3 orders. SQL: SELECT AVG(retention) FROM user_retention WHERE order_count > 3"
+      },
+      {
+        "question": "Which GrabFood cuisine has the highest repeat order rate?",
+        "answer": "Japanese cuisine has the highest repeat order rate at 35%, followed by Chinese (31%) and local food (29%). SQL: SELECT cuisine, AVG(repeat_order_rate) FROM food_orders GROUP BY cuisine"
+      },
+      {
+        "question": "What’s the impact of in-app ads on user activity?",
+        "answer": "Users exposed to in-app ads complete 23% more orders within 7 days of the ad view. SQL: SELECT AVG(orders) FROM user_activity WHERE ad_exposure = TRUE"
+      },
+      {
+        "question": "What’s the average time between placing an order and receiving delivery?",
+        "answer": "Average time between placing an order and delivery is 35 minutes, with fast food chains averaging 28 minutes and full-service restaurants 42 minutes. SQL: SELECT AVG(delivery_time - order_time) FROM orders"
+      },
+      {
+        "question": "How do GrabMart orders differ by product category?",
+        "answer": "Grocery orders make up 45% of GrabMart sales, followed by health & beauty (28%) and home goods (22%). SQL: SELECT product_category, SUM(order_value) FROM grabmart_orders GROUP BY product_category"
+      },
+      {
+        "question": "What’s the impact of free delivery promotions on order volume?",
+        "answer": "Free delivery promotions increase order volume by an average of 32%, especially for high-order categories like groceries. SQL: SELECT AVG(order_volume) FROM promotions WHERE promotion_type = 'free_delivery'"
+      }
 ]

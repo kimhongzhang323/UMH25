@@ -442,5 +442,37 @@
     {
       "question": "List all merchants with fastest response times",
       "answer": "This would require measuring time from order to acceptance."
+    },
+    {
+      "question": "What's the most common day for large group orders?",
+      "answer": "I can analyze orders with high item counts or order values to determine peak days."
+    },
+    {
+      "question": "Which restaurants have the highest breakfast order volume?",
+      "answer": "I can analyze orders between 6am-10am to identify popular breakfast spots."
+    },
+    {
+      "question": "What items are most frequently modified by customers?",
+      "answer": "This would require order customization data not shown in current schema."
+    },
+    {
+      "question": "Which areas show potential for new restaurant partnerships?",
+      "answer": "I can analyze order density and restaurant distribution by location."
+    },
+    {
+      "question": "What's the correlation between delivery time and customer reorder rate?",
+      "answer": "I can analyze if faster deliveries lead to more frequent reorders."
+    },
+    {
+      "question": "Which cuisine types show seasonal popularity?",
+      "answer": "I can analyze order patterns by cuisine_tag across different months."
+    },
+    {
+      "question": "What's the average menu item overlap between similar restaurants?",
+      "answer": "I can compare menu items across restaurants with the same cuisine tags."
+    },
+    {
+      "question": "Which promotional campaigns had the highest conversion rate?",
+      "answer": "This would require promotional campaign and conversion data."
     }
-  ]
+]
