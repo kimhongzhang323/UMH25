@@ -248,49 +248,49 @@ export default function Chatbot() {
     setInput('');
     setLoading(true);
 
-    fetch(import.meta.env.BACKEND_URL)
+    // Generate formData to be sent
+    let payload = new FormData();
+    payload.append("message", userMsg);
+    payload.append("chat_id", currentChatId);
+    payload.append("file", fileInputRef.current.files[0])
 
-    setTimeout(() => {
-      let responseText;
+    fetch(import.meta.env.BACKEND_URL + "/send_chat", {
+      method: "POST",
+      body: payload
+    })
+      .then(response => response.json())
+      .then(responseData => {
+        const botMsg = {
+          id: uuidV4(),
+          text: responseData.response,
+          sender: 'bot',
+          timestamp: new Date(),
+          isImage: activeMode === 'image',
+          imageUrl: activeMode === 'image' ? responseData["image_URL"] : null
+        };
 
-      if (merchantProfile.merchantType) {
-        responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
-      } else {
-        responseText = generateFakeResponse(input, activeMode);
-      }
+        setMessages(prev => [...prev, botMsg]);
+        setLoading(false);
 
-      const botMsg = {
-        id: (Date.now() + 1).toString(),
-        text: responseText,
-        sender: 'bot',
-        timestamp: new Date(),
-        isImage: activeMode === 'image',
-        imageUrl: activeMode === 'image' ?
-          `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}` : null
-      };
-
-      setMessages(prev => [...prev, botMsg]);
-      setLoading(false);
-
-      if (!currentChatId) {
-        saveChatToHistory();
-        setIsNewChat(false); // Reset new chat state after saving
-      } else {
-        setChatHistory(prev =>
-          prev.map(chat =>
-            chat.id === currentChatId
-              ? {
-                ...chat,
-                messages: [...chat.messages, userMsg, botMsg],
-                title: userMsg.text.substring(0, 30) || chat.title,
-                preview: botMsg.text.substring(0, 50) || 'New conversation',
-                timestamp: new Date()
-              }
-              : chat
-          )
-        );
-      }
-    }, 1500);
+        if (!currentChatId) {
+          saveChatToHistory();
+          setIsNewChat(false); // Reset new chat state after saving
+        } else {
+          setChatHistory(prev =>
+            prev.map(chat =>
+              chat.id === currentChatId
+                ? {
+                  ...chat,
+                  messages: [...chat.messages, userMsg, botMsg],
+                  title: userMsg.text.substring(0, 30) || chat.title,
+                  preview: botMsg.text.substring(0, 50) || 'New conversation',
+                  timestamp: new Date()
+                }
+                : chat
+            )
+          );
+        }
+      });
   };
 
   // Define the formatDate function before using it in JSX
