@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Form, status
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional, Annotated
@@ -12,6 +13,7 @@ import io
 import csv
 from fastapi.middleware.cors import CORSMiddleware
 import time
+import os
 
 import customer_service
 from chat_database import Chat, ChatDatabase, Message
@@ -40,6 +42,13 @@ app.add_middleware(
 )
 
 app.include_router(customer_service.router)
+
+
+# Create tmp dir
+os.makedirs("tmp", exist_ok=True)
+
+# Serving static files
+app.mount("/tmp", StaticFiles(directory="tmp"), name="tmp")
 
 chat_db = ChatDatabase(chats=[], messages={})
 
@@ -434,7 +443,10 @@ async def chat(request: ChatRequest):
     try:
         # Fetch the response from the RAG pipeline
         response_text = query_rag(request.query)
-        return JSONResponse(content={"response": response_text})
+        return JSONResponse(content={
+            "response": response_text,
+            "image_url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=b9cf29a75035949e2c8160df1b2904d70c337ee8777e152b9ecfad9e8a9a70a4"
+        })
     except Exception as e:
         # Handle errors and return a meaningful message
         return JSONResponse(content={"error": str(e)}, status_code=500)
