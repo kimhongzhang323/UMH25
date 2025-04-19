@@ -158,11 +158,15 @@ export default function Chatbot() {
   // Update your loadChat function to reset the new chat state
   const loadChat = (chatId) => {
     setIsNewChat(false);
-    const chat = chatHistory.find(c => c.id === chatId);
-    if (chat) {
-      setCurrentChatMessages(chat.messages);
-      setCurrentChatId(chatId);
-    }
+    fetch(import.meta.env.BACKEND_URL + "/get_all_messages" +
+      new URLSearchParams({ chat_id: chatId }).toString()
+    )
+      .then(response => response.json())
+      .then(responseData => {
+        setCurrentChatMessages(prev => [ ...prev, ...responseData])
+      });
+
+    setCurrentChatId(chatId);
   };
 
   // Update your handleSubmit function to reset isNewChat when saving

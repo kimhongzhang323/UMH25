@@ -165,6 +165,16 @@ class Chat(BaseModel):
     timestamp: int
 
 
+# id and chat_id should be UUID v4
+# sender is either 'user' or 'bot'
+# timestamps are Unix timestamp
+class Message(BaseModel):
+    id: str
+    text: str
+    sender: str
+    timestamp: int
+
+
 def process_csv_row(row: dict, config: CSVConfig) -> Document:
     """Convert a CSV row into a Document"""
     # Combine specified text columns
@@ -371,6 +381,43 @@ async def get_all_chats() -> list[Chat]:
             title="E-commerce Platform Upgrade",
             preview="I recommend these improvements to your online checkout process.",
             timestamp=1713552600
+        )
+    ]
+
+
+@app.get("/get_all_messages")
+async def get_messages(chat_id: str):
+    # Return all messages under the specific chat
+    return [
+        Message(
+            id="8f7d1a6e-9c5a-4b3d-8a7e-2e8d79c10e44",
+            text="Womp womp... our sales are down 15% this quarter.",
+            sender="user",
+            timestamp=1713542400
+        ),
+        Message(
+            id="3e7c8945-f2a1-4d6b-ba3c-d98e1c045f22",
+            text="Don't worry! Every womp womp moment is an opportunity for improvement. Let's analyze what happened.",
+            sender="bot",
+            timestamp=1713542460
+        ),
+        Message(
+            id="b23d8f7a-4c5e-4a9b-8d3f-e2c7a1b9d634",
+            text="Womp womp wooooomp. Our biggest competitor just launched a huge promotion.",
+            sender="user",
+            timestamp=1713542520
+        ),
+        Message(
+            id="7a1b4d6e-2c5f-4e8d-9a3b-6c7e5d8f9a1b",
+            text="I see the womp womp situation, but this gives us a chance to differentiate. What unique value can you offer?",
+            sender="bot",
+            timestamp=1713542580
+        ),
+        Message(
+            id="5e9d2c1b-7a3f-4e8d-9c5b-2a4f7e3d8c1a",
+            text="*sad trombone* Womp womp... Our marketing budget is already maxed out.",
+            sender="user",
+            timestamp=1713542640
         )
     ]
 
