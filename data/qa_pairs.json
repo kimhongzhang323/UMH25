@@ -1,6 +1,5 @@
 [
     {
-<<<<<<< HEAD
       "question": "show me monthly sales trends",
       "answer": {
         "text": "Here's the monthly sales trend analysis:",
@@ -33,11 +32,10 @@
         "text": "Merchant acquisition over time:",
         "type": "visualization",
         "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ndf['join_date'] = pd.to_datetime(df['join_date'])\ndf['join_quarter'] = df['join_date'].dt.to_period('Q')\nquarterly_joins = df.groupby('join_quarter')['merchant_id'].nunique()\n\nplt.figure(figsize=(10,5))\nquarterly_joins.plot(kind='area', color='#00B14F', alpha=0.5)\nplt.title('New Merchants by Quarter')\nplt.xlabel('Quarter')\nplt.ylabel('New Merchants')",
-        "insight": "Peak acquisition quarter was {quarterly_joins.idxmax().strftime('Q%q %Y')} with {quarterly_joins.max()} new merchants"
+        "insight": "Peak acquisition quarter was {quarterly_joins.idxmax().strftime('Q%q %Y')} with {quarterly_joins.max()} new merchants",
+        "additional_question": "Which merchants joined in 2023?",
+        "additional_answer": "I can check merchants with join_date containing '2023' in their records."
       }
-=======
-      "question": "Which merchants joined in 2023?",
-      "answer": "I can check merchants with join_date containing '2023' in their records."
     },
     {
       "question": "What is the average delivery time for orders?",
@@ -510,6 +508,5 @@
     {
       "question": "Which promotional campaigns had the highest conversion rate?",
       "answer": "This would require promotional campaign and conversion data."
->>>>>>> 17d656d8d2b2b1f487611fb95833c881b86fd1e7
     }
 ]
