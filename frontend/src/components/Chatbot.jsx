@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Languages
 } from 'lucide-react';
+import jsConvert from 'js-convert-case';
 
 // Component
 export default function Chatbot() {
@@ -335,6 +336,15 @@ export default function Chatbot() {
       reader.readAsDataURL(file);
     }
   };
+
+  const handleMerchantProfileSave = (e) => {
+    fetch(import.meta.env.BACKEND_URL + "/update_merchant_info", {
+      method: PUT,
+      body: JSON.stringify(
+        jsConvert.snakeKeys(merchantProfile)
+      )
+    });
+  }
 
   const toggleRecording = () => {
     if (!recognition) {
@@ -1037,6 +1047,7 @@ export default function Chatbot() {
                   <button
                     type="submit"
                     className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                    onSubmit={handleMerchantProfileSave}
                   >
                     Save Configuration
                   </button>
