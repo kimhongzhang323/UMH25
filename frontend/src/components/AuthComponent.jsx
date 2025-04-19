@@ -22,13 +22,11 @@ export default function AuthComponent() {
 
       if (error) throw error
 
-      // For signup, check if email confirmation is needed
       if (!isLogin && data?.user?.identities?.length === 0) {
         alert('Please check your email for verification link')
         return
       }
 
-      // Force session refresh
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Authentication failed')
 

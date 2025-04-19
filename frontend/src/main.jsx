@@ -135,6 +135,15 @@ createRoot(document.getElementById('root')).render(
           }
         />
 
+        <Route
+          path="/logout"
+          element={
+            <AuthWrapper>
+              <Navigate to="/login" replace />
+            </AuthWrapper>
+          }
+        />
+
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
