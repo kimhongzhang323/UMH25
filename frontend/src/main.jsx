@@ -32,7 +32,7 @@ createRoot(document.getElementById('root')).render(
             index
             element={
               <AuthWrapper>
-                <Navigate to="/dashboard" replace />
+                <Navigate to="/chat" replace />
               </AuthWrapper>
             }
           />
@@ -140,7 +140,7 @@ createRoot(document.getElementById('root')).render(
           path="/"
           element={
             <AuthWrapper>
-              <Navigate to="/dashboard" replace />
+              <Navigate to="/chat" replace />
             </AuthWrapper>
           }
         />
