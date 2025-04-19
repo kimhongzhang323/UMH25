@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import { Line, Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
+import MenuGenerator from './Menu';
 
 const SalesIncomePage = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -453,6 +454,7 @@ const SalesIncomePage = () => {
           </div>
         </div>
       )}
+      <MenuGenerator />
     </div>
   );
 };
