@@ -146,14 +146,18 @@ export default function Chatbot() {
   // Update your newChat function to set this state
   const newChat = () => {
     setIsNewChat(true);
-    setCurrentChatMessages([
-      {
-        id: '1',
-        text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
-        sender: 'bot',
-        timestamp: new Date(),
-      },
-    ]);
+    let firstMessage = {
+      id: '1',
+      text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
+      sender: 'bot',
+      timestamp: new Date(),
+    }
+    setCurrentChatMessages([firstMessage]);
+
+    fetch(BACKEND_URL + "/new_chat", {
+      method: "POST"
+    })
+
     setActiveMode('chat');
     setFilePreview(null);
     setInput('');

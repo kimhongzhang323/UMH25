@@ -435,6 +435,12 @@ async def get_messages(chat_id: str):
     ]
 
 
+@app.post("/new_chat")
+async def new_chat():
+    # add new chat
+    pass
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
