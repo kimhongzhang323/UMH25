@@ -218,6 +218,7 @@ export default function Chatbot() {
         text: responseData.response || "Sorry, I couldn't process your request.",
         sender: "bot",
         timestamp: new Date(),
+        imageUrl: responseData.image_url
       };
 
       setCurrentChatMessages(prev => [...prev, botMsg]);
