@@ -14,7 +14,6 @@ import csv
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import os
-
 import customer_service
 from chat_database import Chat, ChatDatabase, Message
 from rag_pipeline import query_rag  # Import the query_rag function
@@ -61,7 +60,7 @@ TEMPERATURE = 0.7
 CSV_CHUNK_SIZE = 1000  # Number of rows to process at a time for large CSVs
 
 # Load models (mocked for testing)
-TESTING = True
+TESTING = False
 
 if not TESTING:
     try:
