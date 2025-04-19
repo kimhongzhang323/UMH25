@@ -269,13 +269,6 @@ export default function Navbar() {
                   <Settings className="mr-2 h-4 w-4" />
                   Profile
                 </a>
-                <a
-                  href="/logout"
-                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log Out
-                </a>
               </div>
             </div>
 

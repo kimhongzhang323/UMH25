@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FiAward, FiBarChart2, FiCheckCircle, FiGift, FiStar, FiTrendingUp } from 'react-icons/fi';
+import {LogOut} from 'lucide-react';
 
 const ProfilePage = () => {
   // Merchant data with gamification elements
@@ -280,6 +281,13 @@ const ProfilePage = () => {
                 ))}
               </div>
             </div>
+            <a
+                  href="/logout"
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </a>
           </div>
           
           {/* Right Column */}
