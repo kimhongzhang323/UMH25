@@ -35,6 +35,202 @@ const CustomerServicePage = () => {
   // --- Refs ---
   const messagesEndRef = useRef(null); // Ref for the marker div at the end of messages (optional usage)
   const chatContainerRef = useRef(null); // Ref for the scrollable messages container
+  // --- Callbacks & Functions ---
+
+  // Get the data for the currently active chat
+  const getActiveChat = useCallback(() => {
+    return chats.find(chat => chat.id === activeChatId);
+  }, [chats, activeChatId]);
+
+  // Add a new message to the local state for a specific chat
+  const addMessageToChat = useCallback((chatId, message) => {
+    setChats(prevChats => prevChats.map(c => {
+      if (c.id === chatId) {
+        const newMessageWithId = {
+          ...message,
+          // Ensure message has a unique ID (use backend ID if possible, otherwise generate)
+          id: message.id || `msg-${chatId}-${messageIdCounter++}`
+        };
+        return {
+          ...c,
+          messages: [...(c.messages || []), newMessageWithId],
+          // Update last message preview safely
+          lastMessage: newMessageWithId.text.substring(0, 50) + (newMessageWithId.text.length > 50 ? '...' : ''),
+          // Mark unread only if the update is for a non-active chat
+          unread: c.id !== activeChatId ? true : c.unread // Keep existing unread if active
+        };
+      }
+      return c;
+    }));
+  }, [activeChatId]); // Dependency: activeChatId needed for unread logic
+
+  // Trigger AI response for a given chat
+  const triggerAIResponse = useCallback(async (chatId) => {
+    const chat = chats.find(c => c.id === chatId);
+    // Don't trigger if chat not found, AI disabled, or AI already typing for this chat
+    if (!chat || !autoReplyEnabled || isAiTyping[chatId]) return;
+
+    // Find the last message sent by the customer
+    const lastCustomerMessage = chat.messages?.filter(m => m.sender === 'customer').pop();
+    if (!lastCustomerMessage) return; // No customer message to respond to
+
+    // Start typing indicator
+    setIsAiTyping(prev => ({ ...prev, [chatId]: true }));
+
+    const payload = {
+      chatId: chatId,
+      latestCustomerMessage: lastCustomerMessage.text,
+      messageHistory: chat.messages?.slice(-10) || [], // Send recent history
+      settings: { tone: aiTone, speed: aiResponseSpeed } // Include settings
+    };
+
+    try {
+      // Minimum typing duration (1-2 seconds looks natural)
+      const minTypingDuration = 4000 + (Math.random() * 1000); // 1-2 seconds
+      const typingStartTime = Date.now();
+
+      const response = await fetch(SEND_PAYLOAD_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
+      }
+
+      const result = await response.json();
+
+      // Calculate remaining time to fulfill minimum typing duration
+      const elapsedTime = Date.now() - typingStartTime;
+      const remainingTime = Math.max(0, minTypingDuration - elapsedTime);
+
+      // Wait for remaining time before showing response
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+
+      if (result.status == "success" && result.message) {
+        addMessageToChat(result.chatId, {
+          sender: 'system',
+          text: result.message,
+          aiGenerated: true,
+          time: new Date().toISOString()
+        });
+      } else {
+        console.warn("AI response received but no text content found or status not success:", result);
+      }
+    } catch (error) {
+      console.error("Error triggering AI response:", error);
+      addMessageToChat(chatId, {
+        sender: 'system',
+        text: `⚠️ AI Error: ${error.message}`,
+        aiGenerated: false,
+        time: new Date().toISOString(),
+        isError: true
+      });
+    } finally {
+      // Ensure typing indicator is turned off for this chat
+      setIsAiTyping(prev => ({ ...prev, [chatId]: false }));
+    }
+  }, [chats, autoReplyEnabled, aiTone, aiResponseSpeed, isAiTyping, addMessageToChat]);
+
+  // Send a message from the merchant
+  const handleSendMessage = () => {
+    const activeChat = getActiveChat();
+    if (!currentMessage.trim() || !activeChatId || !activeChat || isSending) return;
+
+    setIsSending(true);
+
+    const newMerchantMessage = {
+      // ID will be added by addMessageToChat
+      sender: 'merchant',
+      text: currentMessage,
+      time: new Date().toISOString(), // Use current time for sent message
+      read: true, // Merchant messages are instantly "read" by them
+      aiGenerated: false
+    };
+
+    const messageTextToSend = currentMessage; // Store before clearing
+    setCurrentMessage(''); // Clear input immediately
+
+    // Optimistically update UI
+    addMessageToChat(activeChatId, newMerchantMessage);
+
+
+    // --- Simulate/Actual Backend Send ---
+    // Replace this promise with your actual API call to send the merchant's message
+    new Promise((resolve) => {
+      // --- Simulation ---
+      console.log("Simulating sending merchant message to backend:", messageTextToSend);
+      setTimeout(() => {
+        console.log("Merchant message 'sent' successfully (simulated).");
+        resolve(); // Simulate success
+      }, 300); // Simulate network delay
+    })
+      .then(() => {
+        console.log("Simulation")
+      })
+      .catch(err => {
+        console.error("Failed to send merchant message:", err);
+      })
+      .finally(() => {
+        setIsSending(false); // Re-enable input field
+      });
+  };
+
+  // Toggle AI auto-reply setting
+  const handleToggleAutoReply = () => setAutoReplyEnabled(!autoReplyEnabled);
+
+  // Handle selecting a chat from the sidebar
+  const handleSelectChat = (chatId) => {
+    // 1. Only proceed if selecting a DIFFERENT chat
+    if (chatId === activeChatId) {
+      setChats(prevChats =>
+        prevChats.map(chat =>
+          (chat.id === chatId && chat.unread) ? { ...chat, unread: false } : chat
+        )
+      );
+      return;
+    }
+
+    // 2. Update the active chat ID state
+    setActiveChatId(chatId);
+
+    // 3. Update the chats state to mark the selected chat as read
+    setChats(prevChats =>
+      prevChats.map(chat =>
+        chat.id === chatId ? { ...chat, unread: false } : chat
+      )
+    );
+    // Mark the newly selected chat as read
+    setChats(prevChats => prevChats.map(c =>
+      c.id === chatId ? { ...c, unread: false } : c
+    ));
+  };
+
+  // Mark a chat as resolved (Placeholder - Needs backend integration)
+  const handleResolveChat = (chatId) => {
+    console.log(`Attempting to resolve chat ${chatId} (UI only)`);
+    setChats(prevChats => prevChats.map(chat =>
+      chat.id === chatId ? { ...chat, status: 'resolved' } : chat // Corrected: use 'chat' not 'c'
+    ));
+    // TODO: Add API call here to update chat status on the backend
+  };
+
+  // Use a common response template
+  const handleCommonResponseClick = (text) => {
+    setCurrentMessage(text); // Set, don't append for common responses
+    setIsMobileSettingsOpen(false); // Close settings panel on mobile after selection
+    // Using setTimeout to allow state update to potentially re-render input
+    setTimeout(() => {
+      document.querySelector('input[type="text"]')?.focus();
+    }, 0);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(!isSidebarExpanded)
+  }
+
 
   // --- Effects ---
 
@@ -89,245 +285,27 @@ const CustomerServicePage = () => {
     }
   }, [chats, activeChatId]); // Re-run when chats array or activeChatId changes
 
-  // --- Callbacks & Functions ---
+  // Trigger AI when active chat changes and has a new customer message
+  useEffect(() => {
+    if (!autoReplyEnabled || !activeChatId) return;
 
-  // Get the data for the currently active chat
-  const getActiveChat = useCallback(() => {
-    return chats.find(chat => chat.id === activeChatId);
-  }, [chats, activeChatId]);
-
-  // Add a new message to the local state for a specific chat
-  const addMessageToChat = useCallback((chatId, message) => {
-    setChats(prevChats => prevChats.map(c => {
-      if (c.id === chatId) {
-        const newMessageWithId = {
-          ...message,
-          // Ensure message has a unique ID (use backend ID if possible, otherwise generate)
-          id: message.id || `msg-${chatId}-${messageIdCounter++}`
-        };
-        return {
-          ...c,
-          messages: [...(c.messages || []), newMessageWithId],
-          // Update last message preview safely
-          lastMessage: newMessageWithId.text.substring(0, 50) + (newMessageWithId.text.length > 50 ? '...' : ''),
-          // Mark unread only if the update is for a non-active chat
-          unread: c.id !== activeChatId ? true : c.unread // Keep existing unread if active
-        };
-      }
-      return c;
-    }));
-  }, [activeChatId]); // Dependency: activeChatId needed for unread logic
-
-  // Trigger AI response for a given chat
-  const triggerAIResponse = useCallback(async (chatId) => {
-    const chat = chats.find(c => c.id === chatId);
-    // Don't trigger if chat not found, AI disabled, or AI already typing for this chat
-    if (!chat || !autoReplyEnabled || isAiTyping[chatId]) return;
-
-    // Find the last message sent by the customer
-    const lastCustomerMessage = chat.messages?.filter(m => m.sender === 'customer').pop();
-    if (!lastCustomerMessage) return; // No customer message to respond to
-
-    setIsAiTyping(prev => ({ ...prev, [chatId]: true }));
-
-    const payload = {
-      chatId: chatId,
-      latestCustomerMessage: lastCustomerMessage.text,
-      messageHistory: chat.messages?.slice(-10) || [], // Send recent history
-      settings: { tone: aiTone, speed: aiResponseSpeed } // Include settings
-    };
-
-    try {
-      const response = await fetch(SEND_PAYLOAD_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text(); // Try to get error details
-        throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
-      }
-
-      const result = await response.json();
-
-      if (result.status == "success" && result.message) { // Ensure message exists
-        addMessageToChat(result.chatId, {
-          sender: 'system', // Or 'ai' or 'merchant-ai'
-          text: result.message,
-          aiGenerated: true,
-          time: new Date().toISOString() // Use current time if backend doesn't provide
-        });
-      } else {
-        console.warn("AI response received but no text content found or status not success:", result);
-        // Optionally add a system message indicating no AI response
-        // addMessageToChat(chatId, {
-        //   sender: 'system',
-        //   text: 'AI did not generate a response.',
-        //   time: new Date().toISOString(),
-        //   isInfo: true // Custom flag
-        // });
-      }
-    } catch (error) {
-      console.error("Error triggering AI response:", error);
-      // Show error in UI
-      addMessageToChat(chatId, {
-        sender: 'system',
-        text: `⚠️ AI Error: ${error.message}`,
-        aiGenerated: false, // Mark as system error, not AI response
-        time: new Date().toISOString(),
-        isError: true // Custom flag for styling?
-      });
-    } finally {
-      // Ensure typing indicator is turned off for this chat
-      setIsAiTyping(prev => ({ ...prev, [chatId]: false }));
-    }
-  }, [chats, autoReplyEnabled, aiTone, aiResponseSpeed, isAiTyping, addMessageToChat]); // Dependencies
-
-  // Send a message from the merchant
-  const handleSendMessage = () => {
     const activeChat = getActiveChat();
-    if (!currentMessage.trim() || !activeChatId || !activeChat || isSending) return;
+    if (!activeChat) return;
 
-    setIsSending(true);
+    const messages = activeChat.messages || [];
+    const lastMessage = messages[messages.length - 1];
 
-    const newMerchantMessage = {
-      // ID will be added by addMessageToChat
-      sender: 'merchant',
-      text: currentMessage,
-      time: new Date().toISOString(), // Use current time for sent message
-      read: true, // Merchant messages are instantly "read" by them
-      aiGenerated: false
-    };
+    if (lastMessage?.sender === 'customer' &&
+      !isAiTyping[activeChatId] &&
+      !messages.some(m => m.aiGenerated && m.time > lastMessage.time)) {
 
-    const messageTextToSend = currentMessage; // Store before clearing
-    setCurrentMessage(''); // Clear input immediately
+      const isFirstCustomerMessage = messages.filter(m => m.sender === 'customer').length === 1;
 
-    // Optimistically update UI
-    addMessageToChat(activeChatId, newMerchantMessage);
-
-
-    // --- Simulate/Actual Backend Send ---
-    // Replace this promise with your actual API call to send the merchant's message
-    new Promise((resolve) => {
-      // --- Actual Backend Call (Example Structure) ---
-      /*
-      fetch(`${API_BASE_URL}/customer-service/chats/${activeChatId}/messages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', // Add Auth headers if needed },
-          body: JSON.stringify({ text: messageTextToSend, sender: 'merchant' })
-      })
-      .then(response => {
-          if (!response.ok) throw new Error(`Failed to send message: ${response.statusText}`);
-          return response.json(); // Assuming backend returns confirmation or the saved message
-      })
-      .then(resolve) // Resolve on success
-      .catch(reject); // Reject on failure
-      */
-
-      // --- Simulation ---
-      console.log("Simulating sending merchant message to backend:", messageTextToSend);
-      setTimeout(() => {
-        console.log("Merchant message 'sent' successfully (simulated).");
-        resolve(); // Simulate success
-        // You might receive the saved message with a backend ID here
-        // resolve({ id: 'backend-generated-id', ...newMerchantMessage });
-      }, 300); // Simulate network delay
-      // --- End Simulation ---
-    })
-      .then(() => {
-        // After successfully sending the merchant message (or simulating it)
-        // Decide *when* to trigger AI after a merchant message.
-        // Option A: Trigger AI to *potentially* suggest a follow-up based on merchant's message
-        // if (autoReplyEnabled) { triggerAIResponse(activeChatId); }
-
-        // Option B (More common): AI only responds to customer messages.
-        // No AI trigger needed here. The triggerAIResponse is mainly called
-        // when a new customer message arrives (simulated or from websocket/polling).
-        // In this app, it's triggered when selecting a potentially unread chat.
-
-      })
-      .catch(err => {
-        console.error("Failed to send merchant message:", err);
-        // TODO: Handle failure. Could revert the optimistic update,
-        // show an error indicator on the message, or put text back in input.
-        // Example: Put message back in input on failure (simple)
-        // setCurrentMessage(messageTextToSend);
-        // Example: Find the message and mark it as failed (more complex)
-        // find and update message in chats state
-      })
-      .finally(() => {
-        setIsSending(false); // Re-enable input field
-      });
-  };
-
-  // Toggle AI auto-reply setting
-  const handleToggleAutoReply = () => setAutoReplyEnabled(!autoReplyEnabled);
-
-  // Handle selecting a chat from the sidebar
-  const handleSelectChat = (chatId) => {
-    // 1. Only proceed if selecting a DIFFERENT chat
-    if (chatId === activeChatId) {
-      setChats(prevChats =>
-        prevChats.map(chat =>
-          (chat.id === chatId && chat.unread) ? { ...chat, unread: false } : chat
-        )
-      );
-      return;
+      if (isFirstCustomerMessage) {
+        triggerAIResponse(activeChatId);
+      }
     }
-
-    // 2. Update the active chat ID state
-    setActiveChatId(chatId);
-
-    // 3. Update the chats state to mark the selected chat as read
-    setChats(prevChats =>
-      prevChats.map(chat =>
-        chat.id === chatId ? { ...chat, unread: false } : chat
-      )
-    );
-    // Mark the newly selected chat as read
-    setChats(prevChats => prevChats.map(c =>
-      c.id === chatId ? { ...c, unread: false } : c
-    ));
-
-    // TODO: When to trigger AI?
-
-    // Check if AI should respond to the *last customer message* in the *newly selected* chat
-    // This might be useful if auto-reply was off or failed previously.
-    // More typically, AI responses happen when a *new* customer message arrives.
-    // The current implementation in useEffect already triggers AI for the first chat if applicable.
-    // This click handler could also trigger it if needed, but let's rely on the effect for now
-    // or integrate a websocket/polling mechanism to detect new customer messages.
-
-    // Minimal logic here: if selecting a chat with a customer message and auto-reply is on,
-    // and AI isn't already typing for *this* chat, consider triggering.
-    // The useEffect (scroll) might already handle this if selecting makes new content appear,
-    // but if the chat was just waiting for a response, this might be a place to trigger.
-  };
-
-  // Mark a chat as resolved (Placeholder - Needs backend integration)
-  const handleResolveChat = (chatId) => {
-    console.log(`Attempting to resolve chat ${chatId} (UI only)`);
-    setChats(prevChats => prevChats.map(chat =>
-      chat.id === chatId ? { ...chat, status: 'resolved' } : chat // Corrected: use 'chat' not 'c'
-    ));
-    // TODO: Add API call here to update chat status on the backend
-  };
-
-  // Use a common response template
-  const handleCommonResponseClick = (text) => {
-    setCurrentMessage(text); // Set, don't append for common responses
-    setIsMobileSettingsOpen(false); // Close settings panel on mobile after selection
-    // Need to ensure the input is focused after setting the value
-    // Using setTimeout to allow state update to potentially re-render input
-    setTimeout(() => {
-      document.querySelector('input[type="text"]')?.focus();
-    }, 0);
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarExpanded(!isSidebarExpanded)
-  }
+  }, [activeChatId, autoReplyEnabled, isAiTyping, triggerAIResponse, getActiveChat]);
 
   // --- JSX Rendering ---
 
@@ -361,7 +339,6 @@ const CustomerServicePage = () => {
   const currentActiveChatData = getActiveChat(); // Get the data for the active chat
 
   return (
-    // Added 'lg:overflow-hidden' potentially useful if content pushes boundaries before xl
     <div className="flex h-[calc(100vh-65px)] bg-gray-50 text-gray-900 relative font-sans box-border overflow-hidden"> {/* Added overflow-hidden */}
 
       {/* --- Sidebar (Chat List) --- */}
@@ -387,7 +364,7 @@ const CustomerServicePage = () => {
             {/* Always render Toggle Button */}
             <button
               onClick={toggleSidebar}
-              className={` hover:text-gray-800 hover:cursor-pointer ${isSidebarExpanded ? 'hover:bg-gray-100 rounded p-1 mb-5 text-gray-500' : 'mt-8.5 rounded text-black'}`}
+              className={` hover:text-gray-800 hover:cursor-pointer ${isSidebarExpanded ? 'hover:bg-gray-100 rounded p-1 mb-5 text-gray-500' : 'p-0.1 mt-8.5 rounded-xl text-black bg-white hover:bg-gray-100'}`}
               aria-label={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
               title={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
             >
@@ -470,7 +447,7 @@ const CustomerServicePage = () => {
                   <button
                     onClick={() => handleResolveChat(activeChatId)}
                     title="Mark this chat as resolved"
-                    className="flex items-center text-sm bg-gray-100 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded-lg font-medium transition-colors duration-150"
+                    className="flex items-center text-sm bg-gray-100 hover:bg-green-100 hover:cursor-pointer text-green-700 px-3 py-1.5 rounded-lg font-medium transition-colors duration-150"
                   >
                     <FiCheck className="mr-1" size={16} /> Mark Resolved
                   </button>
@@ -487,8 +464,6 @@ const CustomerServicePage = () => {
               </div>
             </div>
 
-            {/* Messages Area - Scrollable */}
-            {/* Removed max-h, flex-1 handles height, overflow-y-auto handles scrolling */}
             <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto basis-0 ">
               <div className="space-y-4">
                 {currentActiveChatData.messages?.map(message => (
@@ -520,14 +495,16 @@ const CustomerServicePage = () => {
                 {/* AI Typing Indicator */}
                 {isAiTyping[activeChatId] && (
                   <div className="flex justify-end">
-                    <div className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-sm max-w-min"> {/* Fit content */}
+                    <div className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-sm max-w-min">
                       <div className="flex items-center">
                         <span className="text-sm mr-2">AI is typing</span>
-                        {/* Simple dots */}
-                        <div className="typing-dots">
-                          <div className="dot !bg-white/60"></div>
-                          <div className="dot !bg-white/60"></div>
-                          <div className="dot !bg-white/60"></div>
+                        <div className="flex space-x-1">
+                          {/* Dot 1 */}
+                          <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-[typingDot_1.4s_infinite_ease-in-out_both]"></div>
+                          {/* Dot 2 */}
+                          <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-[typingDot_1.4s_infinite_ease-in-out_both_150ms]"></div>
+                          {/* Dot 3 */}
+                          <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-[typingDot_1.4s_infinite_ease-in-out_both_300ms]"></div>
                         </div>
                       </div>
                     </div>
@@ -554,7 +531,7 @@ const CustomerServicePage = () => {
                 <button
                   onClick={handleSendMessage}
                   disabled={isSending || !currentMessage.trim()}
-                  className={`bg-blue-600 text-white p-2 rounded-lg m-1 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150`}
+                  className={`bg-blue-600 text-white p-2 rounded-lg m-1 hover:bg-blue-700 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150`}
                   aria-label={isSending ? 'Sending message' : 'Send message'}
                   title={isSending ? 'Sending...' : 'Send message'}
                 >
@@ -628,7 +605,7 @@ const CustomerServicePage = () => {
                 <button
                   key={speed}
                   onClick={() => setAiResponseSpeed(speed)}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${aiResponseSpeed === speed ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 hover:cursor-pointer ${aiResponseSpeed === speed ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   aria-pressed={aiResponseSpeed === speed}
                 >
@@ -651,7 +628,7 @@ const CustomerServicePage = () => {
                 <button
                   key={tone}
                   onClick={() => setAiTone(tone)}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${aiTone === tone ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 hover:cursor-pointer ${aiTone === tone ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   aria-pressed={aiTone === tone}
                 >
@@ -675,7 +652,7 @@ const CustomerServicePage = () => {
                   key={key}
                   onClick={() => handleCommonResponseClick(value)}
                   title={`Use: ${value}`}
-                  className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 transition-colors duration-100 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                  className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 transition-colors duration-100 focus:outline-none focus:ring-1 focus:ring-blue-300 hover:cursor-pointer"
                 >
                   {key}
                 </button>
@@ -695,26 +672,7 @@ const CustomerServicePage = () => {
           ></div>
         )
       }
-
-      {/* You might want a button to toggle the sidebar on smaller screens */}
-      {/* Example (place in main chat header): */}
-      {/* {!activeChatId && ( // Only show if no chat is active on mobile, preventing overlap
-            <button
-                onClick={() => {
-                    // Logic to show the sidebar on small screens
-                    // This requires additional state to control mobile sidebar visibility
-                    // For now, the sidebar is just hidden below XL
-                    alert("Toggling mobile sidebar requires extra state/logic");
-                }}
-                className="p-2 rounded-lg hover:bg-gray-200 block xl:hidden"
-                aria-label="Show Chats"
-                title="Show Chats"
-            >
-                <FiMessageSquare size={20} />
-            </button>
-        )} */}
-
-    </div >
+    </div>
   );
 };
 
