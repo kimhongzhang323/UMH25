@@ -37,7 +37,7 @@ app.add_middleware(
 
 app.include_router(customer_service.router)
 
-chat_db = ChatDatabase()
+chat_db = ChatDatabase(chats=[], messages={})
 
 # Configuration
 MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Keep for reference
@@ -392,8 +392,13 @@ async def get_menu_item(item_id: int):
 
 
 @app.get("/get_all_chats")
-async def get_all_chats() -> List[Message]:
+async def get_all_chats() -> List[Chat]:
     return chat_db.get_all_chats()
+
+
+@app.get("/get_all_messages")
+async def get_all_messages(chat_id: str) -> List[Message]:
+    return chat_db.get_all_messages(chat_id)
 
 
 @app.post("/new_chat")
