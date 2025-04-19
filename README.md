@@ -67,7 +67,7 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
   - Intuitive design ensures accessibility for all users, regardless of technical expertise.  
   - Context-aware help system
   - Step-by-step guided workflows
-
+  - Unique Customer Record
 ---
 
 <a name="key-features"></a>
@@ -88,7 +88,6 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
 - Real-time notifications for:  
   - AI Anomaly Detection  
   - customer message
-
 
 - Customizable alert thresholds and notification channels:
   - Push notifications

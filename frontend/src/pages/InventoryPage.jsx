@@ -72,7 +72,7 @@ const InventoryPage = () => {
     },
     {
       id: 2,
-      name: "Shrimp",
+      name: "Fresh Shrimp",
       category: "Shrimp Ingredients",
       currentStock: 15,
       minStock: 20,
@@ -96,7 +96,7 @@ const InventoryPage = () => {
     },
     {
       id: 4,
-      name: "BBQ Pork",
+      name: "BBQ Pork (Char Siu)",
       category: "BBQ Pork Ingredients",
       currentStock: 30,
       minStock: 25,
@@ -120,15 +120,63 @@ const InventoryPage = () => {
     },
     {
       id: 6,
-      name: "Mango Puree",
+      name: "Fresh Mango",
       category: "Dessert Ingredients",
-      currentStock: 5,
+      currentStock: 12,
       minStock: 15,
       unit: "kg",
-      lastDelivery: "2025-04-16",
-      nextDelivery: "2025-04-23",
+      lastDelivery: "2025-04-17",
+      nextDelivery: "2025-04-27",
       usageRate: "2/day",
-      status: "critical"
+      status: "low"
+    },
+    {
+      id: 7,
+      name: "Rice Flour",
+      category: "Wrappers/Dough",
+      currentStock: 45,
+      minStock: 30,
+      unit: "kg",
+      lastDelivery: "2025-04-16",
+      nextDelivery: "2025-04-26",
+      usageRate: "4/day",
+      status: "adequate"
+    },
+    {
+      id: 8,
+      name: "Chives",
+      category: "Dumpling Ingredients",
+      currentStock: 5,
+      minStock: 8,
+      unit: "kg",
+      lastDelivery: "2025-04-19",
+      nextDelivery: "2025-04-23",
+      usageRate: "1.5/day",
+      status: "low"
+    },
+    {
+      id: 9,
+      name: "Bamboo Steamers",
+      category: "Other",
+      currentStock: 40,
+      minStock: 25,
+      unit: "pieces",
+      lastDelivery: "2025-04-01",
+      nextDelivery: "2025-05-01",
+      usageRate: "0.2/day",
+      status: "adequate"
+    },
+    {
+      id: 10,
+      name: "Lotus Leaves",
+      category: "Other",
+      currentStock: 200,
+      minStock: 150,
+      unit: "pieces",
+      lastDelivery: "2025-04-05",
+      nextDelivery: "2025-04-25",
+      usageRate: "15/day",
+      status: "adequate"
     }
   ];
 

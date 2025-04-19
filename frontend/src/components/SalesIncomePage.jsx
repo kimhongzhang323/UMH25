@@ -46,9 +46,9 @@ const SalesIncomePage = () => {
           totalOrders: 385,
           avgOrderValue: 32.47,
           topSellingItems: [
-            { name: "Zinger Burger", sales: 142, revenue: 4615 },
-            { name: "Hot & Spicy Chicken", sales: 128, revenue: 4160 },
-            { name: "Popcorn Chicken", sales: 115, revenue: 3450 }
+            { name: "Steamed BBQ Pork Buns", sales: 142, revenue: 4615 },
+            { name: "Pork Siu Mai", sales: 128, revenue: 4160 },
+            { name: "Shrimp Har Gow", sales: 115, revenue: 3450 }
           ],
           salesTrend: [
             { day: "Mon", sales: 45, revenue: 1462.5 },
@@ -60,9 +60,9 @@ const SalesIncomePage = () => {
             { day: "Sun", sales: 30, revenue: 975 }
           ],
           stockPrediction: [
-            { item: "Zinger Patty", current: 42, predicted: 15, status: "low" },
-            { item: "Buns", current: 60, predicted: 30, status: "low" },
-            { item: "Cheese", current: 200, predicted: 90, status: "adequate" }
+            { item: "Dumpling Wrappers", current: 500, predicted: 1800, status: "critical" },
+            { item: "Ground Pork", current: 25, predicted: 40, status: "low" },
+            { item: "Shrimp", current: 30, predicted: 35, status: "adequate" }
           ],
           grabAdPerformance: {
             impressions: 1250,
@@ -76,9 +76,9 @@ const SalesIncomePage = () => {
           totalOrders: 1500,
           avgOrderValue: 32.50,
           topSellingItems: [
-            { name: "Zinger Burger", sales: 550, revenue: 17875 },
-            { name: "Hot & Spicy Chicken", sales: 500, revenue: 16250 },
-            { name: "Twister Wrap", sales: 450, revenue: 14625 }
+            { name: "Steamed BBQ Pork Buns", sales: 550, revenue: 17875 },
+            { name: "Pork Siu Mai", sales: 500, revenue: 16250 },
+            { name: "Shrimp Har Gow", sales: 450, revenue: 14625 }
           ],
           salesTrend: [
             { week: "Week 1", sales: 350, revenue: 11375 },
@@ -87,9 +87,9 @@ const SalesIncomePage = () => {
             { week: "Week 4", sales: 375, revenue: 12187.5 }
           ],
           stockPrediction: [
-            { item: "Zinger Patty", current: 42, predicted: 60, status: "critical" },
-            { item: "Buns", current: 60, predicted: 45, status: "low" },
-            { item: "Cheese", current: 200, predicted: 150, status: "adequate" }
+            { item: "Dumpling Wrappers", current: 500, predicted: 2000, status: "critical" },
+            { item: "Ground Pork", current: 25, predicted: 45, status: "low" },
+            { item: "Shrimp", current: 30, predicted: 40, status: "adequate" }
           ],
           grabAdPerformance: {
             impressions: 5200,
@@ -368,13 +368,13 @@ const SalesIncomePage = () => {
             </h2>
             <div className="space-y-4">
               <div className="p-3 bg-purple-50 rounded-lg">
-                <h4 className="font-medium text-purple-800 mb-1">Increase Zinger Burger Stock</h4>
+                <h4 className="font-medium text-purple-800 mb-1">Increase Steamed BBQ Pork Buns Stock</h4>
                 <p className="text-sm text-purple-700">
                   Projected to sell {Math.round(salesData.topSellingItems[0].sales * 1.15)} next {timePeriod}
                 </p>
               </div>
               <div className="p-3 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-800 mb-1">Promote Hot & Spicy Chicken</h4>
+                <h4 className="font-medium text-blue-800 mb-1">Promote Pork Siu Mai</h4>
                 <p className="text-sm text-blue-700">
                   High margin item with 15% conversion potential
                 </p>
