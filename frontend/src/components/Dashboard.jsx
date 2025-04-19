@@ -5,6 +5,7 @@ import OrderVolumeChart from '../charts/OrderVolumeChart';
 import jsPDF from 'jspdf';
 
 const Dashboard = () => {
+    // AI Features State
   // Function to handle PDF export
   const handleExportPDF = () => {
     const doc = new jsPDF();
@@ -56,7 +57,9 @@ const Dashboard = () => {
     popularTimes: [],
     sentimentAnalysis: {}
   });
+  
 
+  
   const [anomalies, setAnomalies] = useState([]);
 
   const [chatOpen, setChatOpen] = useState(false);
@@ -210,6 +213,56 @@ const Dashboard = () => {
           orderVolume: orderVolumeData,
           recentOrders
         });
+        setSalesPredictions({
+          nextWeekPrediction: 14250,
+          confidenceLevel: 85,
+          recommendedPrep: {
+            inventoryIncrease: "20%",
+            staffIncrease: "2 extra staff",
+            timing: "Friday dinner rush"
+          }
+        });
+        setMenuRecommendations({
+          bestPerformers: ["Pork Siu Mai", "Steamed BBQ Pork Buns", "Shrimp Har Gow"],
+          underperformers: ["BBQ Chicken Feet", "Century Egg Porridge"],
+          suggestedCombos: [
+            { items: ["Shrimp Har Gow", "Century Egg Porridge"], projectedIncrease: 15 },
+            { items: ["BBQ Chicken Feet", "Mango Pudding"], projectedIncrease: 10 },
+            { items: ["Pork Siu Mai", "Steamed BBQ Pork Buns"], projectedIncrease: 8 }
+          ]
+        });
+
+        setCustomerInsights({
+          customerSegments: [
+            { type: "Young Adults", percentage: 45 },
+            { type: "Families", percentage: 30 },
+            { type: "Professionals", percentage: 25 }
+          ],
+          popularTimes: [
+            { period: "12:00-14:00", percentage: 35 },
+            { period: "18:00-20:00", percentage: 40 },
+            { period: "20:00-22:00", percentage: 25 }
+          ],
+          sentimentAnalysis: {
+            positive: 78,
+            neutral: 18,
+            negative: 4
+          }
+        });
+        setAnomalies([
+          {
+            type: "Inventory Shortage",
+            description: "Pork Siu Mai running low (12% below optimal)",
+            severity: "High",
+            time: "10:30 AM"
+          },
+          {
+            type: "Staffing Alert",
+            description: "Predicted understaffing during Friday dinner rush",
+            severity: "Medium",
+            time: "Yesterday"
+          }
+        ]);
 
         // ... rest of your AI initialization code ...
       } catch (error) {
