@@ -259,7 +259,10 @@ export default function Chatbot() {
 
     fetch(BACKEND_URL + "/new_chat", {
       method: "POST",
-      body: JSON.stringify(newChat)
+      body: JSON.stringify(newChat),
+      headers: {
+        "Content-Type": "application/json"
+      }
     })
 
     setChatList(prev => [newChat, ...prev]);
