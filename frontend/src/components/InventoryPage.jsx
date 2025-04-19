@@ -324,6 +324,57 @@ const InventoryPage = () => {
           </div>
         </div>
 
+        {/* Inventory Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Total Items</p>
+                <p className="text-2xl font-medium">{inventorySummary.totalItems}</p>
+              </div>
+              <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                <FiPackage size={20} />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Adequate Stock</p>
+                <p className="text-2xl font-medium text-green-600">{inventorySummary.adequateStock}</p>
+              </div>
+              <div className="p-2 rounded-full bg-green-100 text-green-600">
+                <FiCheckCircle size={20} />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Low Stock</p>
+                <p className="text-2xl font-medium text-amber-600">{inventorySummary.lowStock}</p>
+              </div>
+              <div className="p-2 rounded-full bg-amber-100 text-amber-600">
+                <FiAlertTriangle size={20} />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Critical Stock</p>
+                <p className="text-2xl font-medium text-red-600">{inventorySummary.criticalStock}</p>
+              </div>
+              <div className="p-2 rounded-full bg-red-100 text-red-600">
+                <FiAlertTriangle size={20} />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Inventory Controls */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
