@@ -46,14 +46,14 @@ async def get_chats():
             "id": 3,
             "customer": "Rajesh Kumar",
             "avatar": "https://randomuser.me/api/portraits/men/3.jpg",
-            "lastMessage": "Is the Hot & Spicy Chicken very spicy?",
+            "lastMessage": "Is the Hot & Spicy Chicken Feet very spicy?",
             "status": "pending",
             "unread": True,
             "messages": [
                 {
                     "id": 1,
                     "sender": "customer",
-                    "text": "I want to try the Hot & Spicy Chicken but I have low spice tolerance. How spicy is it?",
+                    "text": "I want to try the Hot & Spicy Chicken Feet but I have low spice tolerance. How spicy is it?",
                     "time": "2025-04-10T09:45:00",
                     "read": True
                 }
@@ -87,7 +87,7 @@ async def get_chats():
                 {
                     "id": 1,
                     "sender": "customer",
-                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
+                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Steamed BBQ Pork Buns",
                     "time": "2025-04-10T14:30:00",
                     "read": True
                 },
@@ -119,7 +119,7 @@ async def get_chats():
                 {
                     "id": 1,
                     "sender": "customer",
-                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
+                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Steamed BBQ Pork Buns",
                     "time": "2025-04-10T14:30:00",
                     "read": True
                 },
@@ -151,7 +151,7 @@ async def get_chats():
                 {
                     "id": 1,
                     "sender": "customer",
-                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
+                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Steamed BBQ Pork Buns",
                     "time": "2025-04-10T14:30:00",
                     "read": True
                 },
@@ -183,7 +183,7 @@ async def get_chats():
                 {
                     "id": 1,
                     "sender": "customer",
-                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
+                    "text": "Hello, I just received my order #ORD-385 but it was missing 2 Steamed BBQ Pork Buns",
                     "time": "2025-04-10T14:30:00",
                     "read": True
                 },
