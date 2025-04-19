@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut, UtensilsCrossed } from 'lucide-react';
+import { User, UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut, UtensilsCrossed } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -154,13 +154,6 @@ export default function Navbar() {
             <DollarSign className="h-5 w-5 mr-2" />
             Sales
           </a>
-          <a
-            href="/profile"
-            className="inline-flex items-center space-x-3 px-3 py-3 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
-          >
-            <Settings className="h-5 w-5 mr-2" />
-            Profile
-          </a>
 
           <a
             href="/logout"
@@ -262,13 +255,6 @@ export default function Navbar() {
                   <UserCog className="mr-3 h-5 w-5" />
                   Staff
                 </a>
-                <a
-                  href="/profile"
-                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Profile
-                </a>
               </div>
             </div>
 
@@ -286,7 +272,15 @@ export default function Navbar() {
                   </span>
                 )}
               </button>
-
+              <button
+                className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer transition-colors relative"
+                aria-label="Profile"
+              >
+                <a href="/profile" className="flex items-center">
+                  <User size={25} />
+                </a>
+                
+              </button>
               {isNotificationsOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
                   <div className="px-4 py-3 border-b border-gray-100">
