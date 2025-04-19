@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional, Annotated
 # from transformers import AutoTokenizer, AutoModelForCausalLM # Comment out real imports
@@ -138,6 +139,21 @@ class DocumentStore:
 
 
 document_store = DocumentStore()
+
+
+# Used by MerchantInfo
+class Location(BaseModel):
+    region: str
+    market_type: str
+
+
+class MerchantInfo(BaseModel):
+    merchant_type: str
+    product_type: str
+    business_size: str
+    challenges: List[str]
+    location: Location
+    language: str
 
 
 def process_csv_row(row: dict, config: CSVConfig) -> Document:
@@ -291,8 +307,10 @@ async def get_document_count():
 
 
 @app.put("/update_merchant_info")
-async def update_merchant_info():
-    pass
+async def update_merchant_info(merchant_info: MerchantInfo):
+    # Update merchant info somewhere
+    # Possibly just a global variable or database
+    return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.post("/send_chat")
@@ -301,6 +319,7 @@ async def chat_to_llm(
     chat_id: Annotated[int, Form()],
     file: Annotated[UploadFile, File()]
 ):
+    # Send data to LLM for processing
     return {
         "response": "Womp Womp",
         "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
