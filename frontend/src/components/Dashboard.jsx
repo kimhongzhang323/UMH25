@@ -8,19 +8,19 @@ const Dashboard = () => {
   // Function to handle PDF export
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    
+
     // Add dashboard content to PDF
     doc.text('Dim Sum Delights Analytics Report', 10, 10);
     doc.text(`Total Sales: ${formatCurrency(dashboardData.totalSales)}`, 10, 20);
     doc.text(`Total Orders: ${dashboardData.totalOrders}`, 10, 30);
     doc.text(`Average Order Value: ${formatCurrency(dashboardData.averageOrderValue)}`, 10, 40);
-    
+
     // Add top selling items
     doc.text('Top Selling Items:', 10, 50);
     dashboardData.topSellingItems.forEach((item, index) => {
       doc.text(`${index + 1}. ${item.name}: ${item.sales} orders`, 15, 60 + (index * 10));
     });
-    
+
     // Save the PDF
     doc.save('dimsum-analytics-report.pdf');
   };
@@ -71,21 +71,21 @@ const Dashboard = () => {
         // For now, we'll use a simulated import of CSV data
         const response = await fetch('/data/DimSumDelight_Full.csv');
         const csvData = await response.text();
-        
+
         // Parse CSV data
         const rows = csvData.split('\n').slice(1); // Skip header row
         const orders = [];
         const itemsMap = new Map();
         const customers = new Set();
         let totalSales = 0;
-        
+
         // Process each row
         rows.forEach(row => {
           if (!row.trim()) return; // Skip empty rows
-          
+
           const columns = row.split(',');
           if (columns.length < 15) return; // Skip malformed rows
-    
+
           // Safely parse date with fallback
           let orderTime;
           try {
@@ -97,7 +97,7 @@ const Dashboard = () => {
           } catch (e) {
             orderTime = new Date();
           }
-    
+
           const hour = orderTime.getHours();
           let dateStr;
           try {
@@ -106,15 +106,15 @@ const Dashboard = () => {
             // Fallback to current date if ISO string conversion fails
             dateStr = new Date().toISOString().split('T')[0];
           }
-    
+
           const itemName = columns[6] || 'Unknown Item';
           const itemPrice = parseFloat(columns[7]) || 0;
           const orderValue = parseFloat(columns[13]) || 0;
           const eaterId = columns[14] || 'unknown-customer';
-          
+
           // Track unique customers
           customers.add(eaterId);
-          
+
           // Track item sales
           if (itemsMap.has(itemName)) {
             const itemData = itemsMap.get(itemName);
@@ -126,10 +126,10 @@ const Dashboard = () => {
               totalRevenue: itemPrice
             });
           }
-          
+
           // Add to total sales
           totalSales += orderValue;
-          
+
           // Create order object
           orders.push({
             id: columns[8] || `order-${Math.random().toString(36).substr(2, 8)}`,
@@ -142,19 +142,19 @@ const Dashboard = () => {
             hour: hour
           });
         });
-        
+
         // Calculate peak hours
-        const hourCounts = Array(24).fill(0).map((_, hour) => ({ 
-          hour, 
-          orders: 0 
+        const hourCounts = Array(24).fill(0).map((_, hour) => ({
+          hour,
+          orders: 0
         }));
-        
+
         orders.forEach(order => {
           if (order.hour >= 0 && order.hour < 24) {
             hourCounts[order.hour].orders++;
           }
         });
-        
+
         // Calculate order volume by date
         const dateCounts = {};
         orders.forEach(order => {
@@ -164,7 +164,7 @@ const Dashboard = () => {
             dateCounts[order.date] = 1;
           }
         });
-        
+
         // Convert to array for chart
         const orderVolumeData = Object.keys(dateCounts)
           .map(date => ({
@@ -173,7 +173,7 @@ const Dashboard = () => {
           }))
           .sort((a, b) => new Date(a.date) - new Date(b.date))
           .slice(-7); // Last 7 days
-        
+
         // Get top selling items
         const topSellingItems = Array.from(itemsMap.entries())
           .map(([name, data]) => ({
@@ -183,10 +183,10 @@ const Dashboard = () => {
           }))
           .sort((a, b) => b.sales - a.sales)
           .slice(0, 5);
-        
+
         // Calculate average order value
         const averageOrderValue = orders.length > 0 ? totalSales / orders.length : 0;
-        
+
         // Get recent orders (last 5)
         const recentOrders = orders
           .sort((a, b) => {
@@ -197,7 +197,7 @@ const Dashboard = () => {
             }
           })
           .slice(0, 5);
-        
+
         // Set dashboard data
         setDashboardData({
           loading: false,
@@ -210,14 +210,14 @@ const Dashboard = () => {
           orderVolume: orderVolumeData,
           recentOrders
         });
-        
+
         // ... rest of your AI initialization code ...
       } catch (error) {
         console.error("Error processing data:", error);
         setDashboardData(prev => ({ ...prev, loading: false }));
       }
     };
-    
+
     fetchAndProcessData();
   }, []);
 
@@ -276,10 +276,10 @@ const Dashboard = () => {
         {/* Metrics Grid - Updated with real data */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-8">
           {/* Total Sales */}
-          <MetricCard 
-            title="Total Sales" 
-            value={formatCurrency(dashboardData.totalSales)} 
-            change="+10% predicted next week" 
+          <MetricCard
+            title="Total Sales"
+            value={formatCurrency(dashboardData.totalSales)}
+            change="+10% predicted next week"
             icon={
               <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -288,10 +288,10 @@ const Dashboard = () => {
           />
 
           {/* Total Orders */}
-          <MetricCard 
-            title="Total Orders" 
-            value={dashboardData.totalOrders} 
-            change={`${dashboardData.uniqueCustomers} unique customers`} 
+          <MetricCard
+            title="Total Orders"
+            value={dashboardData.totalOrders}
+            change={`${dashboardData.uniqueCustomers} unique customers`}
             icon={
               <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -300,10 +300,10 @@ const Dashboard = () => {
           />
 
           {/* Average Order Value */}
-          <MetricCard 
-            title="Avg. Order Value" 
-            value={formatCurrency(dashboardData.averageOrderValue)} 
-            change="Based on recent trends" 
+          <MetricCard
+            title="Avg. Order Value"
+            value={formatCurrency(dashboardData.averageOrderValue)}
+            change="Based on recent trends"
             icon={
               <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 11V9a2 2 0 00-2-2m2 4v4a2 2 0 104 0v-1m-4-3H9m2 0h4m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -312,10 +312,10 @@ const Dashboard = () => {
           />
 
           {/* Unique Customers */}
-          <MetricCard 
-            title="Unique Customers" 
-            value={dashboardData.uniqueCustomers} 
-            change={`${Math.round((dashboardData.uniqueCustomers / dashboardData.totalOrders) * 100)}% of orders`} 
+          <MetricCard
+            title="Unique Customers"
+            value={dashboardData.uniqueCustomers}
+            change={`${Math.round((dashboardData.uniqueCustomers / dashboardData.totalOrders) * 100)}% of orders`}
             icon={
               <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -351,8 +351,8 @@ const Dashboard = () => {
             </p>
             <div className="mb-3">
               <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-purple-600 h-2.5 rounded-full" 
+                <div
+                  className="bg-purple-600 h-2.5 rounded-full"
                   style={{width: `${salesPredictions.confidenceLevel}%`}}
                 ></div>
               </div>
@@ -376,7 +376,7 @@ const Dashboard = () => {
               </svg>
               <h3 className="text-lg font-medium text-gray-800">AI Menu Optimizer</h3>
             </div>
-            
+
             <div className="mb-4">
               <h4 className="font-medium text-gray-700 mb-2">Top Performers</h4>
               <div className="flex flex-wrap gap-2">
@@ -387,7 +387,7 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="mb-4">
               <h4 className="font-medium text-gray-700 mb-2">Underperformers</h4>
               <div className="flex flex-wrap gap-2">
@@ -398,7 +398,7 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-medium text-gray-700 mb-2">Suggested Combos</h4>
               <ul className="space-y-2">
@@ -421,7 +421,7 @@ const Dashboard = () => {
               </svg>
               <h3 className="text-lg font-medium text-gray-800">AI Anomaly Detection</h3>
             </div>
-            
+
             {anomalies.length > 0 ? (
               <div className="space-y-3">
                 {anomalies.map((anomaly, i) => (
@@ -451,7 +451,7 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-            
+
         {/* Charts Section - Using real data */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Order Volume Trend */}
@@ -493,7 +493,7 @@ const Dashboard = () => {
             </svg>
             <h2 className="text-xl font-light text-gray-800">AI Customer Insights</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <h3 className="font-medium text-gray-700 mb-3">Customer Segments</h3>
@@ -506,14 +506,14 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <h3 className="font-medium text-gray-700 mb-3">Customer Sentiment</h3>
               <div className="space-y-2">
                 <div className="flex items-center">
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mr-3">
-                    <div 
-                      className="bg-green-600 h-2.5 rounded-full" 
+                    <div
+                      className="bg-green-600 h-2.5 rounded-full"
                       style={{width: `${customerInsights.sentimentAnalysis.positive}%`}}
                     ></div>
                   </div>
@@ -523,8 +523,8 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center">
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mr-3">
-                    <div 
-                      className="bg-yellow-500 h-2.5 rounded-full" 
+                    <div
+                      className="bg-yellow-500 h-2.5 rounded-full"
                       style={{width: `${customerInsights.sentimentAnalysis.neutral}%`}}
                     ></div>
                   </div>
@@ -534,8 +534,8 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center">
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mr-3">
-                    <div 
-                      className="bg-red-600 h-2.5 rounded-full" 
+                    <div
+                      className="bg-red-600 h-2.5 rounded-full"
                       style={{width: `${customerInsights.sentimentAnalysis.negative}%`}}
                     ></div>
                   </div>
@@ -545,7 +545,7 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h3 className="font-medium text-gray-700 mb-3">Popular Visit Times</h3>
               <ul className="space-y-2">
@@ -641,7 +641,7 @@ const Dashboard = () => {
                 </p>
               </div>
               <div>
-                <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                <button className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:cursor-pointer">
                   View all orders →
                 </button>
               </div>
@@ -658,8 +658,8 @@ const Dashboard = () => {
               {dashboardData.topSellingItems.map((item, index) => (
                 <div key={item.name} className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
-                    index === 0 ? 'bg-red-100 text-red-600' : 
-                    index === 1 ? 'bg-blue-100 text-blue-600' : 
+                    index === 0 ? 'bg-red-100 text-red-600' :
+                    index === 1 ? 'bg-blue-100 text-blue-600' :
                     index === 2 ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-600'
                   }`}>
                     {index + 1}
@@ -680,8 +680,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-xl font-light text-gray-800 mb-6">Quick Actions</h2>
             <div className="space-y-5">
-              <a 
-                href="/reports" 
+              <a
+                href="/reports"
                 className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
               >
                 <span>View Detailed Reports</span>
@@ -690,8 +690,8 @@ const Dashboard = () => {
                 </svg>
               </a>
 
-              <a 
-                href="#" 
+              <a
+                href="#"
                 onClick={handleExportPDF}
                 className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
               >
@@ -700,8 +700,8 @@ const Dashboard = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
               </a>
-              <a 
-                href="/inventory" 
+              <a
+                href="/inventory"
                 className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
               >
                 <span>Manage Inventory</span>
@@ -719,7 +719,7 @@ const Dashboard = () => {
         <div className="fixed bottom-4 right-4 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
           <div className="bg-blue-600 text-white p-3 rounded-t-xl flex justify-between items-center">
             <h3 className="font-medium">AI Assistant</h3>
-            <button onClick={() => setChatOpen(false)} className="text-white hover:text-blue-200">
+            <button onClick={() => setChatOpen(false)} className="text-white hover:text-blue-200 ">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -756,9 +756,9 @@ const Dashboard = () => {
       )}
 
       {/* Floating chat button */}
-      <button 
+      <button
         onClick={() => setChatOpen(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 hover:cursor-pointer transition-colors"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -771,7 +771,7 @@ const Dashboard = () => {
 // Reusable metric card component
 const MetricCard = ({ title, value, change, icon }) => {
   const isPositive = change && change.includes('+');
-  
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
       <div className="flex items-center mb-4">

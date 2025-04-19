@@ -387,7 +387,7 @@ const CustomerServicePage = () => {
             {/* Always render Toggle Button */}
             <button
               onClick={toggleSidebar}
-              className={` hover:text-gray-800 hover:cursor-pointer ${isSidebarExpanded ? 'hover:bg-gray-100 rounded p-1 mb-5 text-gray-500' : 'mt-8.5 rounded text-black'}`}
+              className={` hover:text-gray-800 hover:cursor-pointer ${isSidebarExpanded ? 'hover:bg-gray-100 rounded p-1 mb-5 text-gray-500' : 'p-0.1 mt-8.5 rounded-xl text-black bg-white hover:bg-gray-100'}`}
               aria-label={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
               title={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
             >
@@ -470,7 +470,7 @@ const CustomerServicePage = () => {
                   <button
                     onClick={() => handleResolveChat(activeChatId)}
                     title="Mark this chat as resolved"
-                    className="flex items-center text-sm bg-gray-100 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded-lg font-medium transition-colors duration-150"
+                    className="flex items-center text-sm bg-gray-100 hover:bg-green-100 hover:cursor-pointer text-green-700 px-3 py-1.5 rounded-lg font-medium transition-colors duration-150"
                   >
                     <FiCheck className="mr-1" size={16} /> Mark Resolved
                   </button>
@@ -554,7 +554,7 @@ const CustomerServicePage = () => {
                 <button
                   onClick={handleSendMessage}
                   disabled={isSending || !currentMessage.trim()}
-                  className={`bg-blue-600 text-white p-2 rounded-lg m-1 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150`}
+                  className={`bg-blue-600 text-white p-2 rounded-lg m-1 hover:bg-blue-700 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150`}
                   aria-label={isSending ? 'Sending message' : 'Send message'}
                   title={isSending ? 'Sending...' : 'Send message'}
                 >
@@ -628,7 +628,7 @@ const CustomerServicePage = () => {
                 <button
                   key={speed}
                   onClick={() => setAiResponseSpeed(speed)}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${aiResponseSpeed === speed ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 hover:cursor-pointer ${aiResponseSpeed === speed ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   aria-pressed={aiResponseSpeed === speed}
                 >
@@ -651,7 +651,7 @@ const CustomerServicePage = () => {
                 <button
                   key={tone}
                   onClick={() => setAiTone(tone)}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 ${aiTone === tone ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-150 hover:cursor-pointer ${aiTone === tone ? 'bg-purple-100 text-purple-800 font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   aria-pressed={aiTone === tone}
                 >
@@ -675,7 +675,7 @@ const CustomerServicePage = () => {
                   key={key}
                   onClick={() => handleCommonResponseClick(value)}
                   title={`Use: ${value}`}
-                  className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 transition-colors duration-100 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                  className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 transition-colors duration-100 focus:outline-none focus:ring-1 focus:ring-blue-300 hover:cursor-pointer"
                 >
                   {key}
                 </button>
