@@ -14,9 +14,14 @@ import csv
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import os
+import json
+import logging
+
 import customer_service
 from chat_database import Chat, ChatDatabase, Message
 from rag_pipeline import query_rag  # Import the query_rag function
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Llama RAG API with CSV Support (Mocked)",
@@ -60,7 +65,7 @@ TEMPERATURE = 0.7
 CSV_CHUNK_SIZE = 1000  # Number of rows to process at a time for large CSVs
 
 # Load models (mocked for testing)
-TESTING = False
+TESTING = True
 
 if not TESTING:
     try:
@@ -441,12 +446,20 @@ class ChatRequest(BaseModel):
 async def chat(request: ChatRequest):
     try:
         # Fetch the response from the RAG pipeline
-        response_text = query_rag(request.query)
-        return JSONResponse(content={
-            "response": response_text,
-            "image_url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=b9cf29a75035949e2c8160df1b2904d70c337ee8777e152b9ecfad9e8a9a70a4"
-        })
+        response_text = query_rag(request.query).replace('\'', '"')
+        try:
+            data = json.loads(response_text)
+
+            return JSONResponse(content={
+                "response": data["text"],
+                "image_url": "https://localhost:8000" + data["image"]})
+        except Exception as e:
+            logger.error(e)
+            return JSONResponse(content={
+                "response": response_text})
+
     except Exception as e:
+        logger.error(e)
         # Handle errors and return a meaningful message
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
