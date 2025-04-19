@@ -156,6 +156,15 @@ class MerchantInfo(BaseModel):
     language: str
 
 
+# ID should be UUID v4
+# timestamps are Unix timestamp
+class Chat(BaseModel):
+    id: str
+    title: str
+    preview: str
+    timestamp: int
+
+
 def process_csv_row(row: dict, config: CSVConfig) -> Document:
     """Convert a CSV row into a Document"""
     # Combine specified text columns
@@ -320,10 +329,50 @@ async def chat_to_llm(
     file: Annotated[UploadFile, File()]
 ):
     # Send data to LLM for processing
+    # Save chat to database
     return {
         "response": "Womp Womp",
         "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
     }
+
+
+@app.get("/get_all_chats")
+async def get_all_chats() -> list[Chat]:
+    # Read database for list of chats
+    # Note that messages are NOT part of this data
+    # should compare to another database table with the matching chat ID
+    return [
+        Chat(
+            id="f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            title="Customer Engagement Strategies",
+            preview="Let's discuss ways to improve your customer retention rates.",
+            timestamp=1713542400
+        ),
+        Chat(
+            id="38d28c87-5e13-4bd5-a3ba-e88f87e7838c",
+            title="Inventory Management",
+            preview="I've analyzed your stock patterns and identified optimization opportunities.",
+            timestamp=1713543600
+        ),
+        Chat(
+            id="b0e46453-7184-41e5-b14b-9f5a9d29b456",
+            title="Marketing Campaign Review",
+            preview="How can we adjust your social media advertising to increase conversions?",
+            timestamp=1713545400
+        ),
+        Chat(
+            id="65a7c97d-f239-4c5d-89cc-5a37f5b1cdf3",
+            title="Sales Analytics Report",
+            preview="Your Q1 numbers show interesting patterns in customer buying habits.",
+            timestamp=1713549000
+        ),
+        Chat(
+            id="c29143a3-e83d-48e5-ac8a-f51277cf72ea",
+            title="E-commerce Platform Upgrade",
+            preview="I recommend these improvements to your online checkout process.",
+            timestamp=1713552600
+        )
+    ]
 
 
 if __name__ == "__main__":
