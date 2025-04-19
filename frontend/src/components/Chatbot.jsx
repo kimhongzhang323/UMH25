@@ -21,6 +21,7 @@ import {
   Languages
 } from 'lucide-react';
 import jsConvert from 'js-convert-case';
+import { v4 as uuidV4 } from 'uuid';
 
 // Component
 export default function Chatbot() {
@@ -238,7 +239,7 @@ export default function Chatbot() {
     if (!input.trim() || loading) return;
 
     const userMsg = {
-      id: Date.now().toString(),
+      id: uuidV4(),
       text: input,
       sender: 'user',
       timestamp: new Date(),
@@ -303,7 +304,7 @@ export default function Chatbot() {
     if (currentChatMessages.length <= 1) return;
 
     const newChat = {
-      id: `chat${Date.now()}`,
+      id: `chat-${uuidV4()}`,
       title: currentChatMessages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
       preview: currentChatMessages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
       timestamp: new Date(),
