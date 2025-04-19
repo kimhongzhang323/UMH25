@@ -202,9 +202,11 @@ def process_csv_row(row: dict, config: CSVConfig) -> Document:
 
     return Document(text=text, metadata=metadata, source="csv")
 
+
 @app.options("/{path:path}")
 async def options_handler(path: str):
     return JSONResponse(status_code=200)
+
 
 @app.middleware("http")
 async def add_cors_header(request: Request, call_next):
@@ -213,6 +215,7 @@ async def add_cors_header(request: Request, call_next):
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response
+
 
 def generate_prompt(question: str, context: List[str] = None) -> str:
     if context:
@@ -424,6 +427,7 @@ async def new_chat(chat: Chat):
 class ChatRequest(BaseModel):
     query: str
     chat_id: str = "default"
+
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):

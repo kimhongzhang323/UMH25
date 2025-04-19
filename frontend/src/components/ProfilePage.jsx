@@ -8,7 +8,7 @@ const ProfilePage = () => {
     name: "Dim Sum Delights",
     location: "Petaling Jaya, Selangor",
     joinDate: "2024-01-10",
-    avatar: "https://logo.clearbit.com/dimsumdelight.com",
+    avatar: "https://sdmntprwestus.oaiusercontent.com/files/00000000-5e78-6230-a7e7-a04557c4a34d/raw?se=2025-04-19T18%3A24%3A50Z&sp=r&sv=2024-08-04&sr=b&scid=fe4e0fd9-c1e1-5c7e-a8ef-2b6c83abf005&skoid=e872f19f-7b7f-4feb-9998-20052dec61d6&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-04-18T19%3A25%3A35Z&ske=2025-04-19T19%3A25%3A35Z&sks=b&skv=2024-08-04&sig=KYkDw3v0jpEKA51G/3n8m8%2BMQgaSBCERLb2G6uuGz5g%3D",
     tier: "Gold",
     level: 3,
     points: 1250,
