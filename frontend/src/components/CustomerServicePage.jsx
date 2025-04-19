@@ -35,7 +35,7 @@ const CustomerServicePage = () => {
   // --- Refs ---
   const messagesEndRef = useRef(null); // Ref for the marker div at the end of messages (optional usage)
   const chatContainerRef = useRef(null); // Ref for the scrollable messages container
-    // --- Callbacks & Functions ---
+  // --- Callbacks & Functions ---
 
   // Get the data for the currently active chat
   const getActiveChat = useCallback(() => {
@@ -74,6 +74,7 @@ const CustomerServicePage = () => {
     const lastCustomerMessage = chat.messages?.filter(m => m.sender === 'customer').pop();
     if (!lastCustomerMessage) return; // No customer message to respond to
 
+    // Start typing indicator
     setIsAiTyping(prev => ({ ...prev, [chatId]: true }));
 
     const payload = {
@@ -84,6 +85,10 @@ const CustomerServicePage = () => {
     };
 
     try {
+      // Minimum typing duration (1-2 seconds looks natural)
+      const minTypingDuration = 4000 + (Math.random() * 1000); // 1-2 seconds
+      const typingStartTime = Date.now();
+
       const response = await fetch(SEND_PAYLOAD_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,37 +96,43 @@ const CustomerServicePage = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.text(); // Try to get error details
+        const errorData = await response.text();
         throw new Error(`AI API error! status: ${response.status}, ${errorData}`);
       }
 
       const result = await response.json();
 
-      if (result.status == "success" && result.message) { // Ensure message exists
+      // Calculate remaining time to fulfill minimum typing duration
+      const elapsedTime = Date.now() - typingStartTime;
+      const remainingTime = Math.max(0, minTypingDuration - elapsedTime);
+
+      // Wait for remaining time before showing response
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+
+      if (result.status == "success" && result.message) {
         addMessageToChat(result.chatId, {
-          sender: 'system', // Or 'ai' or 'merchant-ai'
+          sender: 'system',
           text: result.message,
           aiGenerated: true,
-          time: new Date().toISOString() // Use current time if backend doesn't provide
+          time: new Date().toISOString()
         });
       } else {
         console.warn("AI response received but no text content found or status not success:", result);
       }
     } catch (error) {
       console.error("Error triggering AI response:", error);
-      // Show error in UI
       addMessageToChat(chatId, {
         sender: 'system',
         text: `⚠️ AI Error: ${error.message}`,
-        aiGenerated: false, // Mark as system error, not AI response
+        aiGenerated: false,
         time: new Date().toISOString(),
-        isError: true // Custom flag for styling?
+        isError: true
       });
     } finally {
       // Ensure typing indicator is turned off for this chat
       setIsAiTyping(prev => ({ ...prev, [chatId]: false }));
     }
-  }, [chats, autoReplyEnabled, aiTone, aiResponseSpeed, isAiTyping, addMessageToChat]); // Dependencies
+  }, [chats, autoReplyEnabled, aiTone, aiResponseSpeed, isAiTyping, addMessageToChat]);
 
   // Send a message from the merchant
   const handleSendMessage = () => {
@@ -285,8 +296,8 @@ const CustomerServicePage = () => {
     const lastMessage = messages[messages.length - 1];
 
     if (lastMessage?.sender === 'customer' &&
-        !isAiTyping[activeChatId] &&
-        !messages.some(m => m.aiGenerated && m.time > lastMessage.time)) {
+      !isAiTyping[activeChatId] &&
+      !messages.some(m => m.aiGenerated && m.time > lastMessage.time)) {
 
       const isFirstCustomerMessage = messages.filter(m => m.sender === 'customer').length === 1;
 
@@ -484,14 +495,16 @@ const CustomerServicePage = () => {
                 {/* AI Typing Indicator */}
                 {isAiTyping[activeChatId] && (
                   <div className="flex justify-end">
-                    <div className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-sm max-w-min"> {/* Fit content */}
+                    <div className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-sm max-w-min">
                       <div className="flex items-center">
                         <span className="text-sm mr-2">AI is typing</span>
-                        {/* Simple dots */}
-                        <div className="typing-dots">
-                          <div className="dot !bg-white/60"></div>
-                          <div className="dot !bg-white/60"></div>
-                          <div className="dot !bg-white/60"></div>
+                        <div className="flex space-x-1">
+                          {/* Dot 1 */}
+                          <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-[typingDot_1.4s_infinite_ease-in-out_both]"></div>
+                          {/* Dot 2 */}
+                          <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-[typingDot_1.4s_infinite_ease-in-out_both_150ms]"></div>
+                          {/* Dot 3 */}
+                          <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-[typingDot_1.4s_infinite_ease-in-out_both_300ms]"></div>
                         </div>
                       </div>
                     </div>
