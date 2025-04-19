@@ -440,18 +440,72 @@
     {
         "question": "What are some items that can be bundled together and sold?",
         "answer": {
-            "text": "Pork Siew Mai and Steamed BBQ Pork Buns could be bundled together and sold. These items are the most popular among customers, therefore customers are more likely to buy them together.",
+            "text": "Shrimp Har Gow + Century Egg Porridge, BBQ Chicken Feet + Mango Pudding, and Pork Siu Mai + Steamed BBQ Pork Buns make excellent combos. These items are the most popular among customers, therefore customers are more likely to buy them together. For more insights, see the Dashboard page.",
             "type": "action",
             "action": {
                 "label": "View Analytics Reports",
-                "url": "/reports"
+                "url": "/dashboard"
             }
         }
     },
     {
-        "question" : "Which item yields the most revenue?",
-        "answer" : {
-            "text" : "Steamed BBQ Pork Buns yield the most revenue. It is the most popular item among customers. See "
+        "question": "Which item yields the most revenue?",
+        "answer": {
+            "text": "Pork Siu Mai yields the most revenue. It is the most popular item among customers. See the top-selling items in the Dashboard for more details.",
+            "type": "metric",
+            "action": {
+                "label": "Item with the most revenue",
+                "url": "/dashboard"
+            }
         }
     },
+    {
+        "question": "How can I improve customer satisfaction?",
+        "answer": {
+            "text": "To improve customer satisfaction, consider enhancing food quality, improving delivery times, and providing better customer service. Regularly analyze customer feedback to identify areas for improvement.",
+            "type": "action",
+            "action": {
+                "label": "View Customer Feedback"
+            }
+        }
+    },
+    {
+        "question": "How can I promote my business to potential customers?",
+        "answer": {
+            "text": "To promote your business, you can use GrabAds to create targeted advertising campaigns. See GrabAds Page for more info.",
+            "type" : "action",
+            "action" : {
+                "label" : "Promote business",
+                "url" : "/ads"
+            }
+        }
+    },
+    {
+        "question" : "How can I improve employee retention rate?",
+        "answer" : {
+            "text" : "You can improve employee retention rate by offering competitive salaries, adequate benefits and a positive work environment. For example, offer maternity leave and flexible working hours.",
+            "type" : "action",
+            "action" : {
+                "label" : "Improve employee retention"
+            }
+        }
+    },
+    {
+        "question" : "What items are low on stock?",
+        "answer" : {
+            "text" : "Items that are low on stock include Pork Siew Mai, Steamed BBQ Pork Buns and Shrimp Har Gow. For more details, see the Inventory Management page.",
+            "type" : "metric",
+            "action" : {
+                "label" : "Low stock items",
+                "url" : "/inventory"
+            }
+        }
+    },
+    {
+        "question" : "How can I increase staff productivity?",
+        "answer" : {
+            "text" : "Implementing a streamlined workflow and providing adequate training help immensely. For example, define clearly how the kitchen should work together to produce the items on each ticket.",
+            "type" : ""
+        }
+    }
 ]
