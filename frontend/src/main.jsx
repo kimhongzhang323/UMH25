@@ -18,6 +18,7 @@ import GrabAdsPage from './components/GrabAd.jsx'
 import AuthComponent from './components/AuthComponent.jsx'
 import AuthWrapper from './components/AuthWrapper.jsx'
 import AddItem from './components/Additem.jsx'
+import StaffManager from './components/StaffManagement.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -60,6 +61,7 @@ createRoot(document.getElementById('root')).render(
               </AuthWrapper>
             }
           />
+
           <Route
             path="/customer-service"
             element={
@@ -73,6 +75,15 @@ createRoot(document.getElementById('root')).render(
             element={
               <AuthWrapper>
                 <ProfilePage />
+              </AuthWrapper>
+            }
+          />
+          <Route 
+          
+            path="/staff-manager"
+            element={
+              <AuthWrapper>
+                <StaffManager />
               </AuthWrapper>
             }
           />

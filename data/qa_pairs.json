@@ -36,48 +36,12 @@
       }
   },
   {
-      "question": "What's the average order value?",
-      "answer": {
-          "text": "Order value statistics:",
-          "type": "metric",
-          "code": "aov = df['order_value'].mean()\nmedian_ov = df['order_value'].median()",
-          "insight": "Average order value: ${aov:.2f} | Median: ${median_ov:.2f}"
-      }
-  },
-  {
-      "question": "Show me city-wise performance",
-      "answer": {
-          "text": "Sales distribution across cities:",
-          "type": "visualization",
-          "code": "city_sales = df.groupby('city_id')['order_value'].sum()\ncity_sales.plot(kind='pie', autopct='%1.1f%%', figsize=(8,8))\nplt.ylabel('')",
-          "insight": "Top city: {city_sales.idxmax()} ({city_sales.max()/city_sales.sum():.1%} of total sales)"
-      }
-  },
-  {
       "question": "What's my repeat customer rate?",
       "answer": {
           "text": "Customer loyalty analysis:",
           "type": "metric",
           "code": "repeat_rate = df.groupby('eater_id')['order_id'].nunique().gt(1).mean()",
           "insight": "{repeat_rate:.1%} of customers ordered more than once"
-      }
-  },
-  {
-      "question": "Show me item price distribution",
-      "answer": {
-          "text": "Menu price analysis:",
-          "type": "visualization",
-          "code": "df['item_price'].plot(kind='box', vert=False, figsize=(8,4), color='#00B14F')\nplt.title('Item Price Distribution')\nplt.xlabel('Price ($)')",
-          "insight": "Average price: ${df['item_price'].mean():.2f} | Most common price: ${df['item_price'].mode()[0]}"
-      }
-  },
-  {
-      "question": "What's my busiest day of week?",
-      "answer": {
-          "text": "Orders by weekday:",
-          "type": "visualization",
-          "code": "df['weekday'] = pd.to_datetime(df['order_time']).dt.day_name()\ndaily_orders = df['weekday'].value_counts()\ndaily_orders.plot(kind='bar', color='#00B14F')\nplt.title('Orders by Weekday')",
-          "insight": "Busiest day: {daily_orders.idxmax()} ({daily_orders.max()} orders)"
       }
   },
   {
@@ -99,24 +63,6 @@
       }
   },
   {
-      "question": "Show me customer acquisition trend",
-      "answer": {
-          "text": "New customers over time:",
-          "type": "visualization",
-          "code": "df['order_month'] = pd.to_datetime(df['order_time']).dt.to_period('M')\nnew_customers = df.groupby('order_month')['eater_id'].nunique()\nnew_customers.plot(kind='line', marker='o', color='#00B14F')",
-          "insight": "Peak acquisition: {new_customers.idxmax().strftime('%b %Y')} ({new_customers.max()} new customers)"
-      }
-  },
-  {
-      "question": "What's my sales per cuisine type?",
-      "answer": {
-          "text": "Cuisine performance:",
-          "type": "table",
-          "code": "df.groupby('cuisine_tag')['order_value'].sum().sort_values(ascending=False).reset_index()",
-          "insight": "{df.groupby('cuisine_tag')['order_value'].sum().idxmax()} accounts for {df.groupby('cuisine_tag')['order_value'].sum().max()/df['order_value'].sum():.1%} of total sales"
-      }
-  },
-  {
       "question": "Show me delivery time vs order value",
       "answer": {
           "text": "Delivery speed analysis:",
@@ -126,102 +72,12 @@
       }
   },
   {
-      "question": "What's my inventory turnover rate?",
-      "answer": {
-          "text": "Item popularity analysis:",
-          "type": "table",
-          "code": "turnover = df.groupby('item_name')['order_id'].count().sort_values(ascending=False).reset_index()",
-          "insight": "Most ordered item: {turnover.iloc[0]['item_name']} ({turnover.iloc[0]['order_id']} times)"
-      }
-  },
-  {
-      "question": "What's my customer age distribution?",
-      "answer": {
-          "text": "Customer age demographics:",
-          "type": "visualization",
-          "code": "df['age_group'] = pd.cut(df['customer_age'], bins=[0,18,25,35,50,65,100], labels=['<18','18-25','26-35','36-50','51-65','65+'])\ndf['age_group'].value_counts().plot(kind='bar', color='#00B14F')\nplt.title('Customer Age Distribution')\nplt.xlabel('Age Group')\nplt.ylabel('Number of Customers')",
-          "insight": "Most common age group: {df['age_group'].mode()[0]}"
-      }
-  },
-  {
-      "question": "Show me seasonal sales patterns",
-      "answer": {
-          "text": "Seasonal sales analysis:",
-          "type": "visualization",
-          "code": "df['season'] = pd.to_datetime(df['order_time']).dt.month.map({12:'Winter',1:'Winter',2:'Winter',3:'Spring',4:'Spring',5:'Spring',6:'Summer',7:'Summer',8:'Summer',9:'Fall',10:'Fall',11:'Fall'})\nseasonal_sales = df.groupby('season')['order_value'].sum()\nseasonal_sales.plot(kind='bar', color='#00B14F')\nplt.title('Sales by Season')",
-          "insight": "Peak season: {seasonal_sales.idxmax()} (${seasonal_sales.max():,.2f})"
-      }
-  },
-  {
-      "question": "What's my profit margin by item?",
-      "answer": {
-          "text": "Item profitability analysis:",
-          "type": "table",
-          "code": "df['profit_margin'] = (df['item_price'] - df['item_cost']) / df['item_price'] * 100\nitem_margins = df.groupby('item_name')[['profit_margin']].mean().sort_values('profit_margin', ascending=False).reset_index()",
-          "insight": "Most profitable item: {item_margins.iloc[0]['item_name']} ({item_margins.iloc[0]['profit_margin']:.1f}% margin)"
-      }
-  },
-  {
-      "question": "What's my order cancellation rate?",
-      "answer": {
-          "text": "Order cancellation analysis:",
-          "type": "metric",
-          "code": "cancellation_rate = len(df[df['order_status']=='cancelled'])/len(df)\ncancellation_reasons = df[df['order_status']=='cancelled']['cancellation_reason'].value_counts()",
-          "insight": "Cancellation rate: {cancellation_rate:.1%}, Main reason: {cancellation_reasons.index[0]}"
-      }
-  },
-  {
-      "question": "Show me customer spending patterns",
-      "answer": {
-          "text": "Customer spending analysis:",
-          "type": "visualization",
-          "code": "customer_spending = df.groupby('eater_id')['order_value'].sum().reset_index()\nplt.hist(customer_spending['order_value'], bins=30, color='#00B14F')\nplt.title('Customer Lifetime Value Distribution')\nplt.xlabel('Total Spending ($)')\nplt.ylabel('Number of Customers')",
-          "insight": "Average customer lifetime value: ${customer_spending['order_value'].mean():,.2f}"
-      }
-  },
-  {
-      "question": "What's my average rating over time?",
-      "answer": {
-          "text": "Customer satisfaction trend:",
-          "type": "visualization",
-          "code": "monthly_ratings = df.set_index(pd.to_datetime(df['order_time'])).resample('M')['rating'].mean()\nmonthly_ratings.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Average Monthly Ratings')\nplt.ylabel('Rating (1-5)')",
-          "insight": "Overall rating: {df['rating'].mean():.1f}/5.0"
-      }
-  },
-  {
-      "question": "What payment methods do customers prefer?",
-      "answer": {
-          "text": "Payment method analysis:",
-          "type": "visualization",
-          "code": "payment_dist = df['payment_method'].value_counts()\npayment_dist.plot(kind='pie', autopct='%1.1f%%')\nplt.title('Payment Method Distribution')",
-          "insight": "Most popular: {payment_dist.index[0]} ({payment_dist.iloc[0]/len(df):.1%})"
-      }
-  },
-  {
       "question": "How many new vs returning customers per month?",
       "answer": {
           "text": "Customer retention analysis:",
           "type": "visualization",
           "code": "df['customer_type'] = df.groupby('eater_id').cumcount().map(lambda x: 'New' if x==0 else 'Returning')\nmonthly_breakdown = df.pivot_table(index=pd.to_datetime(df['order_time']).dt.to_period('M'), columns='customer_type', values='order_id', aggfunc='count')\nmonthly_breakdown.plot(kind='bar', stacked=True)",
           "insight": "Retention rate: {len(df[df['customer_type']=='Returning'])/len(df[df['customer_type']=='New']):.1%}"
-      }
-  },
-  {
-      "question": "What's my average order processing time by day of week?",
-      "answer": {
-          "text": "Processing efficiency analysis:",
-          "type": "visualization",
-          "code": "df['processing_time'] = (pd.to_datetime(df['ready_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nprocessing_by_day = df.groupby('weekday')['processing_time'].mean().reindex(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])\nprocessing_by_day.plot(kind='bar')\nplt.title('Average Processing Time by Day')\nplt.ylabel('Minutes')",
-          "insight": "Slowest day: {processing_by_day.idxmax()} ({processing_by_day.max():.1f} min)"
-      }
-  },
-  {
-      "question": "What items are often ordered together?",
-      "answer": {
-          "text": "Item combination analysis:",
-          "type": "table",
-          "code": "from itertools import combinations\norder_items = df.groupby('order_id')['item_name'].agg(list)\nitem_pairs = [tuple(sorted(combo)) for items in order_items for combo in combinations(items, 2)]\npair_counts = pd.Series(item_pairs).value_counts().head(10)",
-          "insight": "Most common pair: {pair_counts.index[0][0]} & {pair_counts.index[0][1]} ({pair_counts.iloc[0]} times)"
       }
   },
   {
@@ -240,15 +96,6 @@
           "type": "visualization",
           "code": "high_value = df[df['order_value'] > df['order_value'].quantile(0.9)]\nhigh_value_hours = high_value.groupby(pd.to_datetime(high_value['order_time']).dt.hour)['order_id'].count()\nplt.figure(figsize=(10,5))\nhigh_value_hours.plot(kind='bar', color='#00B14F')\nplt.title('High-Value Orders by Hour')\nplt.xlabel('Hour of Day')\nplt.ylabel('Number of Orders')",
           "insight": "Peak hour for high-value orders: {high_value_hours.idxmax()}:00"
-      }
-  },
-  {
-      "question": "What's my order completion time trend?",
-      "answer": {
-          "text": "Order fulfillment efficiency:",
-          "type": "visualization",
-          "code": "df['completion_time'] = (pd.to_datetime(df['delivery_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nmonthly_completion = df.groupby(pd.to_datetime(df['order_time']).dt.to_period('M'))['completion_time'].mean()\nplt.figure(figsize=(12,6))\nmonthly_completion.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Average Order Completion Time by Month')\nplt.ylabel('Minutes')",
-          "insight": "Current average completion time: {df['completion_time'].mean():.1f} minutes"
       }
   },
   {
@@ -279,24 +126,6 @@
       }
   },
   {
-      "question": "What's my kitchen efficiency by time of day?",
-      "answer": {
-          "text": "Kitchen preparation time analysis:",
-          "type": "visualization",
-          "code": "df['prep_efficiency'] = (pd.to_datetime(df['driver_pickup_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nhourly_efficiency = df.groupby(pd.to_datetime(df['order_time']).dt.hour)['prep_efficiency'].mean()\nplt.figure(figsize=(12,6))\nhourly_efficiency.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Kitchen Preparation Time by Hour')\nplt.xlabel('Hour of Day')\nplt.ylabel('Average Preparation Time (Minutes)')",
-          "insight": "Most efficient hour: {hourly_efficiency.idxmin()}:00 ({hourly_efficiency.min():.1f} min)"
-      }
-  },
-  {
-      "question": "Show me multiple item order patterns",
-      "answer": {
-          "text": "Multi-item order analysis:",
-          "type": "visualization",
-          "code": "order_sizes = df.groupby('order_id')['item_id'].count()\nsize_dist = order_sizes.value_counts().sort_index()\nplt.figure(figsize=(8,6))\nsize_dist.plot(kind='bar', color='#00B14F')\nplt.title('Distribution of Items per Order')\nplt.xlabel('Number of Items')\nplt.ylabel('Number of Orders')",
-          "insight": "Most common order size: {order_sizes.mode()[0]} items"
-      }
-  },
-  {
       "question": "What's my average delivery radius performance?",
       "answer": {
           "text": "Delivery time by distance analysis:",
@@ -315,39 +144,12 @@
       }
   },
   {
-      "question": "What's my average order size by customer segment?",
-      "answer": {
-          "text": "Customer segment order size analysis:",
-          "type": "visualization",
-          "code": "segment_order_size = df.groupby('customer_segment')['order_id'].count() / df['customer_segment'].value_counts()\nsegment_order_size.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Size by Customer Segment')\nplt.xlabel('Customer Segment')\nplt.ylabel('Average Order Size')",
-          "insight": "Largest average order size: {segment_order_size.idxmax()} ({segment_order_size.max():.1f})"
-      }
-  },
-  {
-      "question": "Show me the impact of weather on delivery time",
-      "answer": {
-          "text": "Weather impact analysis:",
-          "type": "visualization",
-          "code": "weather_effect = df.groupby('weather_condition')['delivery_duration'].mean()\nweather_effect.plot(kind='bar', color='#00B14F')\nplt.title('Average Delivery Time by Weather Condition')\nplt.xlabel('Weather Condition')\nplt.ylabel('Average Delivery Time (Minutes)')",
-          "insight": "Worst weather condition: {weather_effect.idxmax()} ({weather_effect.max():.1f} min)"
-      }
-  },
-  {
       "question": "What's my average order size by city?",
       "answer": {
           "text": "City-wise order size analysis:",
           "type": "visualization",
           "code": "city_order_size = df.groupby('city_id')['order_id'].count() / df['city_id'].value_counts()\ncity_order_size.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Size by City')\nplt.xlabel('City ID')\nplt.ylabel('Average Order Size')",
           "insight": "Largest average order size: {city_order_size.idxmax()} ({city_order_size.max():.1f})"
-      }
-  },
-  {
-      "question": "Show me the impact of order size on delivery time",
-      "answer": {
-          "text": "Order size vs delivery performance:",
-          "type": "visualization",
-          "code": "order_size_bins = pd.qcut(df['item_count'], 5)\ndelivery_by_size = df.groupby(order_size_bins)['delivery_duration'].mean()\nplt.figure(figsize=(10,6))\ndelivery_by_size.plot(kind='bar', color='#00B14F')\nplt.title('Delivery Duration by Order Size Quintile')\nplt.xlabel('Order Size Range')\nplt.ylabel('Average Delivery Time (Minutes)')",
-          "insight": "Correlation between order size and delivery time: {df['item_count'].corr(df['delivery_duration']):.2f}"
       }
   },
   {
@@ -360,48 +162,113 @@
       }
   },
   {
-      "question": "Show me the impact of order time on delivery time",
+      "question": "How to increase my sales?",
       "answer": {
-          "text": "Order time vs delivery performance:",
-          "type": "visualization",
-          "code": "order_time_bins = pd.cut(pd.to_datetime(df['order_time']).dt.hour, bins=24)\ndelivery_by_time = df.groupby(order_time_bins)['delivery_duration'].mean()\nplt.figure(figsize=(10,6))\ndelivery_by_time.plot(kind='bar', color='#00B14F')\nplt.title('Delivery Duration by Order Time')\nplt.xlabel('Order Time (Hour)')\nplt.ylabel('Average Delivery Time (Minutes)')",
-          "insight": "Peak delivery time: {delivery_by_time.idxmax()} ({delivery_by_time.max():.1f} min)"
+          "text": "To increase your sales, consider using targeted advertising strategies. You can explore Grab Ads to reach more customers.",
+          "type": "action",
+          "action": {
+              "label": "Learn More About Grab Ads",
+              "url": "/"
+          }
       }
   },
   {
-      "question": "What's my average order value by payment method?",
+      "question": "What's my current inventory status?",
       "answer": {
-          "text": "Payment method order value analysis:",
-          "type": "visualization",
-          "code": "payment_order_value = df.groupby('payment_method')['order_value'].mean()\npayment_order_value.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Value by Payment Method')\nplt.xlabel('Payment Method')\nplt.ylabel('Average Order Value ($)')",
-          "insight": "Highest average order value: {payment_order_value.idxmax()} (${payment_order_value.max():,.2f})"
+          "text": "Your current inventory status is as follows: 10 items are low in stock, and 5 items are out of stock. Please restock to avoid disruptions.",
+          "type": "action",
+          "action": {
+              "label": "View Inventory Details",
+              "url": "/inventory"
+          }
       }
   },
   {
-      "question": "Show me the impact of order time on order value",
+      "question": "What's my sales status?",
       "answer": {
-          "text": "Order time vs order value analysis:",
-          "type": "visualization",
-          "code": "order_time_bins = pd.cut(pd.to_datetime(df['order_time']).dt.hour, bins=24)\nvalue_by_time = df.groupby(order_time_bins)['order_value'].mean()\nplt.figure(figsize=(10,6))\nvalue_by_time.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Value by Order Time')\nplt.xlabel('Order Time (Hour)')\nplt.ylabel('Average Order Value ($)')",
-          "insight": "Peak order value time: {value_by_time.idxmax()} (${value_by_time.max():,.2f})"
+          "text": "Your sales status is as follows: Total sales for this month are $12,345, with a 15% increase compared to last month.",
+          "type": "action",
+          "action": {
+              "label": "View Detailed Sales Report",
+              "url": "/sales"
+          }
       }
   },
   {
-      "question": "What's my average order value by delivery distance?",
+      "question": "What's my gamification level?",
       "answer": {
-          "text": "Delivery distance order value analysis:",
-          "type": "visualization",
-          "code": "distance_bins = pd.qcut(df['delivery_distance'], 5)\nvalue_by_distance = df.groupby(distance_bins)['order_value'].mean()\nplt.figure(figsize=(10,6))\nvalue_by_distance.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Value by Delivery Distance Quintile')\nplt.xlabel('Delivery Distance Range')\nplt.ylabel('Average Order Value ($)')",
-          "insight": "Correlation between delivery distance and order value: {df['delivery_distance'].corr(df['order_value']):.2f}"
+          "text": "Your gamification level is Bronze. Complete more challenges and increase customer engagement to level up!",
+          "type": "action",
+          "action": {
+              "label": "View Gamification Dashboard",
+              "url": "/profile"
+          }
       }
   },
   {
-      "question": "Show me the impact of order time on order value",
+      "question": "What are my payment details for subscription?",
       "answer": {
-          "text": "Order time vs order value performance:",
-          "type": "visualization",
-          "code": "order_time_bins = pd.cut(pd.to_datetime(df['order_time']).dt.hour, bins=24)\nvalue_by_time = df.groupby(order_time_bins)['order_value'].mean()\nplt.figure(figsize=(10,6))\nvalue_by_time.plot(kind='bar', color='#00B14F')\nplt.title('Order Value by Order Time')\nplt.xlabel('Order Time (Hour)')\nplt.ylabel('Average Order Value ($)')",
-          "insight": "Peak order value time: {value_by_time.idxmax()} (${value_by_time.max():,.2f})"
+          "text": "Your subscription payment details are as follows: You are currently subscribed to the Premium Plan at RM 499/year. Your next payment is due on 15th May 2025.",
+          "type": "action",
+          "action": {
+              "label": "View Payment Details",
+              "url": "/payment"
+          }
+      }
+  },
+  {
+      "question": "How can I manage my staff?",
+      "answer": {
+          "text": "You can manage your staff by assigning roles, tracking performance, and scheduling shifts. Use the staff management dashboard for detailed insights.",
+          "type": "action",
+          "action": {
+              "label": "Go to Staff Management Dashboard",
+              "url": "/staff-management"
+          }
+      }
+  },
+  {
+      "question": "What are the results of my store survey?",
+      "answer": {
+          "text": "Your store survey results indicate that 85% of customers are satisfied with your service. The most common feedback is to improve delivery speed.",
+          "type": "action",
+          "action": {
+              "label": "View Full Survey Analysis",
+              "url": "/survey-analysis"
+          }
+      }
+  },
+  {
+      "question": "Compare different grocery stores in Malaysia for dumplings",
+      "answer": {
+          "text": "Based on our analysis, Store A offers the best price for dumplings at RM 12 per pack, while Store B has the highest customer satisfaction rating. Store C provides the most variety of dumpling flavors.",
+          "type": "action",
+          "action": {
+              "label": "View Full Grocery Comparison",
+              "url": "/grocery-comparison"
+          }
+      }
+  },
+  {
+      "question": "How can I inform my supplier about a wrong amount?",
+      "answer": {
+          "text": "You can notify your supplier about the wrong amount by sending them a message. Use the supplier communication dashboard for quick access.",
+          "type": "action",
+          "action": {
+              "label": "Send Message to Supplier",
+              "url": "/supplier-communication"
+          }
+      }
+  },
+  {
+      "question": "Show the location of the business partner and the roadline with the fastest ETA",
+      "answer": {
+          "text": "You can view the location of your business partner and the fastest route with the estimated time of arrival (ETA) on the map dashboard.",
+          "type": "action",
+          "action": {
+              "label": "View Map Dashboard",
+              "url": "/map-dashboard"
+          }
       }
   }
 ]

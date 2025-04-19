@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import time
 
 import customer_service
+from chat_database import Chat, ChatDatabase, Message
 
 
 app = FastAPI(
@@ -35,6 +36,8 @@ app.add_middleware(
 )
 
 app.include_router(customer_service.router)
+
+chat_db = ChatDatabase(chats=[], messages={})
 
 # Configuration
 MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Keep for reference
@@ -159,38 +162,19 @@ class MerchantInfo(BaseModel):
     language: str
 
 
-# ID should be UUID v4
-# timestamps are Unix timestamp
-class Chat(BaseModel):
-    id: str
-    title: str
-    preview: str
-    timestamp: int
-
-
-# id and chat_id should be UUID v4
-# sender is either 'user' or 'bot'
-# timestamps are Unix timestamp
-class Message(BaseModel):
-    id: str
-    text: str
-    sender: str
-    timestamp: int
-    image_url: str = None
-
-
 def generate_unix_timestamp() -> int:
     # 1 billion nanoseconds = 1 second
     value = int(time.time())
     return value
 
-  
+
 # Menu Item Models
 class MenuItemBase(BaseModel):
     item_id: int
     name: str
     cuisine_tag: str
     price: float
+
 
 class MenuItem(MenuItemBase):
     current_stock: int = 0
@@ -378,7 +362,7 @@ async def get_menu_items():
     df = pd.read_csv('data/DimSumDelight_Full.csv')
     # Get unique items and their latest prices
     items = df.groupby(['item_id', 'item_name', 'cuisine_tag', 'item_price']).size().reset_index()
-    
+
     return [
         MenuItem(
             item_id=row['item_id'],
@@ -395,10 +379,10 @@ async def get_menu_item(item_id: int):
     """Get a specific menu item by ID"""
     df = pd.read_csv('data/DimSumDelight_Full.csv')
     item = df[df['item_id'] == item_id].iloc[0]
-    
+
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
-        
+
     return MenuItem(
         item_id=item['item_id'],
         name=item['item_name'],
@@ -407,10 +391,19 @@ async def get_menu_item(item_id: int):
     )
 
 
+@app.get("/get_all_chats")
+async def get_all_chats() -> List[Chat]:
+    return chat_db.get_all_chats()
+
+
+@app.get("/get_all_messages")
+async def get_all_messages(chat_id: str) -> List[Message]:
+    return chat_db.get_all_messages(chat_id)
+
+
 @app.post("/new_chat")
-async def new_chat():
-    # add new chat
-    pass
+async def new_chat(chat: Chat):
+    chat_db.add_new_chat(chat)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut } from 'lucide-react';
+import { LayoutDashboard, UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -245,6 +245,14 @@ export default function Navbar() {
                 >
                   <DollarSign className="mr-3 h-5 w-5" />
                   Sales
+                </a>
+                <a
+                  href="/staff-manager"
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
+                  onClick={toggleMobileMenu}
+                >
+                  <UserCog className="mr-3 h-5 w-5" />
+                  Staff
                 </a>
                 <a
                   href="/profile"

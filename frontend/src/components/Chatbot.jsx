@@ -140,6 +140,10 @@ export default function Chatbot() {
     }
   }, [currentChatId]);
 
+  useEffect(() => {
+
+  }, [currentChatId])
+
   // Handlers
   // Removed duplicate loadChat function
 
@@ -245,14 +249,21 @@ export default function Chatbot() {
   const timestampToDate = (timestamp) => new Date(timestamp * 1000);
 
   const saveUserChat = () => {
-    if (currentChatMessages.length <= 1) return;
-
     const newChat = {
       id: `chat-${uuidV4()}`,
       title: currentChatMessages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
       preview: currentChatMessages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
-      timestamp: new Date(),
+      // date.now() returns Unix timestamp in milliseconds
+      timestamp: Math.floor(Date.now() / 1000),
     };
+
+    fetch(BACKEND_URL + "/new_chat", {
+      method: "POST",
+      body: JSON.stringify(newChat),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
 
     setChatList(prev => [newChat, ...prev]);
     setCurrentChatId(newChat.id);
