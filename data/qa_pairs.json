@@ -1,512 +1,228 @@
 [
-    {
-      "question": "show me monthly sales trends",
+  {
+      "question": "What are my best-selling items?",
       "answer": {
-        "text": "Here's the monthly sales trend analysis:",
-        "type": "visualization",
-        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ndf['order_time'] = pd.to_datetime(df['order_time'])\ndf['month'] = df['order_time'].dt.to_period('M')\nmonthly_sales = df.groupby('month')['order_value'].sum()\n\nplt.figure(figsize=(10,5))\nmonthly_sales.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Monthly Sales Trend')\nplt.xlabel('Month')\nplt.ylabel('Sales ($)')\nplt.grid(True)",
-        "insight": "Peak sales occurred in {monthly_sales.idxmax().strftime('%B %Y')} with ${monthly_sales.max():,.2f}"
+          "text": "Top 5 items by total sales:",
+          "type": "table",
+          "code": "df.groupby('item_name')['order_value'].sum().nlargest(5).reset_index()",
+          "insight": "{df.groupby('item_name')['order_value'].sum().idxmax()} is the top seller with ${df.groupby('item_name')['order_value'].sum().max():,.2f} revenue"
       }
-    },
-    {
-      "question": "what are top selling items by revenue",
+  },
+  {
+      "question": "Show me delivery time distribution",
       "answer": {
-        "text": "Top selling items by revenue:",
-        "type": "visualization", 
-        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ntop_items = df.groupby('item_name')['order_value'].sum().nlargest(5)\n\nplt.figure(figsize=(10,5))\ntop_items.plot(kind='barh', color='#00B14F')\nplt.title('Top 5 Items by Revenue')\nplt.xlabel('Total Revenue ($)')\nplt.ylabel('Item Name')\nplt.gca().invert_yaxis()",
-        "insight": "Top item is {top_items.index[0]} generating ${top_items.iloc[0]:,.2f}"
+          "text": "Delivery duration analysis:",
+          "type": "visualization",
+          "code": "df['delivery_duration'] = (pd.to_datetime(df['delivery_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nplt.hist(df['delivery_duration'], bins=20, color='#00B14F')\nplt.title('Delivery Time Distribution')\nplt.xlabel('Minutes')\nplt.ylabel('Order Count')",
+          "insight": "Average delivery time: {df['delivery_duration'].mean():.1f} minutes"
       }
-    },
-    {
-      "question": "show me average delivery times by city",
+  },
+  {
+      "question": "What's my monthly sales growth?",
       "answer": {
-        "text": "Average delivery times by city:",
-        "type": "visualization",
-        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ndf['delivery_duration'] = (pd.to_datetime(df['delivery_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\ncity_times = df.groupby('city_id')['delivery_duration'].mean().sort_values()\n\nplt.figure(figsize=(10,5))\ncity_times.plot(kind='bar', color='#00B14F')\nplt.title('Average Delivery Time by City')\nplt.xlabel('City ID')\nplt.ylabel('Minutes')\nplt.xticks(rotation=45)",
-        "insight": "Fastest city is {city_times.idxmin()} with {city_times.min():.1f} min average"
+          "text": "Monthly sales performance:",
+          "type": "visualization",
+          "code": "monthly_sales = df.set_index(pd.to_datetime(df['order_time'])).resample('M')['order_value'].sum()\nmonthly_sales.plot(kind='line', marker='o', figsize=(10,5), color='#00B14F')\nplt.title('Monthly Sales Trend')\nplt.ylabel('Total Sales ($)')",
+          "insight": "Peak month: {monthly_sales.idxmax().strftime('%B %Y')} (${monthly_sales.max():,.2f})"
       }
-    },
-    {
-      "question": "show me merchant join dates distribution",
+  },
+  {
+      "question": "Which hours have the most orders?",
       "answer": {
-        "text": "Merchant acquisition over time:",
-        "type": "visualization",
-        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ndf['join_date'] = pd.to_datetime(df['join_date'])\ndf['join_quarter'] = df['join_date'].dt.to_period('Q')\nquarterly_joins = df.groupby('join_quarter')['merchant_id'].nunique()\n\nplt.figure(figsize=(10,5))\nquarterly_joins.plot(kind='area', color='#00B14F', alpha=0.5)\nplt.title('New Merchants by Quarter')\nplt.xlabel('Quarter')\nplt.ylabel('New Merchants')",
-        "insight": "Peak acquisition quarter was {quarterly_joins.idxmax().strftime('Q%q %Y')} with {quarterly_joins.max()} new merchants",
-        "additional_question": "Which merchants joined in 2023?",
-        "additional_answer": "I can check merchants with join_date containing '2023' in their records."
+          "text": "Order frequency by hour:",
+          "type": "visualization",
+          "code": "df['order_hour'] = pd.to_datetime(df['order_time']).dt.hour\nhourly_orders = df['order_hour'].value_counts().sort_index()\nhourly_orders.plot(kind='bar', color='#00B14F', figsize=(10,5))\nplt.title('Orders by Hour of Day')\nplt.xlabel('Hour')\nplt.ylabel('Number of Orders')",
+          "insight": "Busiest hour: {hourly_orders.idxmax()}:00 ({hourly_orders.max()} orders)"
       }
-    },
-    {
-      "question": "What is the average delivery time for orders?",
-      "answer": "Delivery time can be calculated by comparing order_time and delivery_time fields across orders."
-    },
-    {
-      "question": "List all Italian cuisine items priced above $15",
-      "answer": "I can filter items where cuisine_tag includes 'Italian' and item_price > 15."
-    },
-    {
-      "question": "How many orders did merchant ID 12345 process?",
-      "answer": "I can count order_id records associated with merchant_id 12345."
-    },
-    {
-      "question": "What's the most expensive item offered by 'Joe's Pizzeria'?",
-      "answer": "I can find the maximum item_price for items where merchant_name is 'Joe's Pizzeria'."
-    },
-    {
-      "question": "Which city has the most merchants?",
-      "answer": "I can group merchants by city_id and count them to find the city with highest count."
-    },
-    {
-      "question": "What's the average order value for sushi items?",
-      "answer": "I can calculate average order_value for orders containing items where cuisine_tag includes 'sushi'."
-    },
-    {
-      "question": "List all merchants in New York with their join dates",
-      "answer": "Assuming city_id corresponds to New York, I can show merchant_name and join_date for those merchants."
-    },
-    {
-      "question": "Which eater placed the highest value single order?",
-      "answer": "I can find the eater_id associated with the maximum order_value in orders."
-    },
-    {
-      "question": "What's the busiest hour for order placements?",
-      "answer": "I can extract hours from order_time and analyze frequency distribution."
-    },
-    {
-      "question": "How many unique cuisine tags exist in the system?",
-      "answer": "I can count distinct values in the cuisine_tag field across items."
-    },
-    {
-      "question": "List all drivers who took more than 30 minutes to arrive",
-      "answer": "I can compare order_time and driver_arrival_time to identify such cases (assuming driver ID is available)."
-    },
-    {
-      "question": "What percentage of orders contain Mexican food?",
-      "answer": "I can calculate ratio of orders with Mexican cuisine_tag items to total orders."
-    },
-    {
-      "question": "Which merchant offers the most vegetarian options?",
-      "answer": "I can count items per merchant where cuisine_tag includes 'vegetarian'."
-    },
-    {
-      "question": "What's the average time between order placement and pickup?",
-      "answer": "I can calculate duration between order_time and driver_pickup_time across orders."
-    },
-    {
-      "question": "List all items priced between $10 and $20 from Italian restaurants",
-      "answer": "I can filter items where cuisine_tag includes 'Italian' and item_price between 10 and 20."
-    },
-    {
-      "question": "Which eater has placed the most orders?",
-      "answer": "I can count orders grouped by eater_id to find the most frequent customer."
-    },
-    {
-      "question": "What's the total revenue generated from pizza items?",
-      "answer": "I can sum order_value for orders containing items where cuisine_tag includes 'pizza'."
-    },
-    {
-      "question": "How many new merchants joined last month?",
-      "answer": "I can count merchants with join_date in the previous calendar month."
-    },
-    {
-      "question": "What's the average item price for Chinese cuisine?",
-      "answer": "I can calculate average item_price for items where cuisine_tag includes 'Chinese'."
-    },
-    {
-      "question": "List all orders that took over an hour to deliver",
-      "answer": "I can find orders where delivery_time - order_time exceeds 60 minutes."
-    },
-    {
-      "question": "Which merchant has the highest average order value?",
-      "answer": "I can calculate average order_value per merchant and identify the highest."
-    },
-    {
-      "question": "What's the distribution of order values?",
-      "answer": "I can analyze order_value statistics (min, max, average, percentiles)."
-    },
-    {
-      "question": "List all vegan items sorted by price",
-      "answer": "I can filter items where cuisine_tag includes 'vegan' and sort by item_price."
-    },
-    {
-      "question": "How many orders are placed during lunch hours (11am-2pm)?",
-      "answer": "I can count orders where order_time falls between 11:00 and 14:00."
-    },
-    {
-      "question": "Which cuisine is most popular in each city?",
-      "answer": "I can analyze order frequency by cuisine_tag grouped by city_id."
-    },
-    {
-      "question": "What's the average delivery time by merchant?",
-      "answer": "I can calculate average delivery_time - order_time grouped by merchant_id."
-    },
-    {
-      "question": "List all merchants who joined before 2022",
-      "answer": "I can filter merchants with join_date before '2022-01-01'."
-    },
-    {
-      "question": "What's the busiest day of week for orders?",
-      "answer": "I can extract weekday from order_time and analyze frequency."
-    },
-    {
-      "question": "How many orders contain multiple cuisine types?",
-      "answer": "I can analyze orders with items having different cuisine_tags."
-    },
-    {
-      "question": "What's the most common item ordered?",
-      "answer": "I can count order frequency by item_id to find the most popular item."
-    },
-    {
-      "question": "List all merchants offering gluten-free options",
-      "answer": "I can find merchants with items where cuisine_tag includes 'gluten-free'."
-    },
-    {
-      "question": "What's the average order value by time of day?",
-      "answer": "I can group order_value averages by hour extracted from order_time."
-    },
-    {
-      "question": "How many unique eaters placed orders last week?",
-      "answer": "I can count distinct eater_id values for orders in the past 7 days."
-    },
-    {
-      "question": "Which merchant has the fastest average delivery time?",
-      "answer": "I can calculate average delivery duration per merchant and find the minimum."
-    },
-    {
-      "question": "List all orders with exactly 3 items",
-      "answer": "This would require order-item mapping data not shown in the schema."
-    },
-    {
-      "question": "What's the price range for burger items?",
-      "answer": "I can find minimum and maximum item_price for items where item_name includes 'burger'."
-    },
-    {
-      "question": "How many merchants offer both pizza and pasta?",
-      "answer": "I can find merchants with items containing both 'pizza' and 'pasta' in cuisine_tags."
-    },
-    {
-      "question": "What's the average driver wait time at pickup?",
-      "answer": "I can calculate driver_pickup_time - driver_arrival_time across orders."
-    },
-    {
-      "question": "List all items that have never been ordered",
-      "answer": "I can find items where item_id doesn't appear in any order records."
-    },
-    {
-      "question": "What's the most expensive order ever placed?",
-      "answer": "I can find the maximum order_value across all orders."
-    },
-    {
-      "question": "How many eaters have placed only one order?",
-      "answer": "I can count eater_ids appearing exactly once in order records."
-    },
-    {
-      "question": "Which merchant has the most diverse menu?",
-      "answer": "I can count distinct cuisine_tags per merchant to find the most diverse."
-    },
-    {
-      "question": "What's the average number of orders per eater?",
-      "answer": "I can calculate total orders divided by count of distinct eater_ids."
-    },
-    {
-      "question": "List all merchants with average order value above $50",
-      "answer": "I can find merchants where average order_value across their orders > 50."
-    },
-    {
-      "question": "What percentage of orders are delivered within 30 minutes?",
-      "answer": "I can calculate ratio of orders with delivery_time - order_time ≤ 30 minutes."
-    },
-    {
-      "question": "Which city has the highest average order value?",
-      "answer": "I can calculate average order_value grouped by city_id (via merchant-city mapping)."
-    },
-    {
-      "question": "List all items that increased in price this year",
-      "answer": "This would require historical price data not shown in current schema."
-    },
-    {
-      "question": "What's the most popular cuisine for dinner orders?",
-      "answer": "I can analyze cuisine_tags for orders placed between 5pm-10pm."
-    },
-    {
-      "question": "How many merchants don't have any Italian items?",
-      "answer": "I can find merchants with no items where cuisine_tag includes 'Italian'."
-    },
-    {
-      "question": "What's the average delivery time difference between cities?",
-      "answer": "I can compare average delivery durations grouped by city_id."
-    },
-    {
-      "question": "List all eaters who haven't ordered in the last 30 days",
-      "answer": "I can find eater_ids with no orders where order_time is within past 30 days."
-    },
-    {
-      "question": "Which item appears most frequently in high-value orders?",
-      "answer": "I can analyze items appearing in orders above a certain value threshold."
-    },
-    {
-      "question": "What's the peak order volume hour for each cuisine?",
-      "answer": "I can find most frequent order hours grouped by cuisine_tag."
-    },
-    {
-      "question": "How many merchants specialize in only one cuisine?",
-      "answer": "I can find merchants with items all sharing the same cuisine_tag."
-    },
-    {
-      "question": "List all orders with delivery time exceeding estimate",
-      "answer": "This would require estimated delivery time data not in current schema."
-    },
-    {
-      "question": "What's the average order value for first-time vs returning eaters?",
-      "answer": "This would require analyzing order patterns per eater_id over time."
-    },
-    {
-      "question": "Which merchant has the most repeat customers?",
-      "answer": "I can count distinct eater_ids per merchant with >1 order."
-    },
-    {
-      "question": "List all items ordered by eater ID 7890",
-      "answer": "I can find items associated with orders where eater_id is 7890."
-    },
-    {
-      "question": "What's the busiest order day in each month?",
-      "answer": "I can analyze order counts by day grouped by month."
-    },
-    {
-      "question": "How many orders contain items from multiple merchants?",
-      "answer": "This would require analyzing merchant_id per item within orders."
-    },
-    {
-      "question": "What's the most popular add-on item?",
-      "answer": "This would require item categorization not shown in current schema."
-    },
-    {
-      "question": "List all merchants with declining order volume",
-      "answer": "This would require time-series analysis of order counts per merchant."
-    },
-    {
-      "question": "What's the average delivery distance?",
-      "answer": "This would require location/distance data not in current schema."
-    },
-    {
-      "question": "Which eaters always order the same cuisine?",
-      "answer": "I can find eater_ids with orders all containing same cuisine_tag."
-    },
-    {
-      "question": "List all merchants with perfect delivery times",
-      "answer": "This would require defining and measuring 'perfect' delivery metrics."
-    },
-    {
-      "question": "What's the order cancellation rate?",
-      "answer": "This would require cancellation data not shown in current schema."
-    },
-    {
-      "question": "Which item is most commonly paired with drinks?",
-      "answer": "This would require analyzing item combinations within orders."
-    },
-    {
-      "question": "List all eaters who order at unusual hours",
-      "answer": "I can find eater_ids with orders mostly outside normal meal times."
-    },
-    {
-      "question": "What's the average preparation time per cuisine?",
-      "answer": "This would require timestamp data for when items are ready."
-    },
-    {
-      "question": "Which merchant has the most seasonal items?",
-      "answer": "This would require item seasonality data not in current schema."
-    },
-    {
-      "question": "List all orders with driver wait time over 15 minutes",
-      "answer": "I can find orders where driver_pickup_time - driver_arrival_time > 15 minutes."
-    },
-    {
-      "question": "What's the most popular cuisine for late-night orders?",
-      "answer": "I can analyze cuisine_tags for orders placed between 10pm-4am."
-    },
-    {
-      "question": "How many eaters order from only one merchant?",
-      "answer": "I can count eater_ids associated with only one merchant_id."
-    },
-    {
-      "question": "List all merchants with increasing monthly order volume",
-      "answer": "This would require time-series analysis of merchant order counts."
-    },
-    {
-      "question": "What's the average time between orders for repeat customers?",
-      "answer": "I can analyze order_time differences for eaters with multiple orders."
-    },
-    {
-      "question": "Which item has the most price variations?",
-      "answer": "This would require tracking price changes over time."
-    },
-    {
-      "question": "List all eaters who order premium items frequently",
-      "answer": "I can find eaters with many orders containing high-priced items."
-    },
-    {
-      "question": "What's the order volume during holidays vs regular days?",
-      "answer": "This would require identifying holiday dates for comparison."
-    },
-    {
-      "question": "Which merchant has the most loyal customers?",
-      "answer": "I can analyze repeat order patterns per merchant."
-    },
-    {
-      "question": "List all items that are exclusive to one merchant",
-      "answer": "I can find items where item_id appears for only one merchant_id."
-    },
-    {
-      "question": "What's the average order value growth rate?",
-      "answer": "This would require time-series analysis of order values."
-    },
-    {
-      "question": "Which city has the most diverse food options?",
-      "answer": "I can count distinct cuisine_tags grouped by city_id."
-    },
-    {
-      "question": "List all merchants with consistently fast deliveries",
-      "answer": "I can find merchants with low variance in delivery times."
-    },
-    {
-      "question": "What's the most popular cuisine for office lunch orders?",
-      "answer": "This would require identifying office locations or order patterns."
-    },
-    {
-      "question": "How many eaters try a new cuisine each month?",
-      "answer": "I can track first-time cuisine orders per eater_id over time."
-    },
-    {
-      "question": "List all merchants with 24/7 availability",
-      "answer": "This would require merchant operating hours data."
-    },
-    {
-      "question": "What's the average delivery time by weather condition?",
-      "answer": "This would require integrating weather data with order times."
-    },
-    {
-      "question": "Which item has the highest profit margin?",
-      "answer": "This would require cost data not shown in current schema."
-    },
-    {
-      "question": "List all eaters who order healthy items exclusively",
-      "answer": "I can find eaters whose orders only contain 'healthy' tagged items."
-    },
-    {
-      "question": "What's the order frequency distribution by eater?",
-      "answer": "I can analyze how often different eater_ids place orders."
-    },
-    {
-      "question": "Which merchant has the highest customer satisfaction?",
-      "answer": "This would require ratings/review data not in current schema."
-    },
-    {
-      "question": "List all seasonal items available right now",
-      "answer": "This would require item seasonality data and current date."
-    },
-    {
-      "question": "What's the average order value for group orders?",
-      "answer": "This would require identifying group orders in the data."
-    },
-    {
-      "question": "Which cuisine has the fastest average preparation time?",
-      "answer": "This would require tracking when items are marked ready."
-    },
-    {
-      "question": "List all merchants with Valentine's Day specials",
-      "answer": "This would require promotional item data or calendar events."
-    },
-    {
-      "question": "What's the most popular combo meal?",
-      "answer": "This would require analyzing frequently co-ordered items."
-    },
-    {
-      "question": "How many eaters order from multiple cities?",
-      "answer": "I can find eater_ids associated with merchants in different city_ids."
-    },
-    {
-      "question": "List all merchants with sustainable packaging",
-      "answer": "This would require merchant attribute data not in schema."
-    },
-    {
-      "question": "What's the average delivery time for vegan vs non-vegan orders?",
-      "answer": "I can compare delivery times by orders containing vegan items."
-    },
-    {
-      "question": "Which item has the most consistent pricing across merchants?",
-      "answer": "I can analyze price variance for the same item_name across merchants."
-    },
-    {
-      "question": "List all eaters who tip above average",
-      "answer": "This would require tip data not shown in current schema."
-    },
-    {
-      "question": "What's the order volume impact of weather events?",
-      "answer": "This would require integrating weather data with order counts."
-    },
-    {
-      "question": "Which merchant has the most innovative menu?",
-      "answer": "This would require analyzing new item introductions over time."
-    },
-    {
-      "question": "List all gluten-free merchants in Chicago",
-      "answer": "Assuming city_id for Chicago, I can find merchants with gluten-free items there."
-    },
-    {
-      "question": "What's the customer retention rate by merchant?",
-      "answer": "This would require analyzing repeat customers per merchant over time."
-    },
-    {
-      "question": "Which cuisine has the highest average order value?",
-      "answer": "I can calculate average order_value grouped by cuisine_tag."
-    },
-    {
-      "question": "List all merchants who offer loyalty programs",
-      "answer": "This would require merchant program data not in current schema."
-    },
-    {
-      "question": "What's the most popular item for first-time orders?",
-      "answer": "I can analyze items ordered by eaters on their first recorded order."
-    },
-    {
-      "question": "How many eaters order from competitors?",
-      "answer": "This would require data about competitors not in current schema."
-    },
-    {
-      "question": "List all merchants with fastest response times",
-      "answer": "This would require measuring time from order to acceptance."
-    },
-    {
-      "question": "What's the most common day for large group orders?",
-      "answer": "I can analyze orders with high item counts or order values to determine peak days."
-    },
-    {
-      "question": "Which restaurants have the highest breakfast order volume?",
-      "answer": "I can analyze orders between 6am-10am to identify popular breakfast spots."
-    },
-    {
-      "question": "What items are most frequently modified by customers?",
-      "answer": "This would require order customization data not shown in current schema."
-    },
-    {
-      "question": "Which areas show potential for new restaurant partnerships?",
-      "answer": "I can analyze order density and restaurant distribution by location."
-    },
-    {
-      "question": "What's the correlation between delivery time and customer reorder rate?",
-      "answer": "I can analyze if faster deliveries lead to more frequent reorders."
-    },
-    {
-      "question": "Which cuisine types show seasonal popularity?",
-      "answer": "I can analyze order patterns by cuisine_tag across different months."
-    },
-    {
-      "question": "What's the average menu item overlap between similar restaurants?",
-      "answer": "I can compare menu items across restaurants with the same cuisine tags."
-    },
-    {
-      "question": "Which promotional campaigns had the highest conversion rate?",
-      "answer": "This would require promotional campaign and conversion data."
-    }
+  },
+  {
+      "question": "What's the average order value?",
+      "answer": {
+          "text": "Order value statistics:",
+          "type": "metric",
+          "code": "aov = df['order_value'].mean()\nmedian_ov = df['order_value'].median()",
+          "insight": "Average order value: ${aov:.2f} | Median: ${median_ov:.2f}"
+      }
+  },
+  {
+      "question": "Show me city-wise performance",
+      "answer": {
+          "text": "Sales distribution across cities:",
+          "type": "visualization",
+          "code": "city_sales = df.groupby('city_id')['order_value'].sum()\ncity_sales.plot(kind='pie', autopct='%1.1f%%', figsize=(8,8))\nplt.ylabel('')",
+          "insight": "Top city: {city_sales.idxmax()} ({city_sales.max()/city_sales.sum():.1%} of total sales)"
+      }
+  },
+  {
+      "question": "What's my repeat customer rate?",
+      "answer": {
+          "text": "Customer loyalty analysis:",
+          "type": "metric",
+          "code": "repeat_rate = df.groupby('eater_id')['order_id'].nunique().gt(1).mean()",
+          "insight": "{repeat_rate:.1%} of customers ordered more than once"
+      }
+  },
+  {
+      "question": "Show me item price distribution",
+      "answer": {
+          "text": "Menu price analysis:",
+          "type": "visualization",
+          "code": "df['item_price'].plot(kind='box', vert=False, figsize=(8,4), color='#00B14F')\nplt.title('Item Price Distribution')\nplt.xlabel('Price ($)')",
+          "insight": "Average price: ${df['item_price'].mean():.2f} | Most common price: ${df['item_price'].mode()[0]}"
+      }
+  },
+  {
+      "question": "What's my busiest day of week?",
+      "answer": {
+          "text": "Orders by weekday:",
+          "type": "visualization",
+          "code": "df['weekday'] = pd.to_datetime(df['order_time']).dt.day_name()\ndaily_orders = df['weekday'].value_counts()\ndaily_orders.plot(kind='bar', color='#00B14F')\nplt.title('Orders by Weekday')",
+          "insight": "Busiest day: {daily_orders.idxmax()} ({daily_orders.max()} orders)"
+      }
+  },
+  {
+      "question": "Show me order value distribution",
+      "answer": {
+          "text": "Order value ranges:",
+          "type": "visualization",
+          "code": "bins = [0, 20, 50, 100, 500, 1000, 2000]\ndf['order_value'].plot(kind='hist', bins=bins, color='#00B14F')\nplt.title('Order Value Distribution')\nplt.xlabel('Order Value ($)')",
+          "insight": "{len(df[df['order_value'] > 500])} large orders (>$500)"
+      }
+  },
+  {
+      "question": "What's the average preparation time?",
+      "answer": {
+          "text": "Kitchen performance metrics:",
+          "type": "metric",
+          "code": "df['prep_time'] = (pd.to_datetime(df['driver_pickup_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60",
+          "insight": "Average prep time: {df['prep_time'].mean():.1f} minutes"
+      }
+  },
+  {
+      "question": "Show me customer acquisition trend",
+      "answer": {
+          "text": "New customers over time:",
+          "type": "visualization",
+          "code": "df['order_month'] = pd.to_datetime(df['order_time']).dt.to_period('M')\nnew_customers = df.groupby('order_month')['eater_id'].nunique()\nnew_customers.plot(kind='line', marker='o', color='#00B14F')",
+          "insight": "Peak acquisition: {new_customers.idxmax().strftime('%b %Y')} ({new_customers.max()} new customers)"
+      }
+  },
+  {
+      "question": "What's my sales per cuisine type?",
+      "answer": {
+          "text": "Cuisine performance:",
+          "type": "table",
+          "code": "df.groupby('cuisine_tag')['order_value'].sum().sort_values(ascending=False).reset_index()",
+          "insight": "{df.groupby('cuisine_tag')['order_value'].sum().idxmax()} accounts for {df.groupby('cuisine_tag')['order_value'].sum().max()/df['order_value'].sum():.1%} of total sales"
+      }
+  },
+  {
+      "question": "Show me delivery time vs order value",
+      "answer": {
+          "text": "Delivery speed analysis:",
+          "type": "visualization",
+          "code": "df.plot.scatter(x='delivery_duration', y='order_value', alpha=0.5, color='#00B14F')\nplt.title('Delivery Time vs Order Value')\nplt.xlabel('Delivery Minutes')\nplt.ylabel('Order Value ($)')",
+          "insight": "Correlation: {df[['delivery_duration','order_value']].corr().iloc[0,1]:.2f}"
+      }
+  },
+  {
+      "question": "What's my inventory turnover rate?",
+      "answer": {
+          "text": "Item popularity analysis:",
+          "type": "table",
+          "code": "turnover = df.groupby('item_name')['order_id'].count().sort_values(ascending=False).reset_index()",
+          "insight": "Most ordered item: {turnover.iloc[0]['item_name']} ({turnover.iloc[0]['order_id']} times)"
+      }
+  },
+  {
+      "question": "What's my customer age distribution?",
+      "answer": {
+          "text": "Customer age demographics:",
+          "type": "visualization",
+          "code": "df['age_group'] = pd.cut(df['customer_age'], bins=[0,18,25,35,50,65,100], labels=['<18','18-25','26-35','36-50','51-65','65+'])\ndf['age_group'].value_counts().plot(kind='bar', color='#00B14F')\nplt.title('Customer Age Distribution')\nplt.xlabel('Age Group')\nplt.ylabel('Number of Customers')",
+          "insight": "Most common age group: {df['age_group'].mode()[0]}"
+      }
+  },
+  {
+      "question": "Show me seasonal sales patterns",
+      "answer": {
+          "text": "Seasonal sales analysis:",
+          "type": "visualization",
+          "code": "df['season'] = pd.to_datetime(df['order_time']).dt.month.map({12:'Winter',1:'Winter',2:'Winter',3:'Spring',4:'Spring',5:'Spring',6:'Summer',7:'Summer',8:'Summer',9:'Fall',10:'Fall',11:'Fall'})\nseasonal_sales = df.groupby('season')['order_value'].sum()\nseasonal_sales.plot(kind='bar', color='#00B14F')\nplt.title('Sales by Season')",
+          "insight": "Peak season: {seasonal_sales.idxmax()} (${seasonal_sales.max():,.2f})"
+      }
+  },
+  {
+      "question": "What's my profit margin by item?",
+      "answer": {
+          "text": "Item profitability analysis:",
+          "type": "table",
+          "code": "df['profit_margin'] = (df['item_price'] - df['item_cost']) / df['item_price'] * 100\nitem_margins = df.groupby('item_name')[['profit_margin']].mean().sort_values('profit_margin', ascending=False).reset_index()",
+          "insight": "Most profitable item: {item_margins.iloc[0]['item_name']} ({item_margins.iloc[0]['profit_margin']:.1f}% margin)"
+      }
+  },
+  {
+      "question": "What's my order cancellation rate?",
+      "answer": {
+          "text": "Order cancellation analysis:",
+          "type": "metric",
+          "code": "cancellation_rate = len(df[df['order_status']=='cancelled'])/len(df)\ncancellation_reasons = df[df['order_status']=='cancelled']['cancellation_reason'].value_counts()",
+          "insight": "Cancellation rate: {cancellation_rate:.1%}, Main reason: {cancellation_reasons.index[0]}"
+      }
+  },
+  {
+      "question": "Show me customer spending patterns",
+      "answer": {
+          "text": "Customer spending analysis:",
+          "type": "visualization",
+          "code": "customer_spending = df.groupby('eater_id')['order_value'].sum().reset_index()\nplt.hist(customer_spending['order_value'], bins=30, color='#00B14F')\nplt.title('Customer Lifetime Value Distribution')\nplt.xlabel('Total Spending ($)')\nplt.ylabel('Number of Customers')",
+          "insight": "Average customer lifetime value: ${customer_spending['order_value'].mean():,.2f}"
+      }
+  },
+  {
+      "question": "What's my average rating over time?",
+      "answer": {
+          "text": "Customer satisfaction trend:",
+          "type": "visualization",
+          "code": "monthly_ratings = df.set_index(pd.to_datetime(df['order_time'])).resample('M')['rating'].mean()\nmonthly_ratings.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Average Monthly Ratings')\nplt.ylabel('Rating (1-5)')",
+          "insight": "Overall rating: {df['rating'].mean():.1f}/5.0"
+      }
+  },
+  {
+      "question": "What payment methods do customers prefer?",
+      "answer": {
+          "text": "Payment method analysis:",
+          "type": "visualization",
+          "code": "payment_dist = df['payment_method'].value_counts()\npayment_dist.plot(kind='pie', autopct='%1.1f%%')\nplt.title('Payment Method Distribution')",
+          "insight": "Most popular: {payment_dist.index[0]} ({payment_dist.iloc[0]/len(df):.1%})"
+      }
+  },
+  {
+      "question": "How many new vs returning customers per month?",
+      "answer": {
+          "text": "Customer retention analysis:",
+          "type": "visualization",
+          "code": "df['customer_type'] = df.groupby('eater_id').cumcount().map(lambda x: 'New' if x==0 else 'Returning')\nmonthly_breakdown = df.pivot_table(index=pd.to_datetime(df['order_time']).dt.to_period('M'), columns='customer_type', values='order_id', aggfunc='count')\nmonthly_breakdown.plot(kind='bar', stacked=True)",
+          "insight": "Retention rate: {len(df[df['customer_type']=='Returning'])/len(df[df['customer_type']=='New']):.1%}"
+      }
+  },
+  {
+      "question": "What's my average order processing time by day of week?",
+      "answer": {
+          "text": "Processing efficiency analysis:",
+          "type": "visualization",
+          "code": "df['processing_time'] = (pd.to_datetime(df['ready_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nprocessing_by_day = df.groupby('weekday')['processing_time'].mean().reindex(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])\nprocessing_by_day.plot(kind='bar')\nplt.title('Average Processing Time by Day')\nplt.ylabel('Minutes')",
+          "insight": "Slowest day: {processing_by_day.idxmax()} ({processing_by_day.max():.1f} min)"
+      }
+  },
+  {
+      "question": "What items are often ordered together?",
+      "answer": {
+          "text": "Item combination analysis:",
+          "type": "table",
+          "code": "from itertools import combinations\norder_items = df.groupby('order_id')['item_name'].agg(list)\nitem_pairs = [tuple(sorted(combo)) for items in order_items for combo in combinations(items, 2)]\npair_counts = pd.Series(item_pairs).value_counts().head(10)",
+          "insight": "Most common pair: {pair_counts.index[0][0]} & {pair_counts.index[0][1]} ({pair_counts.iloc[0]} times)"
+      }
+  }
+  
 ]
