@@ -830,38 +830,7 @@ export default function Chatbot() {
                     </div>
                   </div>
 
-                  {/* Data Integration */}
-                  <div>
-                    <h3 className="font-medium text-gray-800 mb-3">Data Integration</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Connect Transaction Data
-                        </label>
-                        <button
-                          type="button"
-                          className="w-full p-2 border border-gray-300 rounded-md text-left flex justify-between items-center"
-                        >
-                          <span>Upload CSV or Connect API</span>
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Inventory System Integration
-                        </label>
-                        <select
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select Inventory System</option>
-                          <option value="grab">Grab Inventory Manager</option>
-                          <option value="manual">Manual Entry</option>
-                          <option value="other">Other System (Specify)</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                  
                 </div>
 
                 <div className="mt-6 flex justify-end gap-2">
