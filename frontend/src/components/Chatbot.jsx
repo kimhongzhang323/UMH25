@@ -25,76 +25,6 @@ import { v4 as uuidV4 } from 'uuid';
 
 // Component
 export default function Chatbot() {
-  // Sample chat history data
-  const sampleChatHistory = [
-    {
-      id: 'chat1',
-      title: 'Marketing Strategy',
-      preview: 'Let me analyze our competitors...',
-      timestamp: new Date(Date.now() - 86400000), // Yesterday
-      messages: [
-        {
-          id: '1',
-          text: 'Can you analyze our competitors in the food delivery market?',
-          sender: 'user',
-          timestamp: new Date(Date.now() - 86400000),
-        },
-        {
-          id: '2',
-          text: 'After analyzing competitors: 1. Competitor A has 40% market share 2. Competitor B focuses on premium restaurants 3. Competitor C has fastest delivery times',
-          sender: 'bot',
-          timestamp: new Date(Date.now() - 86300000),
-          mode: 'deep-think'
-        }
-      ]
-    },
-    {
-      id: 'chat2',
-      title: 'Image Generation',
-      preview: 'Restaurant menu design...',
-      timestamp: new Date(Date.now() - 3600000), // 1 hour ago
-      messages: [
-        {
-          id: '1',
-          text: 'Generate an image of a modern restaurant menu',
-          sender: 'user',
-          timestamp: new Date(Date.now() - 3600000),
-          mode: 'image'
-        },
-        {
-          id: '2',
-          text: 'Here\'s the generated image of a modern restaurant menu',
-          sender: 'bot',
-          timestamp: new Date(Date.now() - 3590000),
-          isImage: true,
-          imageUrl: 'https://source.unsplash.com/random/800x400/?restaurant,menu'
-        }
-      ]
-    },
-    {
-      id: 'chat3',
-      title: 'Market Research',
-      preview: 'Latest food trends...',
-      timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
-      messages: [
-        {
-          id: '1',
-          text: 'Search for latest food trends in Southeast Asia',
-          sender: 'user',
-          timestamp: new Date(Date.now() - 1800000),
-          mode: 'search'
-        },
-        {
-          id: '2',
-          text: 'Search results for food trends:\n1. Plant-based meats growing 30% YoY\n2. Cloud kitchens expanding\n3. Ghost kitchens gaining popularity',
-          sender: 'bot',
-          timestamp: new Date(Date.now() - 1790000),
-          mode: 'search'
-        }
-      ]
-    }
-  ];
-
   // State Management
   const [currentChatMessages, setCurrentChatMessages] = useState([
     {
@@ -111,7 +41,7 @@ export default function Chatbot() {
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [chatHistory, setChatHistory] = useState(sampleChatHistory);
+  const [chatList, setChatList] = useState([]);
   const [isNewChat, setIsNewChat] = useState(false); // Add this line
   const [currentChatId, setCurrentChatId] = useState(null);
   const [examplePrompts, setExamplePrompts] = useState([
@@ -189,19 +119,9 @@ export default function Chatbot() {
 
   useEffect(() => {
     if (currentChatId) {
-      setChatHistory((prev) =>
-        prev.map((chat) =>
-          chat.id === currentChatId ? {
-            ...chat,
-            messages: currentChatMessages,
-            title: currentChatMessages.find(m => m.sender === 'user')?.text.substring(0, 30) || chat.title,
-            preview: currentChatMessages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
-            timestamp: new Date()
-          } : chat
-        )
-      );
+      // Fetch current chat data if currentChatId changes
     }
-  }, [currentChatMessages, currentChatId]);
+  }, [currentChatId]);
 
   // Handlers
   // Removed duplicate loadChat function
@@ -270,20 +190,6 @@ export default function Chatbot() {
         if (!currentChatId) {
           saveChatToHistory();
           setIsNewChat(false); // Reset new chat state after saving
-        } else {
-          setChatHistory(prev =>
-            prev.map(chat =>
-              chat.id === currentChatId
-                ? {
-                  ...chat,
-                  messages: [...chat.messages, userMsg, botMsg],
-                  title: userMsg.text.substring(0, 30) || chat.title,
-                  preview: botMsg.text.substring(0, 50) || 'New conversation',
-                  timestamp: new Date()
-                }
-                : chat
-            )
-          );
         }
       });
   };
@@ -308,10 +214,9 @@ export default function Chatbot() {
       title: currentChatMessages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
       preview: currentChatMessages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
       timestamp: new Date(),
-      messages: [...currentChatMessages]
     };
 
-    setChatHistory(prev => [newChat, ...prev]);
+    setChatList(prev => [newChat, ...prev]);
     setCurrentChatId(newChat.id);
   };
 
@@ -440,9 +345,9 @@ export default function Chatbot() {
             </button>
           )}
 
-          {chatHistory.length > 0 ? (
+          {chatList.length > 0 ? (
             <>
-              {chatHistory.map((chat) => (
+              {chatList.map((chat) => (
                 <button
                   key={chat.id}
                   onClick={() => loadChat(chat.id)}
