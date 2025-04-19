@@ -53,7 +53,7 @@ async def get_chats():
                 {
                     "id": 1,
                     "sender": "customer",
-                    "text": "I want to try the Pork Siu Mai Feet but I have low spice tolerance. How spicy is it?",
+                    "text": "I want to try the Pork Siu Mai but I have low spice tolerance. How spicy is it?",
                     "time": "2025-04-10T09:45:00",
                     "read": True
                 }
