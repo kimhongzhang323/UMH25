@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign } from 'lucide-react';
+import { Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -162,6 +162,13 @@ export default function Navbar() {
             Profile
           </a>
 
+          <a
+            href="/logout"
+            className="inline-flex items-center space-x-3 px-3 py-3 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
+          >
+            <LogOut className="h-5 w-5 mr-2 ml-1" />
+            Log Out
+          </a>
         </div>
       </div>
 
@@ -245,6 +252,13 @@ export default function Navbar() {
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Profile
+                </a>
+                <a
+                  href="/logout"
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
                 </a>
               </div>
             </div>
