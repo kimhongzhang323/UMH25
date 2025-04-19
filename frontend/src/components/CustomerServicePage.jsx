@@ -387,7 +387,7 @@ const CustomerServicePage = () => {
             {/* Always render Toggle Button */}
             <button
               onClick={toggleSidebar}
-              className="text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded p-1"
+              className={` hover:text-gray-800 hover:cursor-pointer ${isSidebarExpanded ? 'hover:bg-gray-100 rounded p-1 mb-5 text-gray-500' : 'mt-8.5 rounded text-black'}`}
               aria-label={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
               title={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
             >
