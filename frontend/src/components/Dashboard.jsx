@@ -682,7 +682,7 @@ const Dashboard = () => {
             <div className="space-y-5">
               <a
                 href="/reports"
-                className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                className="block w-full items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
               >
                 <span>View Detailed Reports</span>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -693,7 +693,7 @@ const Dashboard = () => {
               <a
                 href="#"
                 onClick={handleExportPDF}
-                className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                className="block w-full items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
               >
                 <span>Export Data</span>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -702,7 +702,7 @@ const Dashboard = () => {
               </a>
               <a
                 href="/inventory"
-                className="block w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                className="w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
               >
                 <span>Manage Inventory</span>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

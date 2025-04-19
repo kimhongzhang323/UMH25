@@ -156,6 +156,19 @@ class MerchantInfo(BaseModel):
     language: str
 
 
+# Menu Item Models
+class MenuItemBase(BaseModel):
+    item_id: int
+    name: str
+    cuisine_tag: str
+    price: float
+
+class MenuItem(MenuItemBase):
+    current_stock: int = 0
+    min_stock: int = 10
+    status: str = "adequate"
+
+
 def process_csv_row(row: dict, config: CSVConfig) -> Document:
     """Convert a CSV row into a Document"""
     # Combine specified text columns
@@ -324,6 +337,41 @@ async def chat_to_llm(
         "response": "Womp Womp",
         "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
     }
+
+
+@app.get("/menu/items", response_model=List[MenuItem])
+async def get_menu_items():
+    """Get all menu items"""
+    df = pd.read_csv('data/DimSumDelight_Full.csv')
+    # Get unique items and their latest prices
+    items = df.groupby(['item_id', 'item_name', 'cuisine_tag', 'item_price']).size().reset_index()
+    
+    return [
+        MenuItem(
+            item_id=row['item_id'],
+            name=row['item_name'],
+            cuisine_tag=row['cuisine_tag'],
+            price=row['item_price'],
+        )
+        for _, row in items.iterrows()
+    ]
+
+
+@app.get("/menu/items/{item_id}", response_model=MenuItem)
+async def get_menu_item(item_id: int):
+    """Get a specific menu item by ID"""
+    df = pd.read_csv('data/DimSumDelight_Full.csv')
+    item = df[df['item_id'] == item_id].iloc[0]
+    
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+        
+    return MenuItem(
+        item_id=item['item_id'],
+        name=item['item_name'],
+        cuisine_tag=item['cuisine_tag'],
+        price=item['item_price']
+    )
 
 
 if __name__ == "__main__":

@@ -1,7 +1,41 @@
 [
     {
-      "question": "Which merchants joined in 2023?",
-      "answer": "I can check merchants with join_date containing '2023' in their records."
+      "question": "show me monthly sales trends",
+      "answer": {
+        "text": "Here's the monthly sales trend analysis:",
+        "type": "visualization",
+        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ndf['order_time'] = pd.to_datetime(df['order_time'])\ndf['month'] = df['order_time'].dt.to_period('M')\nmonthly_sales = df.groupby('month')['order_value'].sum()\n\nplt.figure(figsize=(10,5))\nmonthly_sales.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Monthly Sales Trend')\nplt.xlabel('Month')\nplt.ylabel('Sales ($)')\nplt.grid(True)",
+        "insight": "Peak sales occurred in {monthly_sales.idxmax().strftime('%B %Y')} with ${monthly_sales.max():,.2f}"
+      }
+    },
+    {
+      "question": "what are top selling items by revenue",
+      "answer": {
+        "text": "Top selling items by revenue:",
+        "type": "visualization", 
+        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ntop_items = df.groupby('item_name')['order_value'].sum().nlargest(5)\n\nplt.figure(figsize=(10,5))\ntop_items.plot(kind='barh', color='#00B14F')\nplt.title('Top 5 Items by Revenue')\nplt.xlabel('Total Revenue ($)')\nplt.ylabel('Item Name')\nplt.gca().invert_yaxis()",
+        "insight": "Top item is {top_items.index[0]} generating ${top_items.iloc[0]:,.2f}"
+      }
+    },
+    {
+      "question": "show me average delivery times by city",
+      "answer": {
+        "text": "Average delivery times by city:",
+        "type": "visualization",
+        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ndf['delivery_duration'] = (pd.to_datetime(df['delivery_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\ncity_times = df.groupby('city_id')['delivery_duration'].mean().sort_values()\n\nplt.figure(figsize=(10,5))\ncity_times.plot(kind='bar', color='#00B14F')\nplt.title('Average Delivery Time by City')\nplt.xlabel('City ID')\nplt.ylabel('Minutes')\nplt.xticks(rotation=45)",
+        "insight": "Fastest city is {city_times.idxmin()} with {city_times.min():.1f} min average"
+      }
+    },
+    {
+      "question": "show me merchant join dates distribution",
+      "answer": {
+        "text": "Merchant acquisition over time:",
+        "type": "visualization",
+        "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data/DimSumDelight_Full.csv')\ndf['join_date'] = pd.to_datetime(df['join_date'])\ndf['join_quarter'] = df['join_date'].dt.to_period('Q')\nquarterly_joins = df.groupby('join_quarter')['merchant_id'].nunique()\n\nplt.figure(figsize=(10,5))\nquarterly_joins.plot(kind='area', color='#00B14F', alpha=0.5)\nplt.title('New Merchants by Quarter')\nplt.xlabel('Quarter')\nplt.ylabel('New Merchants')",
+        "insight": "Peak acquisition quarter was {quarterly_joins.idxmax().strftime('Q%q %Y')} with {quarterly_joins.max()} new merchants",
+        "additional_question": "Which merchants joined in 2023?",
+        "additional_answer": "I can check merchants with join_date containing '2023' in their records."
+      }
     },
     {
       "question": "What is the average delivery time for orders?",

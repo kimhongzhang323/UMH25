@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FiAlertTriangle, 
   FiPackage, 
@@ -6,10 +7,12 @@ import {
   FiSearch, 
   FiTrendingUp,
   FiCheckCircle,
-  FiRefreshCw
+  FiRefreshCw,
+  FiXCircle
 } from 'react-icons/fi';
 
 const InventoryPage = () => {
+  const navigate = useNavigate();
   // Inventory state
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,115 +23,138 @@ const InventoryPage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [orderQuantity, setOrderQuantity] = useState(1);
 
+  const categories = [
+    'Chicken',
+    'Ingredients',
+    'Dairy',
+    'Bakery',
+    'Beverages',
+    'Sauces',
+    'Other'
+  ];
+
+  const units = [
+    'pieces',
+    'kg',
+    'liters',
+    'dozen',
+    'boxes',
+    'packets'
+  ];
+
   // Fetch inventory data
   useEffect(() => {
     const fetchInventory = async () => {
       try {
         setLoading(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock data
-        const mockInventory = [
-          {
-            id: 1,
-            name: "Zinger Burger Patty",
-            category: "Chicken",
-            currentStock: 42,
-            minStock: 50,
-            unit: "pieces",
-            lastDelivery: "2025-04-08",
-            nextDelivery: "2025-04-15",
-            usageRate: "15/day",
-            status: "low"
-          },
-          {
-            id: 2,
-            name: "Original Recipe Coating",
-            category: "Ingredients",
-            currentStock: 25,
-            minStock: 20,
-            unit: "kg",
-            lastDelivery: "2025-04-10",
-            nextDelivery: "2025-04-17",
-            usageRate: "3kg/day",
-            status: "adequate"
-          },
-          {
-            id: 3,
-            name: "Potatoes",
-            category: "Ingredients",
-            currentStock: 120,
-            minStock: 100,
-            unit: "kg",
-            lastDelivery: "2025-04-09",
-            nextDelivery: "2025-04-16",
-            usageRate: "20kg/day",
-            status: "adequate"
-          },
-          {
-            id: 4,
-            name: "Coleslaw Mix",
-            category: "Ingredients",
-            currentStock: 8,
-            minStock: 15,
-            unit: "kg",
-            lastDelivery: "2025-04-05",
-            nextDelivery: "2025-04-12",
-            usageRate: "2kg/day",
-            status: "low"
-          },
-          {
-            id: 5,
-            name: "Cheese Slices",
-            category: "Dairy",
-            currentStock: 200,
-            minStock: 150,
-            unit: "pieces",
-            lastDelivery: "2025-04-11",
-            nextDelivery: "2025-04-18",
-            usageRate: "30/day",
-            status: "adequate"
-          },
-          {
-            id: 6,
-            name: "Buns",
-            category: "Bakery",
-            currentStock: 60,
-            minStock: 80,
-            unit: "dozen",
-            lastDelivery: "2025-04-10",
-            nextDelivery: "2025-04-17",
-            usageRate: "10 dozen/day",
-            status: "low"
-          },
-          {
-            id: 7,
-            name: "Pepsi Syrup",
-            category: "Beverages",
-            currentStock: 5,
-            minStock: 5,
-            unit: "liters",
-            lastDelivery: "2025-04-07",
-            nextDelivery: "2025-04-14",
-            usageRate: "1 liter/day",
-            status: "critical"
-          },
-          {
-            id: 8,
-            name: "Hot & Spicy Marinade",
-            category: "Sauces",
-            currentStock: 12,
-            minStock: 10,
-            unit: "liters",
-            lastDelivery: "2025-04-09",
-            nextDelivery: "2025-04-16",
-            usageRate: "2 liters/day",
-            status: "adequate"
-          }
-        ];
-        
-        setInventory(mockInventory);
+        // Get data from localStorage
+        const savedInventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+        if (savedInventory.length === 0) {
+          // If no data in localStorage, use mock data
+          const mockInventory = [
+            {
+              id: 1,
+              name: "Zinger Burger Patty",
+              category: "Chicken",
+              currentStock: 42,
+              minStock: 50,
+              unit: "pieces",
+              lastDelivery: "2025-04-08",
+              nextDelivery: "2025-04-15",
+              usageRate: "15/day",
+              status: "low"
+            },
+            {
+              id: 2,
+              name: "Original Recipe Coating",
+              category: "Ingredients",
+              currentStock: 25,
+              minStock: 20,
+              unit: "kg",
+              lastDelivery: "2025-04-10",
+              nextDelivery: "2025-04-17",
+              usageRate: "3kg/day",
+              status: "adequate"
+            },
+            {
+              id: 3,
+              name: "Potatoes",
+              category: "Ingredients",
+              currentStock: 120,
+              minStock: 100,
+              unit: "kg",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "20kg/day",
+              status: "adequate"
+            },
+            {
+              id: 4,
+              name: "Coleslaw Mix",
+              category: "Ingredients",
+              currentStock: 8,
+              minStock: 15,
+              unit: "kg",
+              lastDelivery: "2025-04-05",
+              nextDelivery: "2025-04-12",
+              usageRate: "2kg/day",
+              status: "low"
+            },
+            {
+              id: 5,
+              name: "Cheese Slices",
+              category: "Dairy",
+              currentStock: 200,
+              minStock: 150,
+              unit: "pieces",
+              lastDelivery: "2025-04-11",
+              nextDelivery: "2025-04-18",
+              usageRate: "30/day",
+              status: "adequate"
+            },
+            {
+              id: 6,
+              name: "Buns",
+              category: "Bakery",
+              currentStock: 60,
+              minStock: 80,
+              unit: "dozen",
+              lastDelivery: "2025-04-10",
+              nextDelivery: "2025-04-17",
+              usageRate: "10 dozen/day",
+              status: "low"
+            },
+            {
+              id: 7,
+              name: "Pepsi Syrup",
+              category: "Beverages",
+              currentStock: 5,
+              minStock: 5,
+              unit: "liters",
+              lastDelivery: "2025-04-07",
+              nextDelivery: "2025-04-14",
+              usageRate: "1 liter/day",
+              status: "critical"
+            },
+            {
+              id: 8,
+              name: "Hot & Spicy Marinade",
+              category: "Sauces",
+              currentStock: 12,
+              minStock: 10,
+              unit: "liters",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "2 liters/day",
+              status: "adequate"
+            }
+          ];
+          setInventory(mockInventory);
+          // Save mock data to localStorage for future use
+          localStorage.setItem('inventory', JSON.stringify(mockInventory));
+        } else {
+          setInventory(savedInventory);
+        }
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -243,7 +269,7 @@ const InventoryPage = () => {
           <h1 className="text-2xl font-bold text-gray-800">Inventory Management</h1>
           <button 
             className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            onClick={() => alert('Add new item functionality would go here')}
+            onClick={() => navigate('/add-item')}
           >
             <FiPlus className="mr-2" />
             Add New Item

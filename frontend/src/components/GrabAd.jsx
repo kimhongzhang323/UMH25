@@ -275,7 +275,7 @@ const GrabAdsPage = () => {
 
                     {/* AI Analysis Section */}
                     <div>
-                      <label className="block mb-2 font-medium flex items-center">
+                      <label className="mb-2 font-medium flex items-center">
                         <RobotOutlined className="mr-2 text-purple-500" />
                         AI Campaign Analysis
                       </label>
