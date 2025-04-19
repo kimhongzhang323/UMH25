@@ -146,14 +146,18 @@ export default function Chatbot() {
   // Update your newChat function to set this state
   const newChat = () => {
     setIsNewChat(true);
-    setCurrentChatMessages([
-      {
-        id: '1',
-        text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
-        sender: 'bot',
-        timestamp: new Date(),
-      },
-    ]);
+    let firstMessage = {
+      id: '1',
+      text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
+      sender: 'bot',
+      timestamp: new Date(),
+    }
+    setCurrentChatMessages([firstMessage]);
+
+    fetch(BACKEND_URL + "/new_chat", {
+      method: "POST"
+    })
+
     setActiveMode('chat');
     setFilePreview(null);
     setInput('');
@@ -181,7 +185,7 @@ export default function Chatbot() {
   };
 
   // Update your handleSubmit function to reset isNewChat when saving
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
 
@@ -201,7 +205,10 @@ export default function Chatbot() {
     let payload = new FormData();
     payload.append("message", userMsg);
     payload.append("chat_id", currentChatId);
-    payload.append("file", fileInputRef.current.files[0])
+
+    if (fileInputRef.current.files[0]) {
+      payload.append("file", fileInputRef.current.files[0]);
+    }
 
     fetch(BACKEND_URL + "/send_chat", {
       method: "POST",
@@ -209,7 +216,7 @@ export default function Chatbot() {
     })
       .then(response => response.json())
       .then(responseData => {
-        const botMsg = responseData.response;
+        const botMsg = responseData;
 
         setCurrentChatMessages(prev => [...prev, botMsg]);
         setLoading(false);
