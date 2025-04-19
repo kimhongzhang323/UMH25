@@ -109,6 +109,18 @@ export default function Chatbot() {
     scrollToBottom();
   }, [currentChatMessages, loading]);
 
+  // Get all chats from user
+  useEffect(() => {
+    let ignore = false;
+    fetch(import.meta.env.BACKEND_URL + "/get_all_chats")
+    .then(response => response.json())
+    .then(responseData => {
+        setChatList(responseData)
+      });
+
+    return () => { ignore = true };
+  }, [])
+
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -188,7 +200,7 @@ export default function Chatbot() {
         setLoading(false);
 
         if (!currentChatId) {
-          saveChatToHistory();
+          saveUserChat();
           setIsNewChat(false); // Reset new chat state after saving
         }
       });
@@ -206,7 +218,7 @@ export default function Chatbot() {
     return date.toLocaleDateString();
   };
 
-  const saveChatToHistory = () => {
+  const saveUserChat = () => {
     if (currentChatMessages.length <= 1) return;
 
     const newChat = {
