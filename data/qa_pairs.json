@@ -223,6 +223,185 @@
           "code": "from itertools import combinations\norder_items = df.groupby('order_id')['item_name'].agg(list)\nitem_pairs = [tuple(sorted(combo)) for items in order_items for combo in combinations(items, 2)]\npair_counts = pd.Series(item_pairs).value_counts().head(10)",
           "insight": "Most common pair: {pair_counts.index[0][0]} & {pair_counts.index[0][1]} ({pair_counts.iloc[0]} times)"
       }
+  },
+  {
+      "question": "What's my average driver wait time at restaurant?",
+      "answer": {
+          "text": "Driver waiting time analysis:",
+          "type": "metric",
+          "code": "df['driver_wait'] = (pd.to_datetime(df['driver_pickup_time']) - pd.to_datetime(df['driver_arrival_time'])).dt.total_seconds()/60\nwait_by_hour = df.groupby(pd.to_datetime(df['order_time']).dt.hour)['driver_wait'].mean()",
+          "insight": "Average wait time: {df['driver_wait'].mean():.1f} minutes"
+      }
+  },
+  {
+      "question": "Show me order patterns for high-value orders",
+      "answer": {
+          "text": "High-value order analysis:",
+          "type": "visualization",
+          "code": "high_value = df[df['order_value'] > df['order_value'].quantile(0.9)]\nhigh_value_hours = high_value.groupby(pd.to_datetime(high_value['order_time']).dt.hour)['order_id'].count()\nplt.figure(figsize=(10,5))\nhigh_value_hours.plot(kind='bar', color='#00B14F')\nplt.title('High-Value Orders by Hour')\nplt.xlabel('Hour of Day')\nplt.ylabel('Number of Orders')",
+          "insight": "Peak hour for high-value orders: {high_value_hours.idxmax()}:00"
+      }
+  },
+  {
+      "question": "What's my order completion time trend?",
+      "answer": {
+          "text": "Order fulfillment efficiency:",
+          "type": "visualization",
+          "code": "df['completion_time'] = (pd.to_datetime(df['delivery_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nmonthly_completion = df.groupby(pd.to_datetime(df['order_time']).dt.to_period('M'))['completion_time'].mean()\nplt.figure(figsize=(12,6))\nmonthly_completion.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Average Order Completion Time by Month')\nplt.ylabel('Minutes')",
+          "insight": "Current average completion time: {df['completion_time'].mean():.1f} minutes"
+      }
+  },
+  {
+      "question": "Show me customer reorder frequency",
+      "answer": {
+          "text": "Customer reorder pattern analysis:",
+          "type": "table",
+          "code": "reorder_freq = df.groupby('eater_id')['order_id'].count().value_counts().sort_index()\nreorder_dist = pd.DataFrame({'orders': reorder_freq.index, 'customers': reorder_freq.values})",
+          "insight": "Average orders per customer: {df.groupby('eater_id')['order_id'].count().mean():.1f}"
+      }
+  },
+  {
+      "question": "What's my average time between orders for repeat customers?",
+      "answer": {
+          "text": "Customer ordering frequency analysis:",
+          "type": "metric",
+          "code": "repeat_customers = df.groupby('eater_id').filter(lambda x: len(x) > 1)\nrepeat_customers = repeat_customers.sort_values('order_time')\nrepeat_customers['time_between_orders'] = repeat_customers.groupby('eater_id')['order_time'].diff().dt.total_seconds()/(60*60*24)",
+          "insight": "Average days between orders: {repeat_customers['time_between_orders'].mean():.1f}"
+      }
+  },
+  {
+      "question": "Show me the impact of order value on delivery time",
+      "answer": {
+          "text": "Order value vs delivery performance:",
+          "type": "visualization",
+          "code": "value_bins = pd.qcut(df['order_value'], 5)\ndelivery_by_value = df.groupby(value_bins)['delivery_duration'].mean()\nplt.figure(figsize=(10,6))\ndelivery_by_value.plot(kind='bar', color='#00B14F')\nplt.title('Delivery Duration by Order Value Quintile')\nplt.xlabel('Order Value Range')\nplt.ylabel('Average Delivery Time (Minutes)')",
+          "insight": "Correlation between order value and delivery time: {df['order_value'].corr(df['delivery_duration']):.2f}"
+      }
+  },
+  {
+      "question": "What's my kitchen efficiency by time of day?",
+      "answer": {
+          "text": "Kitchen preparation time analysis:",
+          "type": "visualization",
+          "code": "df['prep_efficiency'] = (pd.to_datetime(df['driver_pickup_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nhourly_efficiency = df.groupby(pd.to_datetime(df['order_time']).dt.hour)['prep_efficiency'].mean()\nplt.figure(figsize=(12,6))\nhourly_efficiency.plot(kind='line', marker='o', color='#00B14F')\nplt.title('Kitchen Preparation Time by Hour')\nplt.xlabel('Hour of Day')\nplt.ylabel('Average Preparation Time (Minutes)')",
+          "insight": "Most efficient hour: {hourly_efficiency.idxmin()}:00 ({hourly_efficiency.min():.1f} min)"
+      }
+  },
+  {
+      "question": "Show me multiple item order patterns",
+      "answer": {
+          "text": "Multi-item order analysis:",
+          "type": "visualization",
+          "code": "order_sizes = df.groupby('order_id')['item_id'].count()\nsize_dist = order_sizes.value_counts().sort_index()\nplt.figure(figsize=(8,6))\nsize_dist.plot(kind='bar', color='#00B14F')\nplt.title('Distribution of Items per Order')\nplt.xlabel('Number of Items')\nplt.ylabel('Number of Orders')",
+          "insight": "Most common order size: {order_sizes.mode()[0]} items"
+      }
+  },
+  {
+      "question": "What's my average delivery radius performance?",
+      "answer": {
+          "text": "Delivery time by distance analysis:",
+          "type": "visualization",
+          "code": "delivery_ranges = pd.qcut(df['delivery_duration'], 4, labels=['Short', 'Medium', 'Long', 'Very Long'])\nrange_stats = df.groupby(delivery_ranges)['order_value'].agg(['mean', 'count'])\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15,6))\nrange_stats['mean'].plot(kind='bar', ax=ax1, color='#00B14F', title='Average Order Value by Delivery Time')\nrange_stats['count'].plot(kind='bar', ax=ax2, color='#00B14F', title='Number of Orders by Delivery Time')",
+          "insight": "Most deliveries fall in the {range_stats['count'].idxmax()} range"
+      }
+  },
+  {
+      "question": "Show me the impact of promotions on sales",
+      "answer": {
+          "text": "Promotion effectiveness analysis:",
+          "type": "visualization",
+          "code": "promo_sales = df[df['promo_applied'] == True].groupby('promo_code')['order_value'].sum()\npromo_sales.plot(kind='bar', color='#00B14F')\nplt.title('Sales by Promotion Code')\nplt.xlabel('Promotion Code')\nplt.ylabel('Total Sales ($)')",
+          "insight": "Most effective promo: {promo_sales.idxmax()} (${promo_sales.max():,.2f})"
+      }
+  },
+  {
+      "question": "What's my average order size by customer segment?",
+      "answer": {
+          "text": "Customer segment order size analysis:",
+          "type": "visualization",
+          "code": "segment_order_size = df.groupby('customer_segment')['order_id'].count() / df['customer_segment'].value_counts()\nsegment_order_size.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Size by Customer Segment')\nplt.xlabel('Customer Segment')\nplt.ylabel('Average Order Size')",
+          "insight": "Largest average order size: {segment_order_size.idxmax()} ({segment_order_size.max():.1f})"
+      }
+  },
+  {
+      "question": "Show me the impact of weather on delivery time",
+      "answer": {
+          "text": "Weather impact analysis:",
+          "type": "visualization",
+          "code": "weather_effect = df.groupby('weather_condition')['delivery_duration'].mean()\nweather_effect.plot(kind='bar', color='#00B14F')\nplt.title('Average Delivery Time by Weather Condition')\nplt.xlabel('Weather Condition')\nplt.ylabel('Average Delivery Time (Minutes)')",
+          "insight": "Worst weather condition: {weather_effect.idxmax()} ({weather_effect.max():.1f} min)"
+      }
+  },
+  {
+      "question": "What's my average order size by city?",
+      "answer": {
+          "text": "City-wise order size analysis:",
+          "type": "visualization",
+          "code": "city_order_size = df.groupby('city_id')['order_id'].count() / df['city_id'].value_counts()\ncity_order_size.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Size by City')\nplt.xlabel('City ID')\nplt.ylabel('Average Order Size')",
+          "insight": "Largest average order size: {city_order_size.idxmax()} ({city_order_size.max():.1f})"
+      }
+  },
+  {
+      "question": "Show me the impact of order size on delivery time",
+      "answer": {
+          "text": "Order size vs delivery performance:",
+          "type": "visualization",
+          "code": "order_size_bins = pd.qcut(df['item_count'], 5)\ndelivery_by_size = df.groupby(order_size_bins)['delivery_duration'].mean()\nplt.figure(figsize=(10,6))\ndelivery_by_size.plot(kind='bar', color='#00B14F')\nplt.title('Delivery Duration by Order Size Quintile')\nplt.xlabel('Order Size Range')\nplt.ylabel('Average Delivery Time (Minutes)')",
+          "insight": "Correlation between order size and delivery time: {df['item_count'].corr(df['delivery_duration']):.2f}"
+      }
+  },
+  {
+      "question": "What's my average order value by customer segment?",
+      "answer": {
+          "text": "Customer segment order value analysis:",
+          "type": "visualization",
+          "code": "segment_order_value = df.groupby('customer_segment')['order_value'].mean()\nsegment_order_value.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Value by Customer Segment')\nplt.xlabel('Customer Segment')\nplt.ylabel('Average Order Value ($)')",
+          "insight": "Highest average order value: {segment_order_value.idxmax()} (${segment_order_value.max():,.2f})"
+      }
+  },
+  {
+      "question": "Show me the impact of order time on delivery time",
+      "answer": {
+          "text": "Order time vs delivery performance:",
+          "type": "visualization",
+          "code": "order_time_bins = pd.cut(pd.to_datetime(df['order_time']).dt.hour, bins=24)\ndelivery_by_time = df.groupby(order_time_bins)['delivery_duration'].mean()\nplt.figure(figsize=(10,6))\ndelivery_by_time.plot(kind='bar', color='#00B14F')\nplt.title('Delivery Duration by Order Time')\nplt.xlabel('Order Time (Hour)')\nplt.ylabel('Average Delivery Time (Minutes)')",
+          "insight": "Peak delivery time: {delivery_by_time.idxmax()} ({delivery_by_time.max():.1f} min)"
+      }
+  },
+  {
+      "question": "What's my average order value by payment method?",
+      "answer": {
+          "text": "Payment method order value analysis:",
+          "type": "visualization",
+          "code": "payment_order_value = df.groupby('payment_method')['order_value'].mean()\npayment_order_value.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Value by Payment Method')\nplt.xlabel('Payment Method')\nplt.ylabel('Average Order Value ($)')",
+          "insight": "Highest average order value: {payment_order_value.idxmax()} (${payment_order_value.max():,.2f})"
+      }
+  },
+  {
+      "question": "Show me the impact of order time on order value",
+      "answer": {
+          "text": "Order time vs order value analysis:",
+          "type": "visualization",
+          "code": "order_time_bins = pd.cut(pd.to_datetime(df['order_time']).dt.hour, bins=24)\nvalue_by_time = df.groupby(order_time_bins)['order_value'].mean()\nplt.figure(figsize=(10,6))\nvalue_by_time.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Value by Order Time')\nplt.xlabel('Order Time (Hour)')\nplt.ylabel('Average Order Value ($)')",
+          "insight": "Peak order value time: {value_by_time.idxmax()} (${value_by_time.max():,.2f})"
+      }
+  },
+  {
+      "question": "What's my average order value by delivery distance?",
+      "answer": {
+          "text": "Delivery distance order value analysis:",
+          "type": "visualization",
+          "code": "distance_bins = pd.qcut(df['delivery_distance'], 5)\nvalue_by_distance = df.groupby(distance_bins)['order_value'].mean()\nplt.figure(figsize=(10,6))\nvalue_by_distance.plot(kind='bar', color='#00B14F')\nplt.title('Average Order Value by Delivery Distance Quintile')\nplt.xlabel('Delivery Distance Range')\nplt.ylabel('Average Order Value ($)')",
+          "insight": "Correlation between delivery distance and order value: {df['delivery_distance'].corr(df['order_value']):.2f}"
+      }
+  },
+  {
+      "question": "Show me the impact of order time on order value",
+      "answer": {
+          "text": "Order time vs order value performance:",
+          "type": "visualization",
+          "code": "order_time_bins = pd.cut(pd.to_datetime(df['order_time']).dt.hour, bins=24)\nvalue_by_time = df.groupby(order_time_bins)['order_value'].mean()\nplt.figure(figsize=(10,6))\nvalue_by_time.plot(kind='bar', color='#00B14F')\nplt.title('Order Value by Order Time')\nplt.xlabel('Order Time (Hour)')\nplt.ylabel('Average Order Value ($)')",
+          "insight": "Peak order value time: {value_by_time.idxmax()} (${value_by_time.max():,.2f})"
+      }
   }
-  
 ]
