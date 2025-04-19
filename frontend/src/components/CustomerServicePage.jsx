@@ -367,7 +367,7 @@ const CustomerServicePage = () => {
       {/* --- Sidebar (Chat List) --- */}
       {/* MODIFIED: Added hidden, xl:flex, xl:flex-col, xl:flex-shrink-0, removed initial w-1/4 */}
       <div className={`
-                relative flex flex-col h-screen
+                relative flex flex-col h-[calc(100vh-65px)]
                 bg-white border-r border-gray-200
                 transition-all duration-300 ease-in-out /* Animate width change */
                 flex-shrink-0 /* Prevent shrinking */
