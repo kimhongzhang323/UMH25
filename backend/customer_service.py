@@ -218,7 +218,7 @@ async def send_payload(payload: dict):
     now_utc = datetime.utcnow().isoformat() + "Z"  # Get current UTC time in ISO 8601 format
 
     return {"status": "success",
-            "message": "Payload received successfully",
+            "message": f"Message from frontend: {latest_customer_message}",
             "time": now_utc,
             "chatId": payload["chatId"]
             }
