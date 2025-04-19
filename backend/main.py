@@ -11,7 +11,10 @@ import pandas as pd
 import io
 import csv
 from fastapi.middleware.cors import CORSMiddleware
+import time
+
 import customer_service
+
 
 app = FastAPI(
     title="Llama RAG API with CSV Support (Mocked)",
@@ -156,6 +159,32 @@ class MerchantInfo(BaseModel):
     language: str
 
 
+# ID should be UUID v4
+# timestamps are Unix timestamp
+class Chat(BaseModel):
+    id: str
+    title: str
+    preview: str
+    timestamp: int
+
+
+# id and chat_id should be UUID v4
+# sender is either 'user' or 'bot'
+# timestamps are Unix timestamp
+class Message(BaseModel):
+    id: str
+    text: str
+    sender: str
+    timestamp: int
+    image_url: str = None
+
+
+def generate_unix_timestamp() -> int:
+    # 1 billion nanoseconds = 1 second
+    value = int(time.time())
+    return value
+
+  
 # Menu Item Models
 class MenuItemBase(BaseModel):
     item_id: int
@@ -329,14 +358,18 @@ async def update_merchant_info(merchant_info: MerchantInfo):
 @app.post("/send_chat")
 async def chat_to_llm(
     message: Annotated[str, Form()],
-    chat_id: Annotated[int, Form()],
-    file: Annotated[UploadFile, File()]
+    chat_id: Annotated[str, Form()],
+    file: Annotated[UploadFile, File()] = None
 ):
     # Send data to LLM for processing
-    return {
-        "response": "Womp Womp",
-        "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
-    }
+    # Save chat to database
+    return Message(
+        id="51fb3990-9997-4351-b0a1-bf13a6499651",
+        text="Womp Womp",
+        sender="bot",
+        timestamp=generate_unix_timestamp(),
+        image_url="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
+    )
 
 
 @app.get("/menu/items", response_model=List[MenuItem])
@@ -372,6 +405,12 @@ async def get_menu_item(item_id: int):
         cuisine_tag=item['cuisine_tag'],
         price=item['item_price']
     )
+
+
+@app.post("/new_chat")
+async def new_chat():
+    # add new chat
+    pass
 
 
 if __name__ == "__main__":
