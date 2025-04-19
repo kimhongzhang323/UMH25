@@ -23,19 +23,12 @@ import {
 import jsConvert from 'js-convert-case';
 import { v4 as uuidV4 } from 'uuid';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = "http://localhost:8000";
 
 // Component
 export default function Chatbot() {
   // State Management
-  const [currentChatMessages, setCurrentChatMessages] = useState([
-    {
-      id: '1',
-      text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
-      sender: 'bot',
-      timestamp: new Date(),
-    },
-  ]);
+  const [currentChatMessages, setCurrentChatMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeMode, setActiveMode] = useState('chat');
@@ -46,7 +39,7 @@ export default function Chatbot() {
   const [chatList, setChatList] = useState([]);
   const [isNewChat, setIsNewChat] = useState(false); // Add this line
   const [currentChatId, setCurrentChatId] = useState(null);
-  const [examplePrompts, setExamplePrompts] = useState([
+  const [examplePrompts] = useState([
     "How do I grow my business?",
     "What are the best marketing strategies?",
     "Can you help me analyze my sales data?",
@@ -113,7 +106,6 @@ export default function Chatbot() {
 
   // Get all chats from user
   useEffect(() => {
-    let ignore = false;
     fetch(BACKEND_URL + "/get_all_chats")
       .then(response => response.json())
       .then(responseData => {
@@ -123,7 +115,7 @@ export default function Chatbot() {
         console.log(err);
       });
 
-    return () => { ignore = true };
+    return () => { };
   }, [])
 
   useEffect(() => {
@@ -189,49 +181,60 @@ export default function Chatbot() {
   };
 
   // Update your handleSubmit function to reset isNewChat when saving
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
-
+  
     const userMsg = {
       id: uuidV4(),
       text: input,
       sender: 'user',
       timestamp: new Date(),
-      mode: activeMode,
     };
-
+  
     setCurrentChatMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
-
-    // Generate formData to be sent
-    let payload = new FormData();
-    payload.append("message", userMsg);
-    payload.append("chat_id", currentChatId);
-
-    if (fileInputRef.current.files[0]) {
-      payload.append("file", fileInputRef.current.files[0]);
-    }
-
-    fetch(BACKEND_URL + "/send_chat", {
-      method: "POST",
-      body: payload
-    })
-      .then(response => response.json())
-      .then(responseData => {
-        const botMsg = responseData;
-
-        setCurrentChatMessages(prev => [...prev, botMsg]);
-        setLoading(false);
-
-        if (!currentChatId) {
-          saveUserChat();
-          setIsNewChat(false); // Reset new chat state after saving
-        }
+  
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: userMsg.text,
+          chat_id: currentChatId || "default",
+        }),
       });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const responseData = await response.json();
+      const botMsg = {
+        id: uuidV4(),
+        text: responseData.response || "Sorry, I couldn't process your request.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+  
+      setCurrentChatMessages(prev => [...prev, botMsg]);
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMsg = {
+        id: uuidV4(),
+        text: "An error occurred while fetching the response. Please try again.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+  
+      setCurrentChatMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+    }
   };
-
   // Define the formatDate function before using it in JSX
   const formatDate = (date) => {
     const now = new Date();
@@ -248,26 +251,6 @@ export default function Chatbot() {
   // Note that Date accepts timestamp in millisecond instead of seconds
   const timestampToDate = (timestamp) => new Date(timestamp * 1000);
 
-  const saveUserChat = () => {
-    const newChat = {
-      id: `chat-${uuidV4()}`,
-      title: currentChatMessages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
-      preview: currentChatMessages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
-      // date.now() returns Unix timestamp in milliseconds
-      timestamp: Math.floor(Date.now() / 1000),
-    };
-
-    fetch(BACKEND_URL + "/new_chat", {
-      method: "POST",
-      body: JSON.stringify(newChat),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-
-    setChatList(prev => [newChat, ...prev]);
-    setCurrentChatId(newChat.id);
-  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -292,9 +275,9 @@ export default function Chatbot() {
     }
   };
 
-  const handleMerchantProfileSave = (e) => {
+  const handleMerchantProfileSave = () => {
     fetch(BACKEND_URL + "/update_merchant_info", {
-      method: PUT,
+      method: "PUT",
       body: JSON.stringify(
         jsConvert.snakeKeys(merchantProfile)
       )
