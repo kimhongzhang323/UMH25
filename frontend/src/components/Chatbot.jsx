@@ -257,6 +257,11 @@ export default function Chatbot() {
       timestamp: Math.floor(Date.now() / 1000),
     };
 
+    fetch(BACKEND_URL + "/new_chat", {
+      method: "POST",
+      body: JSON.stringify(newChat)
+    })
+
     setChatList(prev => [newChat, ...prev]);
     setCurrentChatId(newChat.id);
   };

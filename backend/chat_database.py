@@ -36,15 +36,6 @@ class ChatDatabase(BaseModel):
     def get_all_chats(self) -> List[Chat]:
         return self.chats
 
-    def add_new_chat(self, title: str, preview: str, timestamp: int):
-        chat_id = uuid4()
-        self.chats.append(
-            Chat(
-                id=chat_id,
-                title=title,
-                preview=preview,
-                timestamp=timestamp
-            )
-        )
-
-        self.messages[chat_id] = []
+    def add_new_chat(self, chat: Chat):
+        self.chats.append(chat)
+        self.messages[chat.id] = []

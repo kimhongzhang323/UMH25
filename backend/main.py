@@ -402,8 +402,8 @@ async def get_all_messages(chat_id: str) -> List[Message]:
 
 
 @app.post("/new_chat")
-async def new_chat(title: str, preview: str, timestamp: int):
-    chat_db.add_new_chat(title, preview, timestamp)
+async def new_chat(chat: Chat):
+    chat_db.add_new_chat(chat)
 
 
 if __name__ == "__main__":
