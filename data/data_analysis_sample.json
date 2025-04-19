@@ -1,0 +1,22 @@
+[
+    {
+        "question": "What's the average completion rate for Grab rides?",
+        "answer": "Current ride completion rate is 89.2% across all markets. SQL: SELECT AVG(completed) FROM rides WHERE date > CURRENT_DATE - 30"
+    },
+    {
+        "question": "Show food delivery order growth by city",
+        "answer": "Jan-Mar growth: Jakarta +18%, Bangkok +15%, HCMC +12%, Manila +9%. Pandas code: df.groupby('city')['orders'].pct_change()"
+    },
+    {
+        "question": "What's the average GrabFood preparation time?",
+        "answer": "Average prep-to-pickup time is 12.4 minutes, varies by restaurant type (fast food 8min, full-service 16min)"
+    },
+    {
+        "question": "Which payment method is most popular?",
+        "answer": "GrabPay dominates at 62% usage, followed by credit cards (25%) and cash (13%) in digital wallet-enabled markets."
+    },
+    {
+        "question": "What's the peak hours for Grab rides?",
+        "answer": "Morning peak: 7-9am (office commute). Evening peaks: 5-7pm (commute) and 9-11pm (nightlife)."
+    }
+]
