@@ -35,7 +35,7 @@ def query_rag(user_query):
     top_k_qa = [qa_texts[i] for i in I[0]]
     context = "\n".join(top_k_qa)
 
-    prompt = f"""Use the following question-answer pairs to help answer the user's question.Make sure use the same language as input.Answer the question concisely without asking follow up question.Understand the user question and query in the vector database and find the most similar answer for it using english and response in the same language as input.Give the response as the same language as input. ITS A MUST
+    prompt = f"""Use the following question-answer pairs to help answer the user's question.Make sure use the same language as input.Answer the question concisely without asking follow up question.Understand the user question and query in the vector database and find the most similar answer for it using english and response in the same language as input.Give the response as the same language as input. ITS A MUST to use same language. If from the vector database its in english make it into the input language.Calculate the similarities of the question by the user and the question in vector db, if its lesser then 70% u shud generate a text to tell the user to consult the support staff in this "url", make the notice professional
 
 Context:
 {context}
