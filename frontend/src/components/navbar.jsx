@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut } from 'lucide-react';
+import { UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut, UtensilsCrossed } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -237,6 +237,14 @@ export default function Navbar() {
                 >
                   <Warehouse className="mr-3 h-5 w-5" />
                   Inventory
+                </a>
+                <a
+                  href="/menu"
+                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
+                  onClick={toggleMobileMenu}
+                >
+                  <UtensilsCrossed className="mr-3 h-5 w-5" />
+                  Menu
                 </a>
                 <a
                   href="/sales-income"

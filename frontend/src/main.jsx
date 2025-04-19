@@ -19,6 +19,7 @@ import AuthComponent from './components/AuthComponent.jsx'
 import AuthWrapper from './components/AuthWrapper.jsx'
 import AddItem from './components/Additem.jsx'
 import StaffManager from './components/StaffManagement.jsx'
+import MenuGenerator from './components/Menu.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -34,6 +35,14 @@ createRoot(document.getElementById('root')).render(
             element={
               <AuthWrapper>
                 <Navigate to="/dashboard" replace />
+              </AuthWrapper>
+            }
+          />
+          <Route
+            path="/menu"
+            element={
+              <AuthWrapper>
+                <MenuGenerator/>
               </AuthWrapper>
             }
           />
@@ -164,7 +173,7 @@ createRoot(document.getElementById('root')).render(
             </AuthWrapper>
           }
         />
-
+        
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
