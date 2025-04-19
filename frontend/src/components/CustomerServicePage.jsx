@@ -392,7 +392,7 @@ const CustomerServicePage = () => {
               title={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
             >
               {/* Change icon based on state */}
-              {isSidebarExpanded ? <FiChevronsLeft size={20} /> : <FiChevronsRight size={20} />}
+              {isSidebarExpanded ? <FiChevronsLeft size={20} /> : <FiChevronsRight size={25} />}
             </button>
           </div>
         </div>
