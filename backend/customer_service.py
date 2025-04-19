@@ -211,13 +211,10 @@ async def get_chats():
 # Endpoint to send payload from the frontend
 @router.post("/send-payload")
 async def send_payload(payload: dict):
-    chat_id = payload.get("chatId")
     latest_customer_message = payload.get("latestCustomerMessage")
-    message_history = payload.get("messageHistory")
-    response_speed = payload["settings"]["speed"]
     ai_tone = payload["settings"]["tone"]
 
-    ai_response = query_rag(latest_customer_message)
+    ai_response = query_rag(latest_customer_message + f"\nPlease respond in a {ai_tone} tone.")
 
     now_utc = datetime.utcnow().isoformat() + "Z"  # Get current UTC time in ISO 8601 format
 
