@@ -35,61 +35,7 @@ const CustomerServicePage = () => {
   // --- Refs ---
   const messagesEndRef = useRef(null); // Ref for the marker div at the end of messages (optional usage)
   const chatContainerRef = useRef(null); // Ref for the scrollable messages container
-
-  // --- Effects ---
-
-  // Fetch initial chats on component mount
-  useEffect(() => {
-    setIsLoadingChats(true);
-    setFetchError(null);
-    fetch(CHATS_API_URL)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Network response error (${response.status}) fetching chats.`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Ensure data is an array, add basic IDs if missing from backend
-        const processedData = (data || []).map((chat, index) => ({
-          ...chat,
-          id: chat.id || `chat-${index}-${Date.now()}`, // Basic fallback ID
-          messages: (chat.messages || []).map((msg, msgIndex) => ({
-            ...msg,
-            id: msg.id || `msg-${chat.id || index}-${msgIndex}-${Date.now()}` // Basic fallback ID
-          }))
-        }));
-        setChats(processedData);
-        // Automatically select the first chat if available
-        if (processedData.length > 0) {
-          setActiveChatId(processedData[0].id);
-        }
-        setIsLoadingChats(false);
-      })
-      .catch(error => {
-        console.error("Error fetching chat data:", error);
-        setFetchError(error.message || "Failed to load chat data. Please check the API connection.");
-        setIsLoadingChats(false);
-      });
-  }, []); // Empty dependency array ensures this runs only once on mount
-
-  // Scroll to bottom when messages change for the active chat
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      // Use setTimeout to ensure DOM has updated before scrolling
-      const timerId = setTimeout(() => {
-        if (chatContainerRef.current) {
-          // Scroll the container to its full height
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-          // Alternative using messagesEndRef:
-          // messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 0);
-      return () => clearTimeout(timerId); // Cleanup timeout on unmount or dependency change
-    }
-  }, [chats, activeChatId]); // Re-run when chats array or activeChatId changes
-
-  // --- Callbacks & Functions ---
+    // --- Callbacks & Functions ---
 
   // Get the data for the currently active chat
   const getActiveChat = useCallback(() => {
@@ -160,13 +106,6 @@ const CustomerServicePage = () => {
         });
       } else {
         console.warn("AI response received but no text content found or status not success:", result);
-        // Optionally add a system message indicating no AI response
-        // addMessageToChat(chatId, {
-        //   sender: 'system',
-        //   text: 'AI did not generate a response.',
-        //   time: new Date().toISOString(),
-        //   isInfo: true // Custom flag
-        // });
       }
     } catch (error) {
       console.error("Error triggering AI response:", error);
@@ -210,51 +149,18 @@ const CustomerServicePage = () => {
     // --- Simulate/Actual Backend Send ---
     // Replace this promise with your actual API call to send the merchant's message
     new Promise((resolve) => {
-      // --- Actual Backend Call (Example Structure) ---
-      /*
-      fetch(`${API_BASE_URL}/customer-service/chats/${activeChatId}/messages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', // Add Auth headers if needed },
-          body: JSON.stringify({ text: messageTextToSend, sender: 'merchant' })
-      })
-      .then(response => {
-          if (!response.ok) throw new Error(`Failed to send message: ${response.statusText}`);
-          return response.json(); // Assuming backend returns confirmation or the saved message
-      })
-      .then(resolve) // Resolve on success
-      .catch(reject); // Reject on failure
-      */
-
       // --- Simulation ---
       console.log("Simulating sending merchant message to backend:", messageTextToSend);
       setTimeout(() => {
         console.log("Merchant message 'sent' successfully (simulated).");
         resolve(); // Simulate success
-        // You might receive the saved message with a backend ID here
-        // resolve({ id: 'backend-generated-id', ...newMerchantMessage });
       }, 300); // Simulate network delay
-      // --- End Simulation ---
     })
       .then(() => {
-        // After successfully sending the merchant message (or simulating it)
-        // Decide *when* to trigger AI after a merchant message.
-        // Option A: Trigger AI to *potentially* suggest a follow-up based on merchant's message
-        // if (autoReplyEnabled) { triggerAIResponse(activeChatId); }
-
-        // Option B (More common): AI only responds to customer messages.
-        // No AI trigger needed here. The triggerAIResponse is mainly called
-        // when a new customer message arrives (simulated or from websocket/polling).
-        // In this app, it's triggered when selecting a potentially unread chat.
-
+        console.log("Simulation")
       })
       .catch(err => {
         console.error("Failed to send merchant message:", err);
-        // TODO: Handle failure. Could revert the optimistic update,
-        // show an error indicator on the message, or put text back in input.
-        // Example: Put message back in input on failure (simple)
-        // setCurrentMessage(messageTextToSend);
-        // Example: Find the message and mark it as failed (more complex)
-        // find and update message in chats state
       })
       .finally(() => {
         setIsSending(false); // Re-enable input field
@@ -289,20 +195,6 @@ const CustomerServicePage = () => {
     setChats(prevChats => prevChats.map(c =>
       c.id === chatId ? { ...c, unread: false } : c
     ));
-
-    // TODO: When to trigger AI?
-
-    // Check if AI should respond to the *last customer message* in the *newly selected* chat
-    // This might be useful if auto-reply was off or failed previously.
-    // More typically, AI responses happen when a *new* customer message arrives.
-    // The current implementation in useEffect already triggers AI for the first chat if applicable.
-    // This click handler could also trigger it if needed, but let's rely on the effect for now
-    // or integrate a websocket/polling mechanism to detect new customer messages.
-
-    // Minimal logic here: if selecting a chat with a customer message and auto-reply is on,
-    // and AI isn't already typing for *this* chat, consider triggering.
-    // The useEffect (scroll) might already handle this if selecting makes new content appear,
-    // but if the chat was just waiting for a response, this might be a place to trigger.
   };
 
   // Mark a chat as resolved (Placeholder - Needs backend integration)
@@ -318,7 +210,6 @@ const CustomerServicePage = () => {
   const handleCommonResponseClick = (text) => {
     setCurrentMessage(text); // Set, don't append for common responses
     setIsMobileSettingsOpen(false); // Close settings panel on mobile after selection
-    // Need to ensure the input is focused after setting the value
     // Using setTimeout to allow state update to potentially re-render input
     setTimeout(() => {
       document.querySelector('input[type="text"]')?.focus();
@@ -328,6 +219,82 @@ const CustomerServicePage = () => {
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded)
   }
+
+
+  // --- Effects ---
+
+  // Fetch initial chats on component mount
+  useEffect(() => {
+    setIsLoadingChats(true);
+    setFetchError(null);
+    fetch(CHATS_API_URL)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Network response error (${response.status}) fetching chats.`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Ensure data is an array, add basic IDs if missing from backend
+        const processedData = (data || []).map((chat, index) => ({
+          ...chat,
+          id: chat.id || `chat-${index}-${Date.now()}`, // Basic fallback ID
+          messages: (chat.messages || []).map((msg, msgIndex) => ({
+            ...msg,
+            id: msg.id || `msg-${chat.id || index}-${msgIndex}-${Date.now()}` // Basic fallback ID
+          }))
+        }));
+        setChats(processedData);
+        // Automatically select the first chat if available
+        if (processedData.length > 0) {
+          setActiveChatId(processedData[0].id);
+        }
+        setIsLoadingChats(false);
+      })
+      .catch(error => {
+        console.error("Error fetching chat data:", error);
+        setFetchError(error.message || "Failed to load chat data. Please check the API connection.");
+        setIsLoadingChats(false);
+      });
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Scroll to bottom when messages change for the active chat
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      // Use setTimeout to ensure DOM has updated before scrolling
+      const timerId = setTimeout(() => {
+        if (chatContainerRef.current) {
+          // Scroll the container to its full height
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+          // Alternative using messagesEndRef:
+          // messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 0);
+      return () => clearTimeout(timerId); // Cleanup timeout on unmount or dependency change
+    }
+  }, [chats, activeChatId]); // Re-run when chats array or activeChatId changes
+
+  // Trigger AI when active chat changes and has a new customer message
+  useEffect(() => {
+    if (!autoReplyEnabled || !activeChatId) return;
+
+    const activeChat = getActiveChat();
+    if (!activeChat) return;
+
+    const messages = activeChat.messages || [];
+    const lastMessage = messages[messages.length - 1];
+
+    if (lastMessage?.sender === 'customer' &&
+        !isAiTyping[activeChatId] &&
+        !messages.some(m => m.aiGenerated && m.time > lastMessage.time)) {
+
+      const isFirstCustomerMessage = messages.filter(m => m.sender === 'customer').length === 1;
+
+      if (isFirstCustomerMessage) {
+        triggerAIResponse(activeChatId);
+      }
+    }
+  }, [activeChatId, autoReplyEnabled, isAiTyping, triggerAIResponse, getActiveChat]);
 
   // --- JSX Rendering ---
 
@@ -361,7 +328,6 @@ const CustomerServicePage = () => {
   const currentActiveChatData = getActiveChat(); // Get the data for the active chat
 
   return (
-    // Added 'lg:overflow-hidden' potentially useful if content pushes boundaries before xl
     <div className="flex h-[calc(100vh-65px)] bg-gray-50 text-gray-900 relative font-sans box-border overflow-hidden"> {/* Added overflow-hidden */}
 
       {/* --- Sidebar (Chat List) --- */}
@@ -487,8 +453,6 @@ const CustomerServicePage = () => {
               </div>
             </div>
 
-            {/* Messages Area - Scrollable */}
-            {/* Removed max-h, flex-1 handles height, overflow-y-auto handles scrolling */}
             <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto basis-0 ">
               <div className="space-y-4">
                 {currentActiveChatData.messages?.map(message => (
@@ -695,26 +659,7 @@ const CustomerServicePage = () => {
           ></div>
         )
       }
-
-      {/* You might want a button to toggle the sidebar on smaller screens */}
-      {/* Example (place in main chat header): */}
-      {/* {!activeChatId && ( // Only show if no chat is active on mobile, preventing overlap
-            <button
-                onClick={() => {
-                    // Logic to show the sidebar on small screens
-                    // This requires additional state to control mobile sidebar visibility
-                    // For now, the sidebar is just hidden below XL
-                    alert("Toggling mobile sidebar requires extra state/logic");
-                }}
-                className="p-2 rounded-lg hover:bg-gray-200 block xl:hidden"
-                aria-label="Show Chats"
-                title="Show Chats"
-            >
-                <FiMessageSquare size={20} />
-            </button>
-        )} */}
-
-    </div >
+    </div>
   );
 };
 
