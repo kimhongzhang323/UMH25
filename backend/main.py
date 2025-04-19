@@ -37,6 +37,8 @@ app.add_middleware(
 
 app.include_router(customer_service.router)
 
+chat_db = ChatDatabase()
+
 # Configuration
 MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Keep for reference
 EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"  # Keep for reference
@@ -390,14 +392,13 @@ async def get_menu_item(item_id: int):
 
 
 @app.get("/get_all_chats")
-async def get_all_chats(chat_id: str):
-    pass
+async def get_all_chats() -> List[Message]:
+    return chat_db.get_all_chats()
 
 
 @app.post("/new_chat")
-async def new_chat():
-    # add new chat
-    pass
+async def new_chat(title: str, preview: str, timestamp: int):
+    chat_db.add_new_chat(title, preview, timestamp)
 
 
 if __name__ == "__main__":

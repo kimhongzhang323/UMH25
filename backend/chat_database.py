@@ -30,7 +30,10 @@ class ChatDatabase(BaseModel):
     def add_message(self, message: Message, chat_id: str):
         pass
 
-    def get_all_chats(self) -> List[Message]:
+    def get_all_messages(self, chat_id: str) -> List[Message]:
+        return self.messages[chat_id]
+
+    def get_all_chats(self) -> List[Chat]:
         return self.chats
 
     def add_new_chat(self, title: str, preview: str, timestamp: int):
