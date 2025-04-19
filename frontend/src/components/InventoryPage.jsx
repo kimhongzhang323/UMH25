@@ -28,22 +28,22 @@ const InventoryPage = () => {
   const [pendingOrders, setPendingOrders] = useState([]);
 
   const categories = [
-    'Chicken',
-    'Ingredients',
-    'Dairy',
-    'Bakery',
-    'Beverages',
-    'Sauces',
+    'Dumpling Ingredients',
+    'BBQ Pork Ingredients',
+    'Shrimp Ingredients',
+    'Dessert Ingredients',
+    'Wrappers/Dough',
+    'Sauces/Dips',
     'Other'
   ];
 
   const units = [
-    'pieces',
     'kg',
+    'pieces',
     'liters',
-    'dozen',
+    'packs',
     'boxes',
-    'packets'
+    'dozen'
   ];
 
   // Fetch inventory data
@@ -53,85 +53,188 @@ const InventoryPage = () => {
         setLoading(true);
         // Get data from localStorage
         const savedInventory = JSON.parse(localStorage.getItem('inventory') || '[]');
-        if (savedInventory.length === 0) {
-          // If no data in localStorage, use mock data
           const mockInventory = [
+            // Pork Siu Mai Ingredients
             {
               id: 1,
-              name: "Zinger Burger Patty",
-              category: "Chicken",
-              currentStock: 42,
-              minStock: 50,
-              unit: "pieces",
+              name: "Ground Pork",
+              category: "Dumpling Ingredients",
+              currentStock: 15,
+              minStock: 20,
+              unit: "kg",
               lastDelivery: "2025-04-08",
               nextDelivery: "2025-04-15",
-              usageRate: "15/day",
+              usageRate: "5kg/day",
               status: "low"
             },
             {
               id: 2,
-              name: "Original Recipe Coating",
-              category: "Ingredients",
-              currentStock: 25,
-              minStock: 20,
+              name: "Shrimp (for mix)",
+              category: "Dumpling Ingredients",
+              currentStock: 8,
+              minStock: 10,
               unit: "kg",
               lastDelivery: "2025-04-10",
               nextDelivery: "2025-04-17",
               usageRate: "3kg/day",
-              status: "adequate"
-            },
-            {
-              id: 3,
-              name: "Potatoes",
-              category: "Ingredients",
-              currentStock: 120,
-              minStock: 100,
-              unit: "kg",
-              lastDelivery: "2025-04-09",
-              nextDelivery: "2025-04-16",
-              usageRate: "20kg/day",
-              status: "adequate"
-            },
-            {
-              id: 4,
-              name: "Coleslaw Mix",
-              category: "Ingredients",
-              currentStock: 8,
-              minStock: 15,
-              unit: "kg",
-              lastDelivery: "2025-04-05",
-              nextDelivery: "2025-04-12",
-              usageRate: "2kg/day",
               status: "low"
             },
             {
-              id: 5,
-              name: "Cheese Slices",
-              category: "Dairy",
-              currentStock: 200,
-              minStock: 150,
+              id: 3,
+              name: "Siu Mai Wrappers",
+              category: "Wrappers/Dough",
+              currentStock: 1200,
+              minStock: 1500,
               unit: "pieces",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "400/day",
+              status: "low"
+            },
+            {
+              id: 4,
+              name: "Bamboo Shoots",
+              category: "Dumpling Ingredients",
+              currentStock: 5,
+              minStock: 8,
+              unit: "kg",
+              lastDelivery: "2025-04-05",
+              nextDelivery: "2025-04-12",
+              usageRate: "1.5kg/day",
+              status: "low"
+            },
+            
+            // BBQ Pork Bun Ingredients
+            {
+              id: 5,
+              name: "BBQ Pork",
+              category: "BBQ Pork Ingredients",
+              currentStock: 12,
+              minStock: 15,
+              unit: "kg",
               lastDelivery: "2025-04-11",
               nextDelivery: "2025-04-18",
-              usageRate: "30/day",
+              usageRate: "4kg/day",
               status: "adequate"
             },
             {
               id: 6,
-              name: "Buns",
-              category: "Bakery",
-              currentStock: 60,
-              minStock: 80,
-              unit: "dozen",
+              name: "Bun Flour",
+              category: "Wrappers/Dough",
+              currentStock: 25,
+              minStock: 30,
+              unit: "kg",
               lastDelivery: "2025-04-10",
               nextDelivery: "2025-04-17",
-              usageRate: "10 dozen/day",
+              usageRate: "8kg/day",
               status: "low"
             },
             {
               id: 7,
-              name: "Pepsi Syrup",
-              category: "Beverages",
+              name: "Yeast",
+              category: "Wrappers/Dough",
+              currentStock: 2,
+              minStock: 3,
+              unit: "kg",
+              lastDelivery: "2025-04-07",
+              nextDelivery: "2025-04-14",
+              usageRate: "0.5kg/day",
+              status: "adequate"
+            },
+            
+            // Shrimp Har Gow Ingredients
+            {
+              id: 8,
+              name: "Whole Shrimp",
+              category: "Shrimp Ingredients",
+              currentStock: 18,
+              minStock: 20,
+              unit: "kg",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "6kg/day",
+              status: "adequate"
+            },
+            {
+              id: 9,
+              name: "Har Gow Wrappers",
+              category: "Wrappers/Dough",
+              currentStock: 800,
+              minStock: 1000,
+              unit: "pieces",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "300/day",
+              status: "low"
+            },
+            {
+              id: 10,
+              name: "Bamboo Leaves",
+              category: "Shrimp Ingredients",
+              currentStock: 200,
+              minStock: 300,
+              unit: "pieces",
+              lastDelivery: "2025-04-05",
+              nextDelivery: "2025-04-12",
+              usageRate: "50/day",
+              status: "low"
+            },
+            
+            // Mango Pudding Ingredients
+            {
+              id: 11,
+              name: "Fresh Mango",
+              category: "Dessert Ingredients",
+              currentStock: 15,
+              minStock: 20,
+              unit: "kg",
+              lastDelivery: "2025-04-11",
+              nextDelivery: "2025-04-18",
+              usageRate: "5kg/day",
+              status: "low"
+            },
+            {
+              id: 12,
+              name: "Gelatin",
+              category: "Dessert Ingredients",
+              currentStock: 3,
+              minStock: 5,
+              unit: "kg",
+              lastDelivery: "2025-04-10",
+              nextDelivery: "2025-04-17",
+              usageRate: "1kg/day",
+              status: "low"
+            },
+            {
+              id: 13,
+              name: "Evaporated Milk",
+              category: "Dessert Ingredients",
+              currentStock: 8,
+              minStock: 10,
+              unit: "liters",
+              lastDelivery: "2025-04-07",
+              nextDelivery: "2025-04-14",
+              usageRate: "2 liters/day",
+              status: "low"
+            },
+            
+            // Common Ingredients
+            {
+              id: 14,
+              name: "Soy Sauce",
+              category: "Sauces/Dips",
+              currentStock: 10,
+              minStock: 8,
+              unit: "liters",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "2 liters/day",
+              status: "adequate"
+            },
+            {
+              id: 15,
+              name: "Chili Oil",
+              category: "Sauces/Dips",
               currentStock: 5,
               minStock: 5,
               unit: "liters",
@@ -141,24 +244,21 @@ const InventoryPage = () => {
               status: "critical"
             },
             {
-              id: 8,
-              name: "Hot & Spicy Marinade",
-              category: "Sauces",
-              currentStock: 12,
-              minStock: 10,
+              id: 16,
+              name: "Sesame Oil",
+              category: "Sauces/Dips",
+              currentStock: 3,
+              minStock: 4,
               unit: "liters",
-              lastDelivery: "2025-04-09",
-              nextDelivery: "2025-04-16",
-              usageRate: "2 liters/day",
-              status: "adequate"
+              lastDelivery: "2025-04-05",
+              nextDelivery: "2025-04-12",
+              usageRate: "0.5 liters/day",
+              status: "low"
             }
           ];
           setInventory(mockInventory);
           // Save mock data to localStorage for future use
           localStorage.setItem('inventory', JSON.stringify(mockInventory));
-        } else {
-          setInventory(savedInventory);
-        }
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -249,8 +349,9 @@ const InventoryPage = () => {
 
   const getDefaultOrderQuantity = (item) => {
     if (item.unit === 'kg' || item.unit === 'liters') return 5;
-    if (item.unit === 'dozen') return 2;
-    return 20;
+    if (item.unit === 'pieces' || item.unit === 'packs') return 100;
+    if (item.unit === 'boxes') return 2;
+    return 1;
   };
 
   const getStatusColor = (status) => {
@@ -305,7 +406,7 @@ const InventoryPage = () => {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-gray-800">Inventory Management</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Dim Sum Inventory Management</h1>
           <div className="flex gap-3">
             <button 
               className="flex items-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
@@ -324,57 +425,7 @@ const InventoryPage = () => {
           </div>
         </div>
 
-        {/* Inventory Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total Items</p>
-                <p className="text-2xl font-medium">{inventorySummary.totalItems}</p>
-              </div>
-              <div className="p-2 rounded-full bg-blue-100 text-blue-600">
-                <FiPackage size={20} />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Adequate Stock</p>
-                <p className="text-2xl font-medium text-green-600">{inventorySummary.adequateStock}</p>
-              </div>
-              <div className="p-2 rounded-full bg-green-100 text-green-600">
-                <FiCheckCircle size={20} />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Low Stock</p>
-                <p className="text-2xl font-medium text-amber-600">{inventorySummary.lowStock}</p>
-              </div>
-              <div className="p-2 rounded-full bg-amber-100 text-amber-600">
-                <FiAlertTriangle size={20} />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Critical Stock</p>
-                <p className="text-2xl font-medium text-red-600">{inventorySummary.criticalStock}</p>
-              </div>
-              <div className="p-2 rounded-full bg-red-100 text-red-600">
-                <FiAlertTriangle size={20} />
-              </div>
-            </div>
-          </div>
-        </div>
-
+      
         {/* Inventory Controls */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -497,48 +548,48 @@ const InventoryPage = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
             <FiTrendingUp className="mr-2 text-purple-500" />
-            AI Recommendations
+            AI Recommendations for Your Best Sellers
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="border border-gray-200 rounded-lg p-4">
-              <h3 className="font-medium text-gray-700 mb-2">Increase Orders</h3>
+              <h3 className="font-medium text-gray-700 mb-2">Pork Siu Mai</h3>
               <ul className="space-y-2">
                 <li className="flex items-center">
                   <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
-                  <span>Zinger Patty (+20%)</span>
+                  <span>Order more Siu Mai wrappers (+2000)</span>
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
-                  <span>Buns (+15%)</span>
+                  <span>Switch to Supplier B for ground pork (8% cheaper)</span>
                 </li>
               </ul>
             </div>
             
             <div className="border border-gray-200 rounded-lg p-4">
-              <h3 className="font-medium text-gray-700 mb-2">Reduce Waste</h3>
+              <h3 className="font-medium text-gray-700 mb-2">BBQ Pork Buns</h3>
               <ul className="space-y-2">
                 <li className="flex items-center">
                   <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                  <span>Coleslaw Mix (-25%)</span>
+                  <span>Increase BBQ pork order by 20%</span>
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                  <span>Potatoes (-10%)</span>
+                  <span>Try premium bun flour for softer texture</span>
                 </li>
               </ul>
             </div>
             
             <div className="border border-gray-200 rounded-lg p-4">
-              <h3 className="font-medium text-gray-700 mb-2">Supplier Options</h3>
+              <h3 className="font-medium text-gray-700 mb-2">Shrimp Har Gow & Mango Pudding</h3>
               <ul className="space-y-2">
                 <li className="flex items-center">
                   <span className="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
-                  <span>Supplier B (8% cheaper)</span>
+                  <span>Bulk order whole shrimp (15% discount)</span>
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
-                  <span>Supplier C (5% cheaper)</span>
+                  <span>Seasonal mango supplier available</span>
                 </li>
               </ul>
             </div>
