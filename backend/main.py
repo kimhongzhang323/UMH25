@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, status
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Form, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional, Annotated
@@ -15,7 +15,7 @@ import time
 
 import customer_service
 from chat_database import Chat, ChatDatabase, Message
-
+from rag_pipeline import query_rag  # Import the query_rag function
 
 app = FastAPI(
     title="Llama RAG API with CSV Support (Mocked)",
@@ -25,14 +25,18 @@ app = FastAPI(
 
 origins = [
     "http://localhost:5173",
-    "http://localhost:5174"
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    # Add your production frontend URLs here when deployed
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"]
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 app.include_router(customer_service.router)
@@ -198,6 +202,17 @@ def process_csv_row(row: dict, config: CSVConfig) -> Document:
 
     return Document(text=text, metadata=metadata, source="csv")
 
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    return JSONResponse(status_code=200)
+
+@app.middleware("http")
+async def add_cors_header(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
 
 def generate_prompt(question: str, context: List[str] = None) -> str:
     if context:
@@ -404,6 +419,21 @@ async def get_all_messages(chat_id: str) -> List[Message]:
 @app.post("/new_chat")
 async def new_chat(chat: Chat):
     chat_db.add_new_chat(chat)
+
+
+class ChatRequest(BaseModel):
+    query: str
+    chat_id: str = "default"
+
+@app.post("/api/chat")
+async def chat(request: ChatRequest):
+    try:
+        # Fetch the response from the RAG pipeline
+        response_text = query_rag(request.query)
+        return JSONResponse(content={"response": response_text})
+    except Exception as e:
+        # Handle errors and return a meaningful message
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
 if __name__ == "__main__":
