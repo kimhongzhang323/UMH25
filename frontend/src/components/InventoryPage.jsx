@@ -27,6 +27,17 @@ const InventoryPage = () => {
   const [editedItem, setEditedItem] = useState(null);
   const [pendingOrders, setPendingOrders] = useState([]);
 
+  const deleteItem = (item) => {
+    if (window.confirm(`Are you sure you want to delete ${item.name}?`)) {
+      const updatedInventory = inventory.filter((i) => i.id !== item.id);
+      setInventory(updatedInventory);
+      localStorage.setItem('inventory', JSON.stringify(updatedInventory));
+      setEditModalOpen(false);
+      setSelectedItem(null);
+      setEditedItem(null);
+    }
+  };
+
   const categories = [
     'Dumpling Ingredients',
     'BBQ Pork Ingredients',
@@ -51,214 +62,38 @@ const InventoryPage = () => {
     const fetchInventory = async () => {
       try {
         setLoading(true);
-        // Get data from localStorage
-        const savedInventory = JSON.parse(localStorage.getItem('inventory') || '[]');
-          const mockInventory = [
-            // Pork Siu Mai Ingredients
-            {
-              id: 1,
-              name: "Ground Pork",
-              category: "Dumpling Ingredients",
-              currentStock: 15,
-              minStock: 20,
-              unit: "kg",
-              lastDelivery: "2025-04-08",
-              nextDelivery: "2025-04-15",
-              usageRate: "5kg/day",
-              status: "low"
-            },
-            {
-              id: 2,
-              name: "Shrimp (for mix)",
-              category: "Dumpling Ingredients",
-              currentStock: 8,
-              minStock: 10,
-              unit: "kg",
-              lastDelivery: "2025-04-10",
-              nextDelivery: "2025-04-17",
-              usageRate: "3kg/day",
-              status: "low"
-            },
-            {
-              id: 3,
-              name: "Siu Mai Wrappers",
-              category: "Wrappers/Dough",
-              currentStock: 1200,
-              minStock: 1500,
-              unit: "pieces",
-              lastDelivery: "2025-04-09",
-              nextDelivery: "2025-04-16",
-              usageRate: "400/day",
-              status: "low"
-            },
-            {
-              id: 4,
-              name: "Bamboo Shoots",
-              category: "Dumpling Ingredients",
-              currentStock: 5,
-              minStock: 8,
-              unit: "kg",
-              lastDelivery: "2025-04-05",
-              nextDelivery: "2025-04-12",
-              usageRate: "1.5kg/day",
-              status: "low"
-            },
-            
-            // BBQ Pork Bun Ingredients
-            {
-              id: 5,
-              name: "BBQ Pork",
-              category: "BBQ Pork Ingredients",
-              currentStock: 12,
-              minStock: 15,
-              unit: "kg",
-              lastDelivery: "2025-04-11",
-              nextDelivery: "2025-04-18",
-              usageRate: "4kg/day",
-              status: "adequate"
-            },
-            {
-              id: 6,
-              name: "Bun Flour",
-              category: "Wrappers/Dough",
-              currentStock: 25,
-              minStock: 30,
-              unit: "kg",
-              lastDelivery: "2025-04-10",
-              nextDelivery: "2025-04-17",
-              usageRate: "8kg/day",
-              status: "low"
-            },
-            {
-              id: 7,
-              name: "Yeast",
-              category: "Wrappers/Dough",
-              currentStock: 2,
-              minStock: 3,
-              unit: "kg",
-              lastDelivery: "2025-04-07",
-              nextDelivery: "2025-04-14",
-              usageRate: "0.5kg/day",
-              status: "adequate"
-            },
-            
-            // Shrimp Har Gow Ingredients
-            {
-              id: 8,
-              name: "Whole Shrimp",
-              category: "Shrimp Ingredients",
-              currentStock: 18,
-              minStock: 20,
-              unit: "kg",
-              lastDelivery: "2025-04-09",
-              nextDelivery: "2025-04-16",
-              usageRate: "6kg/day",
-              status: "adequate"
-            },
-            {
-              id: 9,
-              name: "Har Gow Wrappers",
-              category: "Wrappers/Dough",
-              currentStock: 800,
-              minStock: 1000,
-              unit: "pieces",
-              lastDelivery: "2025-04-09",
-              nextDelivery: "2025-04-16",
-              usageRate: "300/day",
-              status: "low"
-            },
-            {
-              id: 10,
-              name: "Bamboo Leaves",
-              category: "Shrimp Ingredients",
-              currentStock: 200,
-              minStock: 300,
-              unit: "pieces",
-              lastDelivery: "2025-04-05",
-              nextDelivery: "2025-04-12",
-              usageRate: "50/day",
-              status: "low"
-            },
-            
-            // Mango Pudding Ingredients
-            {
-              id: 11,
-              name: "Fresh Mango",
-              category: "Dessert Ingredients",
-              currentStock: 15,
-              minStock: 20,
-              unit: "kg",
-              lastDelivery: "2025-04-11",
-              nextDelivery: "2025-04-18",
-              usageRate: "5kg/day",
-              status: "low"
-            },
-            {
-              id: 12,
-              name: "Gelatin",
-              category: "Dessert Ingredients",
-              currentStock: 3,
-              minStock: 5,
-              unit: "kg",
-              lastDelivery: "2025-04-10",
-              nextDelivery: "2025-04-17",
-              usageRate: "1kg/day",
-              status: "low"
-            },
-            {
-              id: 13,
-              name: "Evaporated Milk",
-              category: "Dessert Ingredients",
-              currentStock: 8,
-              minStock: 10,
-              unit: "liters",
-              lastDelivery: "2025-04-07",
-              nextDelivery: "2025-04-14",
-              usageRate: "2 liters/day",
-              status: "low"
-            },
-            
-            // Common Ingredients
-            {
-              id: 14,
-              name: "Soy Sauce",
-              category: "Sauces/Dips",
-              currentStock: 10,
-              minStock: 8,
-              unit: "liters",
-              lastDelivery: "2025-04-09",
-              nextDelivery: "2025-04-16",
-              usageRate: "2 liters/day",
-              status: "adequate"
-            },
-            {
-              id: 15,
-              name: "Chili Oil",
-              category: "Sauces/Dips",
-              currentStock: 5,
-              minStock: 5,
-              unit: "liters",
-              lastDelivery: "2025-04-07",
-              nextDelivery: "2025-04-14",
-              usageRate: "1 liter/day",
-              status: "critical"
-            },
-            {
-              id: 16,
-              name: "Sesame Oil",
-              category: "Sauces/Dips",
-              currentStock: 3,
-              minStock: 4,
-              unit: "liters",
-              lastDelivery: "2025-04-05",
-              nextDelivery: "2025-04-12",
-              usageRate: "0.5 liters/day",
-              status: "low"
-            }
-          ];
-          setInventory(mockInventory);
-          // Save mock data to localStorage for future use
-          localStorage.setItem('inventory', JSON.stringify(mockInventory));
+        // Fetch data from CSV file
+        const response = await fetch('data/DimSumDelight_Full.csv');
+        const csvText = await response.text();
+
+        // Parse CSV data
+        const rows = csvText.split('\n').filter(row => row.trim() !== '');
+        const headers = rows[0].split(',').map(header => header.trim());
+        const data = rows.slice(1).map(row => {
+          const values = row.split(',').map(value => value.trim());
+          return headers.reduce((acc, header, index) => {
+            acc[header] = values[index];
+            return acc;
+          }, {});
+        });
+
+        // Transform data into inventory format
+        const inventoryData = data.map((item, index) => ({
+          id: index + 1,
+          name: item['Name'],
+          category: item['Category'],
+          currentStock: parseFloat(item['Current Stock']),
+          minStock: parseFloat(item['Min Stock']),
+          unit: item['Unit'],
+          lastDelivery: item['Last Delivery'],
+          nextDelivery: item['Next Delivery'],
+          usageRate: item['Usage Rate'],
+          status: calculateStatus(parseFloat(item['Current Stock']), parseFloat(item['Min Stock']))
+        }));
+
+        setInventory(inventoryData);
+        // Save data to localStorage
+        localStorage.setItem('inventory', JSON.stringify(inventoryData));
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -271,18 +106,19 @@ const InventoryPage = () => {
 
   // Filter inventory based on search and filter
   const filteredInventory = inventory.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         item.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' || item.status === filter;
+    if (!item) return false;
+    const matchesSearch = item?.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || 
+                         item?.category?.toLowerCase()?.includes(searchTerm.toLowerCase());
+    const matchesFilter = filter === 'all' || item?.status === filter;
     return matchesSearch && matchesFilter;
   });
 
   // Calculate inventory summary
   const inventorySummary = {
     totalItems: inventory.length,
-    lowStock: inventory.filter(item => item.status === 'low').length,
-    criticalStock: inventory.filter(item => item.status === 'critical').length,
-    adequateStock: inventory.filter(item => item.status === 'adequate').length
+    lowStock: inventory.filter(item => item?.status === 'low').length,
+    criticalStock: inventory.filter(item => item?.status === 'critical').length,
+    adequateStock: inventory.filter(item => item?.status === 'adequate').length
   };
 
   // Handle reorder
@@ -524,10 +360,16 @@ const InventoryPage = () => {
                           Reorder
                         </button>
                         <button 
-                          className="text-gray-600 hover:text-gray-800"
+                          className="text-gray-600 hover:text-gray-800 mr-3"
                           onClick={() => handleEdit(item)}
                         >
                           Edit
+                        </button>
+                        <button 
+                          className="text-red-600 hover:text-red-800"
+                          onClick={() => deleteItem(item)}
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>
