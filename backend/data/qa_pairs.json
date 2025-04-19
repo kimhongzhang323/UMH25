@@ -432,9 +432,82 @@
           "text": "To reduce expenses, consider optimizing your inventory, negotiating better supplier deals, and minimizing operational costs. Visit the expense management dashboard for detailed insights.",
           "type": "action",
           "action": {
-              "label": "View Inventory Details",
-              "url": "/inventory"
-          }
+              "label": "View Expense Management Dashboard",
+              "url": "/expense-management"
+          },
+          "insight": "Regularly reviewing your expense reports can help identify areas where costs can be minimized."
+      }
+  },
+  {
+      "question": "How can I improve sales using Grab Ads?",
+      "answer": {
+          "text": "You can improve sales by leveraging Grab Ads to reach a wider audience. Create targeted campaigns to promote your products or services to potential customers.",
+          "type": "action",
+          "action": {
+              "label": "Learn More About Grab Ads",
+              "url": "/grab-ads"
+          },
+          "insight": "Businesses using Grab Ads have seen an average sales increase of 20% by targeting the right audience."
+      }
+  },
+  {
+      "question": "Who among my staff has low performance?",
+      "answer": {
+          "text": "Here is the performance analysis of your staff. Low-performing staff are highlighted based on key metrics such as task completion rate and customer feedback.",
+          "type": "table",
+          "code": "low_performance = df[df['performance_score'] < df['performance_score'].quantile(0.25)][['staff_name', 'performance_score', 'tasks_completed', 'customer_feedback']]\nlow_performance.sort_values('performance_score', ascending=True).reset_index()",
+          "insight": "Staff with the lowest performance score: {low_performance.iloc[0]['staff_name']} (Score: {low_performance.iloc[0]['performance_score']})"
+      }
+  },
+  {
+      "question": "What is the current inventory status?",
+      "answer": {
+          "text": "Here is the current status of your inventory, including stock levels and restocking needs.",
+          "type": "table",
+          "code": "inventory_status = df[['item_name', 'stock_level', 'restock_threshold']]\ninventory_status['restock_needed'] = inventory_status['stock_level'] < inventory_status['restock_threshold']\ninventory_status.sort_values('stock_level', ascending=True).reset_index()",
+          "insight": "Items that need restocking: {inventory_status[inventory_status['restock_needed']]['item_name'].tolist()}"
+      }
+  },
+  {
+      "question": "Which grocery store offers the cheapest prices?",
+      "answer": {
+          "text": "Here is a comparison of prices across different grocery stores. The cheapest grocer is highlighted based on the average price of items.",
+          "type": "table",
+          "code": "price_comparison = df.groupby('grocery_store')['item_price'].mean().sort_values()\ncheapest_grocer = price_comparison.idxmin()\nprice_comparison.reset_index()",
+          "insight": "The cheapest grocery store is {cheapest_grocer} with an average price of ${price_comparison.min():.2f} per item."
+      }
+  },
+  {
+      "question": "Compare different logistic services",
+      "answer": {
+          "text": "Here is a comparison of different logistic services based on delivery speed, cost, and customer satisfaction.",
+          "type": "table",
+          "code": "logistics_comparison = df.groupby('logistic_service')[['delivery_speed', 'cost', 'customer_rating']].mean().sort_values('cost')\nlogistics_comparison.reset_index()",
+          "insight": "The most cost-effective logistic service is {logistics_comparison.iloc[0]['logistic_service']} with an average cost of ${logistics_comparison.iloc[0]['cost']:.2f} and a customer rating of {logistics_comparison.iloc[0]['customer_rating']:.1f}/5."
+      }
+  },
+  {
+      "question": "Send a message to the supplier who gave the wrong amount of ingredients",
+      "answer": {
+          "text": "You can notify the supplier about the discrepancy in the ingredient quantity. Use the supplier communication system to send a message.",
+          "type": "action",
+          "action": {
+              "label": "Contact Supplier",
+              "url": "/supplier-communication"
+          },
+          "insight": "Ensure to include the order ID and details of the discrepancy in your message for faster resolution."
+      }
+  },
+  {
+      "question": "How do I grow my business?",
+      "answer": {
+          "text": "To grow your business, focus on improving customer satisfaction, leveraging marketing strategies, and optimizing operations. Explore our business growth resources for detailed strategies.",
+          "type": "action",
+          "action": {
+              "label": "Explore Business Growth Resources",
+              "url": "/business-growth"
+          },
+          "insight": "Businesses that focus on customer retention and data-driven marketing see an average growth of 30% annually."
       }
   }
 ]
