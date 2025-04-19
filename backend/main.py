@@ -452,7 +452,7 @@ async def chat(request: ChatRequest):
 
             return JSONResponse(content={
                 "response": data["text"],
-                "image_url": "https://localhost:8000" + data["image"]})
+                "image_url": "http://localhost:8000" + data["image"]})
         except Exception as e:
             logger.error(e)
             return JSONResponse(content={
