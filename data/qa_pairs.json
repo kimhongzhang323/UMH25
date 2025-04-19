@@ -190,7 +190,7 @@
           "type": "action",
           "action": {
               "label": "View Detailed Sales Report",
-              "url": "/sales-report"
+              "url": "/sales"
           }
       }
   },
@@ -235,6 +235,39 @@
           "action": {
               "label": "View Full Survey Analysis",
               "url": "/survey-analysis"
+          }
+      }
+  },
+  {
+      "question": "Compare different grocery stores in Malaysia for dumplings",
+      "answer": {
+          "text": "Based on our analysis, Store A offers the best price for dumplings at RM 12 per pack, while Store B has the highest customer satisfaction rating. Store C provides the most variety of dumpling flavors.",
+          "type": "action",
+          "action": {
+              "label": "View Full Grocery Comparison",
+              "url": "/grocery-comparison"
+          }
+      }
+  },
+  {
+      "question": "How can I inform my supplier about a wrong amount?",
+      "answer": {
+          "text": "You can notify your supplier about the wrong amount by sending them a message. Use the supplier communication dashboard for quick access.",
+          "type": "action",
+          "action": {
+              "label": "Send Message to Supplier",
+              "url": "/supplier-communication"
+          }
+      }
+  },
+  {
+      "question": "Show the location of the business partner and the roadline with the fastest ETA",
+      "answer": {
+          "text": "You can view the location of your business partner and the fastest route with the estimated time of arrival (ETA) on the map dashboard.",
+          "type": "action",
+          "action": {
+              "label": "View Map Dashboard",
+              "url": "/map-dashboard"
           }
       }
   }
