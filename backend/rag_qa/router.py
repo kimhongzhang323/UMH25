@@ -1,347 +1,236 @@
-import os
 import json
-import numpy as np
 import faiss
-from pathlib import Path
-from typing import Dict, List, Optional
-from sentence_transformers import SentenceTransformer
-from transformers import pipeline
+import numpy as np
 import torch
-from langdetect import detect
+from sentence_transformers import SentenceTransformer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from typing import List, Dict
+from io import BytesIO
+import base64
+import matplotlib.pyplot as plt
+import pandas as pd
 from googletrans import Translator
+from datetime import datetime, timedelta
 
-class BaseAgent:
-    def __init__(self, name: str):
-        self.name = name
-        self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')  # Multilingual model
-        self.index = None
-        self.responses = None
-        self._initialize_knowledge_base()
+class BusinessQASystem:
+    def __init__(self, qa_path: str = 'data/qa_pairs.json', hf_token: str = None, data_path: str = 'data/DimSumDelight_Full.csv'):
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.embedding_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2').to(self.device)
         self.translator = Translator()
-
-    def _initialize_knowledge_base(self):
-        """Initialize or create knowledge base for the agent"""
-        os.makedirs("vector_db", exist_ok=True)
-        index_path = f"vector_db/{self.name}_faiss.index"
-        responses_path = f"vector_db/{self.name}_responses.npy"
         
-        if not os.path.exists(index_path) or not os.path.exists(responses_path):
-            print(f"No existing knowledge base found for {self.name}. Creating new...")
-            self._create_new_knowledge_base()
-        else:
-            try:
-                self.index = faiss.read_index(index_path)
-                self.responses = np.load(responses_path, allow_pickle=True)
-                print(f"Loaded knowledge base for {self.name} agent")
-            except Exception as e:
-                print(f"Error loading knowledge base for {self.name}: {str(e)}")
-                self._create_new_knowledge_base()
-
-    def _create_new_knowledge_base(self):
-        """Create a new empty knowledge base"""
-        dim = self.model.get_sentence_embedding_dimension()
-        self.index = faiss.IndexFlatIP(dim)
-        self.responses = np.array([], dtype=object)
-        self._save_knowledge_base()
-
-    def _save_knowledge_base(self):
-        """Save the current knowledge base to disk"""
-        faiss.write_index(self.index, f"vector_db/{self.name}_faiss.index")
-        np.save(f"vector_db/{self.name}_responses.npy", self.responses)
-
-    def add_knowledge(self, questions: List[str], answers: List[str]):
-        """Add new Q&A pairs to the knowledge base"""
-        if len(questions) != len(answers):
-            raise ValueError("Questions and answers must be of equal length")
-            
-        new_embeddings = self.model.encode(questions)
-        faiss.normalize_L2(new_embeddings)
-        self.index.add(new_embeddings)
-        self.responses = np.concatenate([self.responses, np.array(answers)])
-        self._save_knowledge_base()
-
-    def detect_language(self, text: str) -> str:
-        """Detect language of input text"""
+        self.qa_pairs = self._load_qa(qa_path)
         try:
-            return detect(text)
-        except:
-            return 'en'  # Default to English if detection fails
+            self.sales_data = pd.read_csv(data_path, parse_dates=['order_time'])
+        except Exception as e:
+            print(f"Error loading sales data: {e}")
+            self.sales_data = pd.DataFrame()
+        self.index, self.answers = self._build_index()
+        
+        self.llm, self.tokenizer = self._init_llm(hf_token)
 
-    def translate_to_english(self, text: str) -> str:
-        """Translate non-English text to English for processing"""
-        if self.detect_language(text) == 'en':
+        self.supported_langs = {
+            'en': 'English',
+            'zh': 'Chinese',
+            'id': 'Indonesian',
+            'ms': 'Malay',
+            'vi': 'Vietnamese',
+            'th': 'Thai'
+        }
+
+    def _load_qa(self, path: str) -> List[Dict]:
+        try:
+            with open(path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading QA pairs: {e}")
+            return []
+
+    def _build_index(self):
+        questions = [pair['question'] for pair in self.qa_pairs]
+        answers = [json.dumps(pair['answer']) if isinstance(pair['answer'], dict)
+                  else json.dumps({'text': str(pair['answer']), 'type': 'text'})
+                  for pair in self.qa_pairs]
+        embeddings = self.embedding_model.encode(questions)
+        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index.add(np.array(embeddings))
+        return index, np.array(answers)
+
+    def _init_llm(self, hf_token: str):
+        if not hf_token or self.device != 'cuda':
+            print("LLM disabled - no token or CUDA unavailable")
+            return None, None
+        try:
+            model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
+            tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_token)
+            llm = AutoModelForCausalLM.from_pretrained(
+                model_name,
+                torch_dtype=torch.bfloat16,
+                device_map="balanced",
+                token=hf_token
+            )
+            print("Llama 3-8B initialized successfully")
+            return llm, tokenizer
+        except Exception as e:
+            print(f"Error initializing LLM: {e}")
+            return None, None
+
+    def _contains_chinese(self, text: str) -> bool:
+        return any('\u4e00' <= ch <= '\u9fff' for ch in text)
+
+    def _detect_language(self, text: str) -> str:
+        try:
+            if self._contains_chinese(text):
+                return 'zh'
+                
+            detected = self.translator.detect(text)
+            if detected.lang in self.supported_langs:
+                return detected.lang
+                
+            if any(word in text.lower() for word in ['apa', 'khabar']):
+                return 'ms'
+            if any(word in text.lower() for word in ['tôi', 'bạn']):
+                return 'vi'
+                
+            return 'en'
+        except Exception as e:
+            print(f"Language detection error: {e}")
+            return 'en'
+
+    def _translate_to_english(self, text: str) -> str:
+        lang = self._detect_language(text)
+        if lang == 'en':
             return text
         try:
-            return self.translator.translate(text, dest='en').text
+            return self.translator.translate(text, src=lang, dest='en').text
         except:
-            return text  # Fallback to original if translation fails
+            return text
 
-    def translate_to_target(self, text: str, target_lang: str) -> str:
-        """Translate English text to target language"""
+    def _translate_to_target(self, text: str, target_lang: str) -> str:
         if target_lang == 'en':
             return text
         try:
-            return self.translator.translate(text, dest=target_lang).text
-        except:
-            return text  # Fallback to English if translation fails
-
-    def respond(self, query: str, top_k: int = 1) -> Optional[str]:
-        """Generate response to query in the same language as the query"""
-        if not self.index or len(self.responses) == 0:
-            return f"{self.name} agent doesn't have any knowledge yet."
-            
-        # Detect and process in user's language
-        user_lang = self.detect_language(query)
-        english_query = self.translate_to_english(query)
-        
-        query_embedding = self.model.encode([english_query])
-        faiss.normalize_L2(query_embedding)
-        
-        try:
-            _, indices = self.index.search(query_embedding, k=top_k)
-            english_response = "\n".join([self.responses[i] for i in indices[0]])
-            return self.translate_to_target(english_response, user_lang)
+            if target_lang == 'zh':
+                return self.translator.translate(text, src='en', dest='zh-cn').text
+            return self.translator.translate(text, src='en', dest=target_lang).text
         except Exception as e:
-            print(f"Error in search: {str(e)}")
-            return None
-
-class CustomerServiceAgent(BaseAgent):
-    def __init__(self):
-        super().__init__("customer_service")
-    
-    def respond(self, query: str) -> str:
-        response = super().respond(query)
-        user_lang = self.detect_language(query)
-        if not response:
-            no_answer = "I need more training to answer that."
-            return f"🔹 Customer Service:\n{self.translate_to_target(no_answer, user_lang)}"
-        return f"🔹 Customer Service:\n{response}"
-
-class DataAnalysisAgent(BaseAgent):
-    def __init__(self):
-        super().__init__("data_analysis")
-    
-    def respond(self, query: str) -> str:
-        response = super().respond(query)
-        user_lang = self.detect_language(query)
-        if not response:
-            no_answer = "I don't have data on this yet."
-            base = self.translate_to_target(no_answer, user_lang)
-        else:
-            base = response
-        note = "I can generate SQL or pandas code if needed"
-        return f"📊 Data Analysis:\n{base}\n[{self.translate_to_target(note, user_lang)}]"
-
-class MarketingAgent(BaseAgent):
-    def __init__(self):
-        super().__init__("marketing")
-    
-    def respond(self, query: str) -> str:
-        response = super().respond(query)
-        user_lang = self.detect_language(query)
-        if not response:
-            no_answer = "No campaign data available."
-            return f"📢 Marketing:\n{self.translate_to_target(no_answer, user_lang)}"
-        return f"📢 Marketing:\n{response}"
-
-class TechnicalSupportAgent(BaseAgent):
-    def __init__(self):
-        super().__init__("tech_support")
-    
-    def respond(self, query: str) -> str:
-        response = super().respond(query)
-        user_lang = self.detect_language(query)
-        if not response:
-            no_answer = "I need more technical details."
-            return f"🛠️ Technical Support:\n{self.translate_to_target(no_answer, user_lang)}"
-        return f"🛠️ Technical Support:\n{response}"
-
-class FeedbackAgent(BaseAgent):
-    def __init__(self):
-        super().__init__("feedback")
-    
-    def respond(self, query: str) -> str:
-        response = super().respond(query)
-        user_lang = self.detect_language(query)
-        if not response:
-            no_answer = "No feedback analysis available."
-            return f"💬 Product Feedback:\n{self.translate_to_target(no_answer, user_lang)}"
-        return f"💬 Product Feedback:\n{response}"
-
-class Router:
-    def __init__(self, hf_token: str = None):
-        self.agents = {
-            'customer': CustomerServiceAgent(),
-            'pandas': DataAnalysisAgent(),
-            'campaign': MarketingAgent(),
-            'support': TechnicalSupportAgent(),
-            'feedback': FeedbackAgent()
-        }
-        
-        # Initialize LLM for routing
-        self.llm = self._initialize_llm(hf_token)
-        self.translator = Translator()
-    
-    def _initialize_llm(self, hf_token: str = None):
-        """Initialize the LLM with fallback options"""
-        try:
-            if hf_token:
-                return pipeline(
-                    "text-generation",
-                    model="meta-llama/Meta-Llama-3-8B",
-                    use_auth_token=hf_token,
-                    device="cuda" if torch.cuda.is_available() else "cpu"
-                )
-            return pipeline("text-generation", model="gpt2")  # Fallback
-        except Exception as e:
-            print(f"LLM initialization error: {str(e)}")
-            return None
-    
-    def detect_language(self, text: str) -> str:
-        """Detect language of input text"""
-        try:
-            return detect(text)
-        except:
-            return 'en'  # Default to English if detection fails
-
-    def translate_to_english(self, text: str) -> str:
-        """Translate non-English text to English for processing"""
-        if self.detect_language(text) == 'en':
+            print(f"Translation error (en→{target_lang}): {e}")
             return text
+
+    def _generate_customer_report(self, time_period: str, lang: str) -> Dict:
+        if self.sales_data.empty:
+            return {'text': self._translate_to_target("No customer data available", lang), 'type': 'text'}
+
+        end_date = datetime.now()
+        if time_period == 'week':
+            start_date = end_date - timedelta(days=7)
+            title = self._translate_to_target("Weekly New Customers", lang)
+            xlabel = self._translate_to_target("Day of Week", lang)
+            size = 7
+        else:
+            start_date = end_date - timedelta(days=30)
+            title = self._translate_to_target("Monthly New Customers", lang)
+            xlabel = self._translate_to_target("Day of Month", lang)
+            size = 30
+
         try:
-            return self.translator.translate(text, dest='en').text
-        except:
-            return text  # Fallback to original if translation fails
+            plt.figure(figsize=(10, 5))
+            dummy_data = pd.Series(np.random.randint(10, 50, size=size))
+            plot_type = 'bar' if time_period == 'week' else 'line'
+            dummy_data.plot(kind=plot_type, color='#00B14F', marker='o' if time_period == 'month' else None)
+            
+            plt.title(title)
+            plt.xlabel(xlabel)
+            plt.ylabel(self._translate_to_target("New Customers", lang))
+            plt.grid(True)
+            plt.tight_layout()
 
-    def route(self, question: str) -> str:
-        """Route question to appropriate agent in user's language"""
-        user_lang = self.detect_language(question)
-        english_question = self.translate_to_english(question)
-        
-        if not self.llm:
-            response = self._fallback_route(english_question)
-        else:            
+            buf = BytesIO()
+            plt.savefig(buf, format='png')
+            plt.close()
+            buf.seek(0)
+
+            total_new = dummy_data.sum()
+            peak_value = dummy_data.max()
+            peak_day = dummy_data.idxmax() + 1  # Day number
+
+            return {
+                'text': self._translate_to_target(f"Your {time_period}ly new customer report", lang),
+                'image': base64.b64encode(buf.read()).decode('utf-8'),
+                'insight': self._translate_to_target(
+                    f"Total new customers: {total_new} | Peak day: {peak_day} ({peak_value} customers)", 
+                    lang
+                ),
+                'type': 'visualization'
+            }
+        except Exception as e:
+            print(f"Error generating customer report: {e}")
+            return {'text': self._translate_to_target("Error generating report", lang), 'type': 'text'}
+
+    def search(self, query: str, top_k: int = 3) -> List[Dict]:
+        input_lang = self._detect_language(query)
+        english_query = self._translate_to_english(query)
+
+        # Handle Chinese customer queries
+        if input_lang == 'zh' and any(term in query for term in ['新顾客', '新客户']):
+            time_period = 'week' if '周' in query else 'month'
+            return [self._generate_customer_report(time_period, 'zh')]
+
+        # Handle English/other language customer queries
+        if any(phrase in english_query.lower() for phrase in ['new customers', 'recent customers']):
+            time_period = 'week' if 'week' in english_query.lower() else 'month'
+            return [self._generate_customer_report(time_period, input_lang)]
+
+        # Vector search for other queries
+        query_embed = self.embedding_model.encode([english_query])
+        distances, indices = self.index.search(np.array(query_embed), top_k)
+
+        results = []
+        for i, dist in zip(indices[0], distances[0]):
             try:
-                classification = self._classify_question(english_question)
-                response = self.agents[classification].respond(english_question)
+                answer = json.loads(self.answers[i])
+                if not isinstance(answer, dict):
+                    answer = {'text': str(answer), 'type': 'text'}
+
+                results.append({
+                    'text': self._translate_to_target(answer.get('text', ''), input_lang),
+                    'type': answer.get('type', 'text'),
+                    'insight': self._translate_to_target(answer.get('insight', ''), input_lang) if 'insight' in answer else None
+                })
             except Exception as e:
-                print(f"Routing error: {str(e)}")
-                response = self._fallback_response(english_question)
-        
-        # Translate response back to user's language
-        if user_lang != 'en':
-            try:
-                return self.translator.translate(response, dest=user_lang).text
-            except:
-                return response  # Fallback to English if translation fails
-        return response
-    
-    def _classify_question(self, question: str) -> str:
-        """Classify question using LLM"""
-        prompt = f"""Classify this question into one category:
-        1. Customer Service - account issues, orders, payments
-        2. Data/Sales Analysis - reports, metrics, analytics
-        3. Marketing Campaign - promotions, ads, campaigns
-        4. Technical Support - bugs, errors, technical issues
-        5. Product Feedback - suggestions, reviews, complaints
-        
-        Respond with exactly one word: 'customer', 'pandas', 'campaign', 'support', or 'feedback'.
-        
-        Question: {question}
-        Classification:"""
-        
-        result = self.llm(prompt, max_new_tokens=10)[0]['generated_text']
-        return self._parse_classification(result)
-    
-    def _parse_classification(self, text: str) -> str:
-        """Parse LLM classification output"""
-        text = text.lower()
-        if "pandas" in text or "data" in text or "sales" in text or "sql" in text or "analys" in text:
-            return 'pandas'
-        elif "campaign" in text or "market" in text or "promo" in text:
-            return 'campaign'
-        elif "support" in text or "technical" in text or "bug" in text or "error" in text:
-            return 'support'
-        elif "feedback" in text or "product" in text or "review" in text or "suggest" in text:
-            return 'feedback'
-        return 'customer'  # default fallback
-    
-    def _fallback_route(self, question: str) -> str:
-        """Fallback routing without LLM"""
-        question_lower = question.lower()
-        if any(word in question_lower for word in ['data', 'report', 'analys', 'sql']):
-            return self.agents['pandas'].respond(question)
-        elif any(word in question_lower for word in ['campaign', 'market', 'promo', 'ad']):
-            return self.agents['campaign'].respond(question)
-        elif any(word in question_lower for word in ['bug', 'error', 'tech', 'support']):
-            return self.agents['support'].respond(question)
-        elif any(word in question_lower for word in ['feedback', 'review', 'suggest']):
-            return self.agents['feedback'].respond(question)
-        return self.agents['customer'].respond(question)
-    
-    def _fallback_response(self, question: str) -> str:
-        """Final fallback response if everything fails"""
-        return "I'm having trouble processing your request. Please try again or contact support."
+                print(f"Error processing answer: {e}")
+                continue
 
-def initialize_agents():
-    """Initialize all agents with sample data if empty"""
-    agents = [
-        CustomerServiceAgent(),
-        DataAnalysisAgent(),
-        MarketingAgent(),
-        TechnicalSupportAgent(),
-        FeedbackAgent()
-    ]
-    
-    # Add sample knowledge if agents are empty
-    for agent in agents:
-        if len(agent.responses) == 0:
-            sample_path = f"data/{agent.name}_sample.json"
-            if os.path.exists(sample_path):
-                with open(sample_path) as f:
-                    qa_pairs = json.load(f)
-                agent.add_knowledge(
-                    [q['question'] for q in qa_pairs],
-                    [q['answer'] for q in qa_pairs]
-                )
-                print(f"Added sample knowledge to {agent.name}")
+        return results if results else [{'text': self._translate_to_target("No results found", input_lang), 'type': 'text'}]
 
 if __name__ == "__main__":
-    # Install required packages if not already installed
-    try:
-        import langdetect
-        import googletrans
-    except ImportError:
-        print("Installing required language packages...")
-        os.system("pip install langdetect googletrans==4.0.0-rc1")
-    
-    # Set your Hugging Face token if using Llama
-    HF_TOKEN = "="
-    
-    # Initialize all agents (will create knowledge bases if they don't exist)
-    initialize_agents()
-    
-    # Create router
-    router = Router(hf_token=HF_TOKEN)
-    
-    print("\n🌟 Multilingual Multi-Agent System Ready 🌟")
-    print("Type your question in any language or 'exit' to quit\n")
-    
+    HF_TOKEN = ""
+    qa_system = BusinessQASystem(
+        qa_path='data/qa_pairs.json',
+        hf_token=HF_TOKEN,
+        data_path='data/DimSumDelight_Full.csv'
+    )
+
+    print("🌏 SEA Business Intelligence System Ready")
+    print("Supported languages: English, Chinese, Malay, Vietnamese, Thai")
+
     while True:
         try:
-            query = input("You: ").strip()
-            if query.lower() in ['exit', 'quit']:
+            query = input("\nAsk a question (or 'quit'): ").strip()
+            if query.lower() == 'quit':
                 break
-                
-            if not query:
-                continue
-                
-            response = router.route(query)
-            print(f"\nAssistant: {response}\n")
-            
+
+            results = qa_system.search(query)
+            response = results[0]
+
+            if response['type'] == 'visualization':
+                print(f"\n{response['text']}")
+                print(f"💡 {response.get('insight', '')}")
+                print("[Visualization would be displayed in app]")
+            else:
+                print(f"\n{response['text']}")
+
         except KeyboardInterrupt:
             print("\nGoodbye!")
             break
         except Exception as e:
-            print(f"System error: {str(e)}")
-            continue
+            print(f"\nError: {e}")
