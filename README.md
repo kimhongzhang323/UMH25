@@ -29,7 +29,7 @@ The **Grab MEX AI Assistant** is an end-to-end merchant support platform combini
 ### **Technical Stack**
 - **Frontend**: React 18+, Vite, TailwindCSS, Javascripts
 - **Backend**: Python 3.10+, FastAPI, 
-- **AI Models**: Gemini 2.0
+- **AI Models**: Gemini 2.0 Flash
 
 ### **Core Benefits**  
 
