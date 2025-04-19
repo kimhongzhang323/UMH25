@@ -17,24 +17,9 @@ async def get_chats():
       {
         "id": 1,
         "sender": "customer",
-        "text": "Hello, I just received my order #ORD-385 but it was missing 2 Zinger Burgers",
+        "text": "Hello, I just received my order #ORD-385 but it was missing 2 Har Gow",
         "time": "2025-04-10T14:30:00",
-        "read": True
-      },
-      {
-        "id": 2,
-        "sender": "system",
-        "text": "Thank you for reaching out. I apologize for the missing items in your order.",
-        "time": "2025-04-10T14:32:00",
-        "read": True,
-        "aiGenerated": "autoReplyEnabled"
-      },
-      {
-        "id": 3,
-        "sender": "customer",
-        "text": "This is very disappointing. I was hosting guests and had to make alternative arrangements",
-        "time": "2025-04-10T14:35:00",
-        "read": True
+        "read": False
       }
     ]
   },
@@ -53,21 +38,6 @@ async def get_chats():
         "time": "2025-04-09T12:15:00",
         "read": True
       },
-      {
-        "id": 2,
-        "sender": "system",
-        "text": "Our standard delivery time to Bangsar is 30-45 minutes during regular hours.",
-        "time": "2025-04-09T12:16:00",
-        "read": True,
-        "aiGenerated": True
-      },
-      {
-        "id": 3,
-        "sender": "customer",
-        "text": "Thank you!",
-        "time": "2025-04-09T12:17:00",
-        "read": True
-      }
     ]
   },
   {
@@ -248,7 +218,7 @@ async def send_payload(payload: dict):
     now_utc = datetime.utcnow().isoformat() + "Z"  # Get current UTC time in ISO 8601 format
 
     return {"status": "success",
-            "message": "Payload received successfully",
+            "message": f"Message from frontend: {latest_customer_message}",
             "time": now_utc,
             "chatId": payload["chatId"]
             }

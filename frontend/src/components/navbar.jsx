@@ -101,7 +101,7 @@ export default function Navbar() {
           </div>
           <button
             onClick={toggleMobileMenu}
-            className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+            className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
           >
             <X className="h-6 w-6" />
           </button>
@@ -181,7 +181,7 @@ export default function Navbar() {
               {/* Mobile menu button */}
               <button
                 onClick={toggleMobileMenu}
-                className="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                className="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
               >
                 <Menu className="h-6 w-6" />
               </button>
@@ -202,7 +202,7 @@ export default function Navbar() {
               <div className="hidden lg:flex space-x-6">
                 <a
                   href="/"
-                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
+                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors hover:cursor-pointer"
                 >
                   <Home className="mr-2 h-4 w-4" />
                   Home
@@ -267,7 +267,7 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={toggleNotifications}
-                className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors relative"
+                className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer transition-colors relative"
                 aria-label="Notifications"
               >
                 <Bell size={20} />
@@ -302,7 +302,7 @@ export default function Navbar() {
                               <p className="text-xs text-gray-400">
                                 {notification.time}
                               </p>
-                              <button className="text-xs bg-gray-100 text-gray-800 hover:bg-gray-200 px-2 py-1 rounded transition-colors">
+                              <button className="text-xs bg-gray-100 text-gray-800 hover:bg-gray-200 px-2 py-1 rounded transition-colors hover:cursor-pointer">
                                 {notification.action}
                               </button>
                             </div>
