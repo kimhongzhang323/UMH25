@@ -270,5 +270,38 @@
               "url": "/map-dashboard"
           }
       }
+  },
+  {
+      "question": "How can I generate an invoice?",
+      "answer": {
+          "text": "You can generate an invoice for your orders using the invoice management system. Access the dashboard to create and download invoices.",
+          "type": "action",
+          "action": {
+              "label": "Generate Invoice",
+              "url": "/invoice-management"
+          }
+      }
+  },
+  {
+      "question": "Help me to create an invoice for xxx",
+      "answer": {
+          "text": "You can create an invoice for xxx using the invoice management system. Access the dashboard to create and download invoices.",
+          "type": "action",
+          "action": {
+              "label": "Create Invoice for xxx",
+              "url": "/invoice-management"
+          }
+      }
+  },
+  {
+      "question": "How can I reduce expenses in my merchant?",
+      "answer": {
+          "text": "To reduce expenses, consider optimizing your inventory, negotiating better supplier deals, and minimizing operational costs. Visit the expense management dashboard for detailed insights.",
+          "type": "action",
+          "action": {
+              "label": "View Inventory Details",
+              "url": "/inventory"
+          }
+      }
   }
 ]
