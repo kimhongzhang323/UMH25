@@ -551,51 +551,13 @@ export default function Chatbot() {
           <div className="max-w-3xl mx-auto w-full">
             {/* Mode Selector */}
             <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
-              <button
-                onClick={() => setActiveMode('chat')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'chat'
-? 'bg-blue-100 text-blue-600'
-: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-}`}
-              >
-                Chat
-              </button>
-              <button
-                onClick={() => setActiveMode('deep-think')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'deep-think'
-? 'bg-purple-100 text-purple-600'
-: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-}`}
-              >
-                <Brain className="w-4 h-4" />
-                Deep Think
-              </button>
-              <button
-                onClick={() => setActiveMode('search')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'search'
-? 'bg-green-100 text-green-600'
-: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-}`}
-              >
-                <Search className="w-4 h-4" />
-                Search
-              </button>
-              <button
-                onClick={() => setActiveMode('image')}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'image'
-? 'bg-orange-100 text-orange-600'
-: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-}`}
-              >
-                <Image className="w-4 h-4" />
-                Text to Image
-              </button>
+              
               <button
                 onClick={() => setShowFilterPanel(true)}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${merchantProfile.merchantType
-? 'bg-yellow-100 text-yellow-600'
-: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-}`}
+                  ? 'bg-yellow-100 text-yellow-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <ShoppingBag className="w-4 h-4" />
                 {merchantProfile.merchantType ? 'Merchant' : 'Business Profile'}
@@ -703,120 +665,10 @@ export default function Chatbot() {
                 setShowFilterPanel(false);
               }}>
                 <div className="space-y-4">
-                  {/* Business Profile Section */}
-                  <div className="border-b pb-4">
-                    <h3 className="font-medium text-gray-800 mb-3">Business Profile</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Business Type
-                        </label>
-                        <select
-                          value={merchantProfile.merchantType}
-                          onChange={(e) => setMerchantProfile(prev => ({
-                            ...prev,
-                            merchantType: e.target.value
-                          }))}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select Business Type</option>
-                          <option value="restaurant">Restaurant/Food Service</option>
-                          <option value="retail">Retail Store</option>
-                          <option value="service">Service Business</option>
-                          <option value="ecommerce">E-commerce</option>
-                          <option value="grocery">Grocery/Convenience</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Main Product Categories
-                        </label>
-                        <input
-                          type="text"
-                          value={merchantProfile.productType}
-                          onChange={(e) => setMerchantProfile(prev => ({
-                            ...prev,
-                            productType: e.target.value
-                          }))}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                          placeholder="e.g. fast food, electronics, beauty products"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Business Size
-                        </label>
-                        <select
-                          value={merchantProfile.businessSize}
-                          onChange={(e) => setMerchantProfile(prev => ({
-                            ...prev,
-                            businessSize: e.target.value
-                          }))}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select Size</option>
-                          <option value="micro">Micro (1 employee)</option>
-                          <option value="small">Small (2-10 employees)</option>
-                          <option value="medium">Medium (11-50 employees)</option>
-                          <option value="large">Large (51+ employees)</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                  
 
                   {/* Location & Market Section */}
-                  <div className="border-b pb-4">
-                    <h3 className="font-medium text-gray-800 mb-3">Location & Market</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Market Type
-                        </label>
-                        <select
-                          value={merchantProfile.location.marketType}
-                          onChange={(e) => setMerchantProfile(prev => ({
-                            ...prev,
-                            location: { ...prev.location, marketType: e.target.value }
-                          }))}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select Market Type</option>
-                          <option value="urban">Urban City Center</option>
-                          <option value="suburban">Suburban Area</option>
-                          <option value="rural">Rural Area</option>
-                          <option value="tourist">Tourist Area</option>
-                          <option value="transport">Transport Hub</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Country/Region
-                        </label>
-                        <select
-                          value={merchantProfile.location.region}
-                          onChange={(e) => setMerchantProfile(prev => ({
-                            ...prev,
-                            location: { ...prev.location, region: e.target.value }
-                          }))}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select Country</option>
-                          <option value="SG">Singapore</option>
-                          <option value="MY">Malaysia</option>
-                          <option value="ID">Indonesia</option>
-                          <option value="TH">Thailand</option>
-                          <option value="VN">Vietnam</option>
-                          <option value="PH">Philippines</option>
-                          <option value="KH">Cambodia</option>
-                          <option value="MM">Myanmar</option>
-                          <option value="LA">Laos</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                  
 
                   {/* Business Challenges Section */}
                   <div className="border-b pb-4">
@@ -858,117 +710,6 @@ export default function Chatbot() {
                             {challenge}
                           </label>
                         ))}
-                    </div>
-                  </div>
-
-                  {/* Communication Preferences */}
-                  <div className="border-b pb-4">
-                    <h3 className="font-medium text-gray-800 mb-3">Communication Preferences</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Primary Language
-                        </label>
-                        <select
-                          value={merchantProfile.language}
-                          onChange={(e) => setMerchantProfile(prev => ({
-                            ...prev,
-                            language: e.target.value
-                          }))}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="en">English</option>
-                          <option value="zh">Chinese (中文)</option>
-                          <option value="ms">Malay (Bahasa Melayu)</option>
-                          <option value="id">Indonesian (Bahasa Indonesia)</option>
-                          <option value="th">Thai (ไทย)</option>
-                          <option value="vi">Vietnamese (Tiếng Việt)</option>
-                          <option value="tl">Filipino (Tagalog)</option>
-                          <option value="km">Khmer (ភាសាខ្មែរ)</option>
-                          <option value="lo">Lao (ພາສາລາວ)</option>
-                          <option value="my">Burmese (မြန်မာဘာသာ)</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Preferred Insight Format
-                        </label>
-                        <div className="space-y-2">
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name="insightFormat"
-                              checked={merchantProfile.insightFormat === 'text'}
-                              onChange={() => setMerchantProfile(prev => ({
-                                ...prev,
-                                insightFormat: 'text'
-                              }))}
-                              className="mr-2"
-                            />
-                            Text Summary
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name="insightFormat"
-                              checked={merchantProfile.insightFormat === 'visual'}
-                              onChange={() => setMerchantProfile(prev => ({
-                                ...prev,
-                                insightFormat: 'visual'
-                              }))}
-                              className="mr-2"
-                            />
-                            Visual Charts
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name="insightFormat"
-                              checked={merchantProfile.insightFormat === 'both'}
-                              onChange={() => setMerchantProfile(prev => ({
-                                ...prev,
-                                insightFormat: 'both'
-                              }))}
-                              className="mr-2"
-                            />
-                            Both Text and Visuals
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Data Integration */}
-                  <div>
-                    <h3 className="font-medium text-gray-800 mb-3">Data Integration</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Connect Transaction Data
-                        </label>
-                        <button
-                          type="button"
-                          className="w-full p-2 border border-gray-300 rounded-md text-left flex justify-between items-center"
-                        >
-                          <span>Upload CSV or Connect API</span>
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Inventory System Integration
-                        </label>
-                        <select
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select Inventory System</option>
-                          <option value="grab">Grab Inventory Manager</option>
-                          <option value="manual">Manual Entry</option>
-                          <option value="other">Other System (Specify)</option>
-                        </select>
-                      </div>
                     </div>
                   </div>
                 </div>

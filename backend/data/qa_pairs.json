@@ -502,3 +502,252 @@
         }
     }
 ]
+  {
+      "question": "What are my best-selling items?",
+      "answer": {
+          "text": "Top 5 items by total sales:"
+      }
+  },
+  {
+      "question": "Show me delivery time distribution",
+      "answer": {
+          "text": "Delivery duration analysis:",
+          "type": "visualization",
+          "code": "df['delivery_duration'] = (pd.to_datetime(df['delivery_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nplt.hist(df['delivery_duration'], bins=20, color='#00B14F')\nplt.title('Delivery Time Distribution')\nplt.xlabel('Minutes')\nplt.ylabel('Order Count')",
+          "insight": "Average delivery time: {df['delivery_duration'].mean():.1f} minutes"
+      }
+  },
+  {
+      "question": "What's my monthly sales growth?",
+      "answer": {
+          "text": "Monthly sales performance:",
+          "type": "visualization",
+          "code": "monthly_sales = df.set_index(pd.to_datetime(df['order_time'])).resample('M')['order_value'].sum()\nmonthly_sales.plot(kind='line', marker='o', figsize=(10,5), color='#00B14F')\nplt.title('Monthly Sales Trend')\nplt.ylabel('Total Sales ($)')",
+          "insight": "Peak month: {monthly_sales.idxmax().strftime('%B %Y')} (${monthly_sales.max():,.2f})"
+      }
+  },
+  {
+      "question": "Which hours have the most orders?",
+      "answer": {
+          "text": "Order frequency by hour:",
+          "type": "visualization",
+          "code": "df['order_hour'] = pd.to_datetime(df['order_time']).dt.hour\nhourly_orders = df['order_hour'].value_counts().sort_index()\nhourly_orders.plot(kind='bar', color='#00B14F', figsize=(10,5))\nplt.title('Orders by Hour of Day')\nplt.xlabel('Hour')\nplt.ylabel('Number of Orders')",
+          "insight": "Busiest hour: {hourly_orders.idxmax()}:00 ({hourly_orders.max()} orders)"
+      }
+  },
+  {
+      "question": "What's the average order value?",
+      "answer": {
+          "text": "Order value statistics:",
+          "type": "metric",
+          "code": "aov = df['order_value'].mean()\nmedian_ov = df['order_value'].median()",
+          "insight": "Average order value: ${aov:.2f} | Median: ${median_ov:.2f}"
+      }
+  },
+  {
+      "question": "What's my repeat customer rate?",
+      "answer": {
+          "text": "Customer loyalty analysis:",
+          "type": "metric",
+          "code": "repeat_rate = df.groupby('eater_id')['order_id'].nunique().gt(1).mean()",
+          "insight": "{repeat_rate:.1%} of customers ordered more than once"
+      }
+  },
+  {
+      "question": "Show me item price distribution",
+      "answer": {
+          "text": "Menu price analysis:",
+          "type": "visualization",
+          "code": "df['item_price'].plot(kind='box', vert=False, figsize=(8,4), color='#00B14F')\nplt.title('Item Price Distribution')\nplt.xlabel('Price ($)')",
+          "insight": "Average price: ${df['item_price'].mean():.2f} | Most common price: ${df['item_price'].mode()[0]}"
+      }
+  },
+
+  {
+      "question": "What's the average preparation time?",
+      "answer": {
+          "text": "Kitchen performance metrics:",
+          "type": "metric",
+          "code": "df['prep_time'] = (pd.to_datetime(df['driver_pickup_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60",
+          "insight": "Average prep time: {df['prep_time'].mean():.1f} minutes"
+      }
+  },
+  {
+      "question": "Show me delivery time vs order value",
+      "answer": {
+          "text": "Delivery speed analysis:",
+          "type": "visualization",
+          "code": "df.plot.scatter(x='delivery_duration', y='order_value', alpha=0.5, color='#00B14F')\nplt.title('Delivery Time vs Order Value')\nplt.xlabel('Delivery Minutes')\nplt.ylabel('Order Value ($)')",
+          "insight": "Correlation: {df[['delivery_duration','order_value']].corr().iloc[0,1]:.2f}"
+      }
+  },
+  {
+      "question": "What's my order cancellation rate?",
+      "answer": {
+          "text": "Order cancellation analysis:",
+          "type": "metric",
+          "code": "cancellation_rate = len(df[df['order_status']=='cancelled'])/len(df)\ncancellation_reasons = df[df['order_status']=='cancelled']['cancellation_reason'].value_counts()",
+          "insight": "Cancellation rate: {cancellation_rate:.1%}, Main reason: {cancellation_reasons.index[0]}"
+      }
+  },
+  {
+      "question": "What payment methods do customers prefer?",
+      "answer": {
+          "text": "Payment method analysis:",
+          "type": "visualization",
+          "code": "payment_dist = df['payment_method'].value_counts()\npayment_dist.plot(kind='pie', autopct='%1.1f%%')\nplt.title('Payment Method Distribution')",
+          "insight": "Most popular: {payment_dist.index[0]} ({payment_dist.iloc[0]/len(df):.1%})"
+      }
+  },
+  {
+      "question": "How many new vs returning customers per month?",
+      "answer": {
+          "text": "Customer retention analysis:",
+          "type": "visualization",
+          "code": "df['customer_type'] = df.groupby('eater_id').cumcount().map(lambda x: 'New' if x==0 else 'Returning')\nmonthly_breakdown = df.pivot_table(index=pd.to_datetime(df['order_time']).dt.to_period('M'), columns='customer_type', values='order_id', aggfunc='count')\nmonthly_breakdown.plot(kind='bar', stacked=True)",
+          "insight": "Retention rate: {len(df[df['customer_type']=='Returning'])/len(df[df['customer_type']=='New']):.1%}"
+      }
+  },
+  {
+      "question": "What's my average order processing time by day of week?",
+      "answer": {
+          "text": "Processing efficiency analysis:",
+          "type": "visualization",
+          "code": "df['processing_time'] = (pd.to_datetime(df['ready_time']) - pd.to_datetime(df['order_time'])).dt.total_seconds()/60\nprocessing_by_day = df.groupby('weekday')['processing_time'].mean().reindex(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])\nprocessing_by_day.plot(kind='bar')\nplt.title('Average Processing Time by Day')\nplt.ylabel('Minutes')",
+          "insight": "Slowest day: {processing_by_day.idxmax()} ({processing_by_day.max():.1f} min)"
+      }
+  },
+  {
+      "question": "What items are often ordered together?",
+      "answer": {
+          "text": "Item combination analysis:",
+          "type": "table",
+          "code": "from itertools import combinations\norder_items = df.groupby('order_id')['item_name'].agg(list)\nitem_pairs = [tuple(sorted(combo)) for items in order_items for combo in combinations(items, 2)]\npair_counts = pd.Series(item_pairs).value_counts().head(10)",
+          "insight": "Most common pair: {pair_counts.index[0][0]} & {pair_counts.index[0][1]} ({pair_counts.iloc[0]} times)"
+      }
+  },
+  {
+      "question": "Show me order patterns for high-value orders",
+      "answer": {
+          "text": "High-value order analysis:",
+          "type": "visualization",
+          "code": "high_value = df[df['order_value'] > df['order_value'].quantile(0.9)]\nhigh_value_hours = high_value.groupby(pd.to_datetime(high_value['order_time']).dt.hour)['order_id'].count()\nplt.figure(figsize=(10,5))\nhigh_value_hours.plot(kind='bar', color='#00B14F')\nplt.title('High-Value Orders by Hour')\nplt.xlabel('Hour of Day')\nplt.ylabel('Number of Orders')",
+          "insight": "Peak hour for high-value orders: {high_value_hours.idxmax()}:00"
+      }
+  },
+  {
+      "question": "What's my average time between orders for repeat customers?",
+      "answer": {
+          "text": "Customer ordering frequency analysis:",
+          "type": "metric",
+          "code": "repeat_customers = df.groupby('eater_id').filter(lambda x: len(x) > 1)\nrepeat_customers = repeat_customers.sort_values('order_time')\nrepeat_customers['time_between_orders'] = repeat_customers.groupby('eater_id')['order_time'].diff().dt.total_seconds()/(60*60*24)",
+          "insight": "Average days between orders: {repeat_customers['time_between_orders'].mean():.1f}"
+      }
+  },
+  {
+      "question": "How can I generate an invoice?",
+      "answer": {
+          "text": "You can generate an invoice for your orders using the invoice management system. Access the dashboard to create and download invoices.",
+          "type": "action",
+          "action": {
+              "label": "Generate Invoice",
+              "url": "/invoice-management"
+          }
+      }
+  },
+  {
+      "question": "Help me to create an invoice for xxx",
+      "answer": {
+          "text": "You can create an invoice for xxx using the invoice management system. Access the dashboard to create and download invoices.",
+          "type": "action",
+          "action": {
+              "label": "Create Invoice for xxx",
+              "url": "/invoice-management"
+          }
+      }
+  },
+  {
+      "question": "How can I reduce expenses in my merchant?",
+      "answer": {
+          "text": "To reduce expenses, consider optimizing your inventory, negotiating better supplier deals, and minimizing operational costs. Visit the expense management dashboard for detailed insights.",
+          "type": "action",
+          "action": {
+              "label": "View Expense Management Dashboard",
+              "url": "/expense-management"
+          },
+          "insight": "Regularly reviewing your expense reports can help identify areas where costs can be minimized."
+      }
+  },
+  {
+      "question": "How can I improve sales using Grab Ads?",
+      "answer": {
+          "text": "You can improve sales by leveraging Grab Ads to reach a wider audience. Create targeted campaigns to promote your products or services to potential customers.",
+          "type": "action",
+          "action": {
+              "label": "Learn More About Grab Ads",
+              "url": "/grab-ads"
+          },
+          "insight": "Businesses using Grab Ads have seen an average sales increase of 20% by targeting the right audience."
+      }
+  },
+  {
+      "question": "Who among my staff has low performance?",
+      "answer": {
+          "text": "Here is the performance analysis of your staff. Low-performing staff are highlighted based on key metrics such as task completion rate and customer feedback.",
+          "type": "table",
+          "code": "low_performance = df[df['performance_score'] < df['performance_score'].quantile(0.25)][['staff_name', 'performance_score', 'tasks_completed', 'customer_feedback']]\nlow_performance.sort_values('performance_score', ascending=True).reset_index()",
+          "insight": "Staff with the lowest performance score: {low_performance.iloc[0]['staff_name']} (Score: {low_performance.iloc[0]['performance_score']})"
+      }
+  },
+  {
+      "question": "What is the current inventory status?",
+      "answer": {
+          "text": "Here is the current status of your inventory, including stock levels and restocking needs.",
+          "type": "table",
+          "code": "inventory_status = df[['item_name', 'stock_level', 'restock_threshold']]\ninventory_status['restock_needed'] = inventory_status['stock_level'] < inventory_status['restock_threshold']\ninventory_status.sort_values('stock_level', ascending=True).reset_index()",
+          "insight": "Items that need restocking: {inventory_status[inventory_status['restock_needed']]['item_name'].tolist()}"
+      }
+  },
+  {
+      "question": "Which grocery store offers the cheapest prices?",
+      "answer": {
+          "text": "Here is a comparison of prices across different grocery stores. The cheapest grocer is highlighted based on the average price of items.",
+          "type": "table",
+          "code": "price_comparison = df.groupby('grocery_store')['item_price'].mean().sort_values()\ncheapest_grocer = price_comparison.idxmin()\nprice_comparison.reset_index()",
+          "insight": "The cheapest grocery store is {cheapest_grocer} with an average price of ${price_comparison.min():.2f} per item."
+      }
+  },
+  {
+      "question": "Compare different logistic services",
+      "answer": {
+          "text": "Here is a comparison of different logistic services based on delivery speed, cost, and customer satisfaction.",
+          "type": "table",
+          "code": "logistics_comparison = df.groupby('logistic_service')[['delivery_speed', 'cost', 'customer_rating']].mean().sort_values('cost')\nlogistics_comparison.reset_index()",
+          "insight": "The most cost-effective logistic service is {logistics_comparison.iloc[0]['logistic_service']} with an average cost of ${logistics_comparison.iloc[0]['cost']:.2f} and a customer rating of {logistics_comparison.iloc[0]['customer_rating']:.1f}/5."
+      }
+  },
+  {
+      "question": "Send a message to the supplier who gave the wrong amount of ingredients",
+      "answer": {
+          "text": "You can notify the supplier about the discrepancy in the ingredient quantity. Use the supplier communication system to send a message.",
+          "type": "action",
+          "action": {
+              "label": "Contact Supplier",
+              "url": "/supplier-communication"
+          },
+          "insight": "Ensure to include the order ID and details of the discrepancy in your message for faster resolution."
+      }
+  },
+  {
+      "question": "How do I grow my business?",
+      "answer": {
+          "text": "To grow your business, focus on improving customer satisfaction, leveraging marketing strategies, and optimizing operations. Explore our business growth resources for detailed strategies.",
+          "type": "action",
+          "action": {
+              "label": "Explore Business Growth Resources",
+              "url": "/business-growth"
+          },
+          "insight": "Businesses that focus on customer retention and data-driven marketing see an average growth of 30% annually."
+      }
+  }
+]
