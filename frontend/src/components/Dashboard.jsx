@@ -527,7 +527,17 @@ const Dashboard = () => {
         </div>
 
         {/* Inventory Summary Cards */}
-        <h2 className="text-xl font-light text-gray-800 mb-4">Inventory Summary</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-light text-gray-800">Inventory Summary</h2>
+          <a href="/inventory">
+          <button 
+            className="px-4 py-2 bg-blue-500 text-white rounded-md" 
+          >
+           Manage Inventory
+          </button>
+          </a>
+        </div>
+        
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   <div className="bg-white rounded-lg shadow p-4">
                     <div className="flex items-center justify-between">
