@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 from datetime import datetime
+from rag_pipeline import query_rag
 
 router = APIRouter(prefix="/customer-service")
+
 
 @router.get("/chats")
 async def get_chats():
@@ -205,20 +207,22 @@ async def get_chats():
     ]
     return chats
 
+
 # Endpoint to send payload from the frontend
 @router.post("/send-payload")
 async def send_payload(payload: dict):
-    print("Payload received")
     chat_id = payload.get("chatId")
     latest_customer_message = payload.get("latestCustomerMessage")
     message_history = payload.get("messageHistory")
     response_speed = payload["settings"]["speed"]
     ai_tone = payload["settings"]["tone"]
 
+    ai_response = query_rag(latest_customer_message)
+
     now_utc = datetime.utcnow().isoformat() + "Z"  # Get current UTC time in ISO 8601 format
 
     return {"status": "success",
-            "message": f"Message from frontend: {latest_customer_message}",
+            "message": ai_response,
             "time": now_utc,
             "chatId": payload["chatId"]
             }
