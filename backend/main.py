@@ -182,7 +182,6 @@ class Message(BaseModel):
 def generate_unix_timestamp() -> int:
     # 1 billion nanoseconds = 1 second
     value = int(time.time())
-    print(value)
     return value
 
 
