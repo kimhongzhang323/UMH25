@@ -215,5 +215,27 @@
               "url": "/payment"
           }
       }
+  },
+  {
+      "question": "How can I manage my staff?",
+      "answer": {
+          "text": "You can manage your staff by assigning roles, tracking performance, and scheduling shifts. Use the staff management dashboard for detailed insights.",
+          "type": "action",
+          "action": {
+              "label": "Go to Staff Management Dashboard",
+              "url": "/staff-management"
+          }
+      }
+  },
+  {
+      "question": "What are the results of my store survey?",
+      "answer": {
+          "text": "Your store survey results indicate that 85% of customers are satisfied with your service. The most common feedback is to improve delivery speed.",
+          "type": "action",
+          "action": {
+              "label": "View Full Survey Analysis",
+              "url": "/survey-analysis"
+          }
+      }
   }
 ]
