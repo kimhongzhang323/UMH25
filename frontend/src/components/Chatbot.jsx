@@ -233,6 +233,10 @@ export default function Chatbot() {
     return date.toLocaleDateString();
   };
 
+  // Convert Unix timestamps to Date objects
+  // Note that Date accepts timestamp in millisecond instead of seconds
+  const timestampToDate = (timestamp) => new Date(timestamp * 1000);
+
   const saveUserChat = () => {
     if (currentChatMessages.length <= 1) return;
 
@@ -383,12 +387,7 @@ export default function Chatbot() {
                 >
                   <div className="font-medium text-gray-900 truncate">{chat.title}</div>
                   <div className="text-sm text-gray-500 truncate">{chat.preview}</div>
-                  <div className="text-xs text-gray-400 mt-1">{
-                    // Date() accepts Unix timestamp in milliseconds, so need to convert first
-                    formatDate(
-                      new Date(chat.timestamp * 1000)
-                    )
-                  }</div>
+                  <div className="text-xs text-gray-400 mt-1">{formatDate( timestampToDate(chat.timestamp) )}</div>
                 </button>
               ))}
             </>
@@ -516,7 +515,7 @@ export default function Chatbot() {
                             </div>
                           )}
                         <div className="text-xs text-gray-500 mt-1">
-                          {msg.timestamp.toLocaleTimeString([], {
+                          {timestampToDate(msg.timestamp).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
