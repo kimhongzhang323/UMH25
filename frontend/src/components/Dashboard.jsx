@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {useNavigate} from 'react-router-dom';
+import { 
+  FiAlertTriangle, 
+  FiPackage, 
+  FiCheckCircle,
+} from 'react-icons/fi';
 import PeakHoursChart from '../charts/PeakHoursChart';
 import OrderVolumeChart from '../charts/OrderVolumeChart';
 import jsPDF from 'jspdf';
@@ -61,7 +66,9 @@ const Dashboard = () => {
 
   
   const [anomalies, setAnomalies] = useState([]);
-
+  const [inventory, setInventory] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
@@ -274,6 +281,136 @@ const Dashboard = () => {
     fetchAndProcessData();
   }, []);
 
+    // Fetch inventory data
+    useEffect(() => {
+      const fetchInventory = async () => {
+        try {
+          setLoading(true);
+          // Get data from localStorage
+          const savedInventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+          if (savedInventory.length === 0) {
+            // If no data in localStorage, use mock data
+            const mockInventory = [
+              {
+                id: 1,
+                name: "Zinger Burger Patty",
+                category: "Chicken",
+                currentStock: 42,
+                minStock: 50,
+                unit: "pieces",
+                lastDelivery: "2025-04-08",
+                nextDelivery: "2025-04-15",
+                usageRate: "15/day",
+                status: "low"
+              },
+              {
+                id: 2,
+                name: "Original Recipe Coating",
+                category: "Ingredients",
+                currentStock: 25,
+                minStock: 20,
+                unit: "kg",
+                lastDelivery: "2025-04-10",
+                nextDelivery: "2025-04-17",
+                usageRate: "3kg/day",
+                status: "adequate"
+              },
+              {
+                id: 3,
+                name: "Potatoes",
+                category: "Ingredients",
+                currentStock: 120,
+                minStock: 100,
+                unit: "kg",
+                lastDelivery: "2025-04-09",
+                nextDelivery: "2025-04-16",
+                usageRate: "20kg/day",
+                status: "adequate"
+              },
+              {
+                id: 4,
+                name: "Coleslaw Mix",
+                category: "Ingredients",
+                currentStock: 8,
+                minStock: 15,
+                unit: "kg",
+                lastDelivery: "2025-04-05",
+                nextDelivery: "2025-04-12",
+                usageRate: "2kg/day",
+                status: "low"
+              },
+              {
+                id: 5,
+                name: "Cheese Slices",
+                category: "Dairy",
+                currentStock: 200,
+                minStock: 150,
+                unit: "pieces",
+                lastDelivery: "2025-04-11",
+                nextDelivery: "2025-04-18",
+                usageRate: "30/day",
+                status: "adequate"
+              },
+              {
+                id: 6,
+                name: "Buns",
+                category: "Bakery",
+                currentStock: 60,
+                minStock: 80,
+                unit: "dozen",
+                lastDelivery: "2025-04-10",
+                nextDelivery: "2025-04-17",
+                usageRate: "10 dozen/day",
+                status: "low"
+              },
+              {
+                id: 7,
+                name: "Pepsi Syrup",
+                category: "Beverages",
+                currentStock: 5,
+                minStock: 5,
+                unit: "liters",
+                lastDelivery: "2025-04-07",
+                nextDelivery: "2025-04-14",
+                usageRate: "1 liter/day",
+                status: "critical"
+              },
+              {
+                id: 8,
+                name: "Hot & Spicy Marinade",
+                category: "Sauces",
+                currentStock: 12,
+                minStock: 10,
+                unit: "liters",
+                lastDelivery: "2025-04-09",
+                nextDelivery: "2025-04-16",
+                usageRate: "2 liters/day",
+                status: "adequate"
+              }
+            ];
+            setInventory(mockInventory);
+            // Save mock data to localStorage for future use
+            localStorage.setItem('inventory', JSON.stringify(mockInventory));
+          } else {
+            setInventory(savedInventory);
+          }
+          setLoading(false);
+        } catch (err) {
+          setError(err.message);
+          setLoading(false);
+        }
+      };
+  
+      fetchInventory();
+    }, []);
+
+    // Calculate inventory summary
+    const inventorySummary = {
+      totalItems: inventory.length,
+      lowStock: inventory.filter(item => item.status === 'low').length,
+      criticalStock: inventory.filter(item => item.status === 'critical').length,
+      adequateStock: inventory.filter(item => item.status === 'adequate').length
+    };
   // Format currency
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
@@ -389,6 +526,57 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Inventory Summary Cards */}
+        <h2 className="text-xl font-light text-gray-800 mb-4">Inventory Summary</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Total Items</p>
+                        <p className="text-2xl font-medium">{inventorySummary.totalItems}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                        <FiPackage size={20} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Adequate Stock</p>
+                        <p className="text-2xl font-medium text-green-600">{inventorySummary.adequateStock}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-green-100 text-green-600">
+                        <FiCheckCircle size={20} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Low Stock</p>
+                        <p className="text-2xl font-medium text-amber-600">{inventorySummary.lowStock}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-amber-100 text-amber-600">
+                        <FiAlertTriangle size={20} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Critical Stock</p>
+                        <p className="text-2xl font-medium text-red-600">{inventorySummary.criticalStock}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-red-100 text-red-600">
+                        <FiAlertTriangle size={20} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
         {/* AI Features Section - Retained for later implementation */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* AI Sales Predictions */}
@@ -808,15 +996,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Floating chat button */}
-      <button
-        onClick={() => setChatOpen(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 hover:cursor-pointer transition-colors"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
-      </button>
     </div>
   );
 };
