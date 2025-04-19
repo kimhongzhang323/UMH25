@@ -9,12 +9,11 @@
 3. [Technology Architecture](#technology-architecture)  
 4. [Installation Guide](#installation-guide)  
 5. [AI Services Integration](#ai-services-integration)  
-6. [Model Integration](#model-integration)  
-7. [Security & Authentication](#security-configuration)  
-8. [API Documentation](#api-documentation)  
-9. [Deployment](#deployment)  
-10. [Maintenance & Support](#maintenance)  
-11. [License & Contact](#license--contact)  
+6. [Customization](#customization)  
+7. [Deployment](#deployment)  
+  8. [Security Configuration](#security-configuration)  
+9. [API Documentation](#api-documentation)  
+10. [License & Contact](#license--contact)  
 
 ---
 
@@ -23,7 +22,8 @@
 The **Grab MEX AI Assistant** is an end-to-end merchant support platform combining:  
 
 - **Conversational AI** (Gemini 2.0 Flash + RAG Pipeline)  
-- **Advanced Analytics** (TimescaleDB)
+- **Visual Content Generation** (Stable Diffusion XL)
+- **Advanced Analytics** (DeepSeek + TimescaleDB)
 - **Real-time Monitoring** (FastAPI + WebSocket)
 
 ### **Technical Stack**
@@ -106,26 +106,15 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
 
 ```mermaid
 graph TD
-  A[React + Tailwind Frontend] -->|HTTP/WebSocket| B[FastAPI Backend]
-  B --> C[Gemini 2.0 Flash API]
-  B --> E[Analytics Engine]
-  B --> F[(Supabase Database)]
-  B --> G[RAG Pipeline]
-  G --> H[FAISS Vector Store]
-  G --> C
-  E --> F
-  F --> I[Real-time Monitoring]
-  I --> A
-
-  subgraph "AI Services"
-    C
-    G
-  end
-
-  subgraph "Data Layer"
-    F
-    H
-  end
+    A[React Frontend] -->|HTTP| B[FastAPI Backend]
+    B --> C[Gemini 2.0 flash]
+    B --> D[Stable Diffusion]
+    B --> E[DeepSeek Analytics]
+    B --> F[(PostgreSQL Database)]
+    C --> F
+    D --> G[(S3 Storage)]
+    E --> F
+    F --> H[TimescaleDB Extension]
 ```
 
 **Component Details:**  
@@ -163,11 +152,13 @@ graph TD
 | Endpoint | Method | Description |
 |----------|---------|-------------|
 |             POST                 |
+|----------|---------|-------------|
 | `/api/chat` | POST | Chat completion with RAG |
 | `/api/sd` | POST | Image generation |
 | `/api/inventory` | GET/POST | Inventory management |
 |----------|---------|-------------|
 |             GET                  |
+|----------|---------|-------------|
 | `/api/analytics` | GET | Business metrics |
 
 ---
@@ -207,6 +198,7 @@ VITE_SUPABASE_KEY=your_supabase_key
 
 # Backend
 API_KEY=your_genai_api
+DATABASE_URL=postgresql://user:password@localhost:5432/mexdb
 ```
 
 **3. Install Dependencies**  
@@ -274,12 +266,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
----
-```
-<a name="model-integration"></a>
-## **6. Model Integration**
-```
-### **A. RAG Pipeline Setup**
+
 ### **B. Model Fine-Tuning**  
 ** Data Preparation**  
 def load_and_clean_data(filepath='data/DimSumDelight_Full.csv'):
@@ -304,11 +291,10 @@ def load_and_clean_data(filepath='data/DimSumDelight_Full.csv'):
     
     return df
 
----
-```
+
 <a name="security-configuration"></a>
-## **7. Security & Authentication**
-```
+## **8. Security Configuration**
+
 **1. Authentication**
 ```ini
 # Supabase Auth Configuration
@@ -352,7 +338,7 @@ VITE_SUPABASE_KEY=your-vite-supabase-key
 ---
 
 <a name="api-documentation"></a>
-## **8. API Documentation**
+## **9. API Documentation**
 
 **Authentication Endpoints:**
 ```http
@@ -385,28 +371,8 @@ For additional technical documentation, please refer to the [Wiki](https://githu
 
 ---
 
-<a name="deployment"></a>
-## **9. Deployment**
-
-### **A. Production Setup**
-### **B. Scaling Considerations**
-### **C. Monitoring**
-
----
-
-<a name="maintenance"></a>
-## **10. Maintenance & Support**
-
-### **A. Update Procedures**
-### **B. Troubleshooting**
-### **C. Support Channels**
-
----
-
 <a name="license--contact"></a>
-## **11. License & Contact**  
-
-```
+## **10. License & Contact**  
 **License:** MIT  
 **Contact:** kim.hong.zhang323@gmail.com  
 **Repository:** [github.com/kimhongzhang323/UMH25](https://github.com/kimhongzhang323/UMH25)  

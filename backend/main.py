@@ -3,6 +3,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional, Annotated
+# from transformers import AutoTokenizer, AutoModelForCausalLM # Comment out real imports
+# from sentence_transformers import SentenceTransformer # Comment out real imports
 import torch
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
