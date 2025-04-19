@@ -11,7 +11,10 @@ import pandas as pd
 import io
 import csv
 from fastapi.middleware.cors import CORSMiddleware
+import time
+
 import customer_service
+
 
 app = FastAPI(
     title="Llama RAG API with CSV Support (Mocked)",
@@ -173,6 +176,14 @@ class Message(BaseModel):
     text: str
     sender: str
     timestamp: int
+    image_url: str = None
+
+
+def generate_unix_timestamp() -> int:
+    # 1 billion nanoseconds = 1 second
+    value = int(time.time())
+    print(value)
+    return value
 
 
 def process_csv_row(row: dict, config: CSVConfig) -> Document:
@@ -335,15 +346,18 @@ async def update_merchant_info(merchant_info: MerchantInfo):
 @app.post("/send_chat")
 async def chat_to_llm(
     message: Annotated[str, Form()],
-    chat_id: Annotated[int, Form()],
-    file: Annotated[UploadFile, File()]
+    chat_id: Annotated[str, Form()],
+    file: Annotated[UploadFile, File()] = None
 ):
     # Send data to LLM for processing
     # Save chat to database
-    return {
-        "response": "Womp Womp",
-        "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
-    }
+    return Message(
+        id="51fb3990-9997-4351-b0a1-bf13a6499651",
+        text="Womp Womp",
+        sender="bot",
+        timestamp=generate_unix_timestamp(),
+        image_url="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
+    )
 
 
 @app.get("/get_all_chats")
