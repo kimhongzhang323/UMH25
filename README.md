@@ -11,7 +11,7 @@
 5. [AI Services Integration](#ai-services-integration)  
 6. [Customization](#customization)  
 7. [Deployment](#deployment)  
-8. [Security Configuration](#security-configuration)  
+  8. [Security Configuration](#security-configuration)  
 9. [API Documentation](#api-documentation)  
 10. [License & Contact](#license--contact)  
 
@@ -27,10 +27,9 @@ The **Grab MEX AI Assistant** is an end-to-end merchant support platform combini
 - **Real-time Monitoring** (FastAPI + WebSocket)
 
 ### **Technical Stack**
-- **Frontend**: React 18+, Vite, TailwindCSS, Zustand
-- **Backend**: Python 3.10+, FastAPI, PostgreSQL
-- **AI Models**: Gemini 2.0, Llama 2, Stable Diffusion XL, DeepSeek
-- **Infrastructure**: Docker, Kubernetes-ready
+- **Frontend**: React 18+, Vite, TailwindCSS, Javascripts
+- **Backend**: Python 3.10+, FastAPI, 
+- **AI Models**: Gemini 2.0 Flash
 
 ### **Core Benefits**  
 
@@ -38,23 +37,21 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
 
 ✔ **24/7 Multilingual Business Advisory**  
   - Supports English, Bahasa, Thai, and Vietnamese for seamless communication across regions.  
-  - RAG-enhanced responses for accurate local context
+  - RAG-Pipeline enhanced responses for accurate local context
   - Real-time translation capabilities
 
 ✔ **Predictive Financial Insights**  
   - Leverage advanced analytics to forecast revenue and optimize financial planning.  
-  - 30/60/90 day predictions with confidence intervals
   - Anomaly detection and early warning system
 
 ✔ **Real-Time Inventory and Sales Monitoring**  
   - Stay updated with live data on stock levels and sales performance.  
   - Smart reorder predictions
-  - Automated stockout prevention
+  - Automated stockout alert
 
 ✔ **Customizable AI Models for Regional Business Needs**  
   - Fine-tune AI models to align with local market trends and merchant requirements.  
   - Region-specific pricing optimization
-  - Local customer preference analysis
 
 ✔ **Scalable Architecture for Growing Businesses**  
   - Designed to handle increasing workloads as your business expands.  
@@ -70,7 +67,7 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
   - Intuitive design ensures accessibility for all users, regardless of technical expertise.  
   - Context-aware help system
   - Step-by-step guided workflows
-
+  - Unique Customer Record
 ---
 
 <a name="key-features"></a>
@@ -80,35 +77,26 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
 | Feature | Description | AI Models Used |  
 |---------|-------------|----------------|  
 | **Smart Chat** | Natural language Q&A about sales, inventory, etc. | Gemini 2.0 Flash |  
-| **Smart Inventory System** | 30/60/90 day predictions with confidence intervals | DeepSeek Finance |  
-| **Menu Optimizer** | Identify best-performing items and combos | Llama 2 + DeepSeek |  
-| **Marketing Assistant** | Generate promotional content and campaign ideas | Stable Diffusion + Llama 2 |  
-| **Competitor Analysis** | Track and analyze nearby business performance | DeepSeek Analytics |  
-| **Financial Forecaster** | Revenue predictions and expense management tools | DeepSeek Finance |  
+| **Smart Inventory System** | 30/60/90 day predictions with confidence intervals | Gemini 2.0 Flash |  
+| **Menu Optimizer** | Identify best-performing items and combos | Gemini 2.0 Flash |  
+| **Marketing Assistant** | Generate promotional content and campaign ideas | Gemini 2.0 Flash |  
+| **Competitor Analysis** | Track and analyze nearby business performance | Gemini 2.0 Flash |  
+| **Financial Forecaster** | Revenue predictions  | Gemini 2.0 Flash |  
 | **Customer Insights** | Analyze feedback and identify improvement opportunities | Gemini 2.0 Flash |  
 
 ### **⚠️ Alert System**  
 - Real-time notifications for:  
-  - Abnormal sales patterns   
   - AI Anomaly Detection  
-  - Payment delays  
-  - Price fluctuations in key ingredients
-  - Staff scheduling conflicts
-  - Competitor promotion activities
-  - Negative customer reviews
-  - System maintenance windows
-  - Security incidents
+  - customer message
+
 - Customizable alert thresholds and notification channels:
-  - SMS
-  - Email
   - Push notifications
   - In-app alerts
-  - Telegram/WhatsApp integration
+
 - Alert prioritization framework:
   - Critical (immediate action required)
   - Warning (attention needed)
   - Informational (for awareness)
-
 
 ---
 
@@ -118,7 +106,7 @@ The **Grab MEX AI Assistant** offers a comprehensive suite of benefits tailored 
 ```mermaid
 graph TD
     A[React Frontend] -->|HTTP| B[FastAPI Backend]
-    B --> C[Llama 2 Service]
+    B --> C[Gemini 2.0 flash]
     B --> D[Stable Diffusion]
     B --> E[DeepSeek Analytics]
     B --> F[(PostgreSQL Database)]
@@ -133,18 +121,14 @@ graph TD
 | Layer | Technology | Purpose |  
 |-------|------------|---------|  
 | **UI** | React.js + Tailwind | Dashboard and chat interface |  
-| **State** | Zustand | Client-side state management |  
-| **API** | FastAPI | Python backend services |  
+| **API** | Supabase | Gemini 2.0 Flash | 
 | **AI** | See below | - |  
 
 **AI Model Matrix:**  
 
 | Model | Version | Deployment | Hardware Requirements |  
 |-------|---------|------------|-----------------------|  
-| Gemini | 2.0 Flash | GCP API | None (Cloud API) |
-| Llama 2 | 7B Chat | Local/Cloud | 16GB VRAM for FP16 |
-| Stable Diffusion | XL 1.0 | Local/Cloud | 12GB VRAM for FP16 |
-| DeepSeek | Finance/Analytics | Local/Cloud | 8GB VRAM for FP16 |
+| Gemini | 2.0 Flash | GCP API | None |
 
 **System Requirements:**
 
@@ -156,26 +140,25 @@ graph TD
 | Storage | 100GB SSD | 500GB NVMe SSD |
 | Network | 100Mbps | 1Gbps |
 
-**Database Schema:**
-
-- **PostgreSQL + TimescaleDB**
-  - Time-series data for analytics
-  - Real-time metrics tracking
-  - Historical performance analysis
 
 - **Vector Store (FAISS)**
   - Document embeddings
   - Semantic search
-  - RAG context storage
+  - RAG-Pipeline context storage
 
 **API Endpoints:**
 
 | Endpoint | Method | Description |
 |----------|---------|-------------|
+|             POST                 |
+|----------|---------|-------------|
 | `/api/chat` | POST | Chat completion with RAG |
 | `/api/sd` | POST | Image generation |
-| `/api/analytics` | GET | Business metrics |
 | `/api/inventory` | GET/POST | Inventory management |
+|----------|---------|-------------|
+|             GET                  |
+|----------|---------|-------------|
+| `/api/analytics` | GET | Business metrics |
 
 ---
 
@@ -184,11 +167,9 @@ graph TD
 
 ### **Prerequisites**  
 - Node.js v18+  
+- Vite
+- pip
 - Python 3.10+  
-- NVIDIA GPU (for local AI models)
-- Docker (optional, for containerized deployment)
-- PostgreSQL 14+ with TimescaleDB extension
-- Redis (for caching and session management)
 
 ### **Setup Process**  
 
@@ -210,29 +191,15 @@ cp backend/.env.example backend/.env
 **Sample .env Configuration:**  
 ```ini
 # Frontend
-VITE_HF_API_KEY=your_huggingface_key
 VITE_API_BASE=http://localhost:8000
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_KEY=your_supabase_key
 
 # Backend
-HF_TOKEN=your_huggingface_key
 API_KEY=your_genai_api
-DATABASE_URL=postgresql://user:password@localhost:5432/mexdb
-REDIS_URL=redis://localhost:6379
 ```
 
-**3. Database Setup**
-```bash
-# Install TimescaleDB extension
-psql -U postgres -d mexdb -c "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"
-
-# Run migrations
-cd backend
-alembic upgrade head
-```
-
-**4. Install Dependencies**  
+**3. Install Dependencies**  
 ```bash
 # Frontend
 cd frontend && npm install
@@ -241,29 +208,32 @@ cd frontend && npm install
 cd backend && pip install -r requirements.txt
 ```
 
-**5. Setup AI Models**
+**4. Setup AI Models**
 ```bash
 # Download and configure models (if running locally)
-python setup_models.py --models llama2,sd,deepseek
+cd backend
 
-# Or use cloud APIs (recommended for production)
-# Configure in .env file
+# run AI model
+python rag_pipeline.py 
+
 ```
-
-**6. Run Development Servers**  
+**5. Run Development Servers**  
 ```bash
-# Terminal 1 (Backend)
+# Start the backend server
+cd backend
 uvicorn main:app --reload --workers 4
 
-# Terminal 2 (Frontend)
-cd frontend && npm run dev
+# Start the frontend server (in a new terminal)
+cd frontend
+npm run dev
 ```
+
+**6. Access the Application**
+- Frontend: Open your browser and go to http://localhost:5173
 
 **7. Verify Installation**
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8000/docs
-- Database: psql -U postgres -d mexdb
-- Redis: redis-cli ping
+- Backend API: http://localhost:8000/
 
 ---
 
@@ -274,195 +244,52 @@ cd frontend && npm run dev
 
 **Frontend (React):**  
 ```javascript
-// src/services/llamaService.js
-export const queryLlama = async (messages) => {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE}/llama`, {
-    method: "POST",
-    body: JSON.stringify({ messages })
-  });
-  return response.json();
-};
-```
+// frontend/Chatbot.jsx
+const response = await fetch(`${BACKEND_URL}/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: userMsg.text,
+          chat_id: currentChatId || "default",
+        }),
+      });
 
 **Backend (FastAPI):**  
-```python
-# backend/llama_router.py
-@router.post("/llama")
-async def chat_endpoint(request: Request):
-    data = await request.json()
-    inputs = tokenizer.apply_chat_template(
-        data["messages"],
-        return_tensors="pt"
-    ).to("cuda")
-    
-    outputs = model.generate(inputs, max_new_tokens=256)
-    return {"response": tokenizer.decode(outputs[0])}
-```
+// ```python
+// # backend/main.py
+app = FastAPI(
+    title="Llama RAG API with CSV Support (Mocked)",
+    description="Retrieval-Augmented Generation API using mocked Llama for testing",
+    version="1.0.0"
+)
 
-### **B. Stable Diffusion Image Generation**  
-
-**Frontend Component:**  
-```javascript
-// src/components/SDGenerator.jsx
-const generateImage = async () => {
-  const imgUrl = await fetch(`${import.meta.env.VITE_API_BASE}/sd`, {
-    method: "POST",
-    body: JSON.stringify({ prompt })
-  }).then(r => r.blob());
-  
-  setGeneratedImage(URL.createObjectURL(imgUrl));
-};
-```
-
-**Backend Handler:**  
-```python
-# backend/sd_router.py
-from diffusers import StableDiffusionPipeline
-import torch
-
-pipe = StableDiffusionPipeline.from_pretrained(
-    "stabilityai/stable-diffusion-xl-base-1.0",
-    torch_dtype=torch.float16
-).to("cuda")
-
-@router.post("/sd")
-async def generate_image(prompt: str):
-    image = pipe(prompt).images[0]
-    return StreamingResponse(image, media_type="image/png")
-```
-
-### **C. DeepSeek Financial Analysis**  
-
-**Backend Service:**  
-```python
-# backend/deepseek_service.py
-class FinancialAnalyzer:
-    def __init__(self):
-        self.model = load_deepseek_model()
-    
-    def forecast(self, history):
-        return self.model.predict(
-            query="30_day_forecast",
-            data=history
-        )
-```
-
----
-
-<a name="customization"></a>
-## **6. Customization**  
-
-### **A. Theming**  
-**1. Brand Colors**  
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        'grab-green': '#00B14F',
-        'grab-dark': '#003D2A'
-      }
-    }
-  }
-}
-```  
-
-**2. Localization**  
-```json
-// src/locales/id.json
-{
-  "salesDashboard": "Dasbor Penjualan",
-  "inventoryAlerts": "Peringatan Inventaris"
-}
-```  
 
 ### **B. Model Fine-Tuning**  
-**Llama 2 for SEA Merchant Lingo:**  
-```bash
-python -m llama_finetuning \
-    --base_model meta-llama/Llama-2-7b-chat-hf \
-    --dataset ./data/merchant_chats.json
-```  
+** Data Preparation**  
+def load_and_clean_data(filepath='data/DimSumDelight_Full.csv'):
+    """Load and clean the raw dataset"""
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"Dataset not found at {filepath}")
+    
+    df = pd.read_csv(filepath)
+    
+    # Remove duplicate columns
+    df = df.loc[:, ~df.columns.duplicated()]
+    
+    # Convert datetime columns
+    datetime_cols = ['order_time', 'driver_arrival_time', 'driver_pickup_time', 'delivery_time']
+    for col in datetime_cols:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col])
+    
+    # Basic cleaning
+    df = df.dropna(subset=['order_value', 'item_price'])
+    df = df[df['order_value'] > 0]
+    
+    return df
 
----
-
-<a name="deployment"></a>
-## **7. Deployment**  
-
-### **Production Build**  
-```bash
-# Frontend
-npm run build
-
-# Backend
-docker build -t mex-ai-backend .
-```  
-
-### **Infrastructure Setup**
-
-**1. Docker Deployment**
-```dockerfile
-# Production-ready Dockerfile included
-# Build with GPU support:
-docker build -t mex-ai-backend:gpu -f Dockerfile.gpu .
-
-# Build CPU-only version:
-docker build -t mex-ai-backend:cpu -f Dockerfile.cpu .
-```
-
-**2. Kubernetes Configuration**
-```yaml
-# Sample deployment for high availability
-replicas: 3
-resources:
-  requests:
-    cpu: 2
-    memory: 8Gi
-    nvidia.com/gpu: 1
-  limits:
-    cpu: 4
-    memory: 16Gi
-    nvidia.com/gpu: 1
-```
-
-**3. Load Balancing**
-- NGINX Ingress Controller
-- SSL/TLS termination
-- WebSocket support for real-time features
-
-**4. Monitoring Stack**
-- Prometheus for metrics
-- Grafana dashboards
-- ELK Stack for logs
-- New Relic APM (optional)
-
-**5. Backup Strategy**
-- PostgreSQL streaming replication
-- Daily automated backups
-- Point-in-time recovery
-- Multi-region failover
-
-**6. CI/CD Pipeline**
-```yaml
-stages:
-  - test
-  - build
-  - deploy
-  - monitor
-```
-
-**7. Production Checklist**
-- [ ] SSL/TLS certificates
-- [ ] Database backups
-- [ ] Rate limiting
-- [ ] API authentication
-- [ ] Error tracking
-- [ ] Performance monitoring
-- [ ] Auto-scaling rules
-- [ ] Security scanning
-
----
 
 <a name="security-configuration"></a>
 ## **8. Security Configuration**
@@ -470,21 +297,31 @@ stages:
 **1. Authentication**
 ```ini
 # Supabase Auth Configuration
-SUPABASE_JWT_SECRET=your_jwt_secret
-SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+VITE_BACKEND_URL=Backend-url
+VITE_SUPABASE_URL=your-vite-supabase-url
+VITE_SUPABASE_KEY=your-vite-supabase-key
 
-# API Security
-API_KEY_HEADER=X-API-Key
-RATE_LIMIT_REQUESTS=100
-RATE_LIMIT_PERIOD=60
 ```
 
 **2. Data Protection**
-- End-to-end encryption for sensitive data
-- Data masking for PII
-- Regular security audits
-- Compliance with GDPR and PDPA
+
+- **Encryption Standards**
+  - All data at rest is encrypted using AES-256
+  - TLS 1.3 for all data in transit
+  - Database column-level encryption for PII
+
+- **Data Handling Policies**
+  - Strict data isolation between merchant accounts
+  - Anonymized analytics aggregation
+  - No cross-merchant data sharing or insights exposure
+  - Regular data purging for non-essential information
+  - Compliance with regional data sovereignty requirements
+
+- **Access Controls**
+  - Role-based access control (RBAC) implementation
+  - MFA required for administrative access
+  - IP whitelisting for sensitive operations
+  - Comprehensive audit logging
 
 **3. Error Handling**
 ```javascript
@@ -519,12 +356,17 @@ DELETE /api/chat/{chatId}
 
 **Analytics Endpoints:**
 ```http
-GET /api/analytics/sales
-GET /api/analytics/inventory
-GET /api/analytics/customers
+GET /*
+GET /chat
+GET /dashboard
+GET /customer-service
+GET /sales-income
+GET /menu
+GET /inventory
+GET /staff-manager
 ```
 
-For additional technical documentation, please refer to the [Wiki](https://github.com/kimhongzhang323/UMH25/wiki).
+For additional technical documentation, please refer to the [Wiki](https://github.com/kimhongzhang323/UMH25/).
 
 ---
 

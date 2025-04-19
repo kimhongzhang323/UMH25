@@ -57,51 +57,141 @@ const InventoryPage = () => {
     'dozen'
   ];
 
+  const mockInventory = [
+    {
+      id: 1,
+      name: "Ground Pork",
+      category: "Dumpling Ingredients",
+      currentStock: 25,
+      minStock: 20,
+      unit: "kg",
+      lastDelivery: "2025-04-15",
+      nextDelivery: "2025-04-25",
+      usageRate: "3/day",
+      status: "adequate"
+    },
+    {
+      id: 2,
+      name: "Fresh Shrimp",
+      category: "Shrimp Ingredients",
+      currentStock: 15,
+      minStock: 20,
+      unit: "kg",
+      lastDelivery: "2025-04-10",
+      nextDelivery: "2025-04-22",
+      usageRate: "4/day",
+      status: "low"
+    },
+    {
+      id: 3,
+      name: "Dumpling Wrappers",
+      category: "Wrappers/Dough",
+      currentStock: 500,
+      minStock: 2000,
+      unit: "pieces",
+      lastDelivery: "2025-04-12",
+      nextDelivery: "2025-04-21",
+      usageRate: "300/day",
+      status: "critical"
+    },
+    {
+      id: 4,
+      name: "BBQ Pork (Char Siu)",
+      category: "BBQ Pork Ingredients",
+      currentStock: 30,
+      minStock: 25,
+      unit: "kg",
+      lastDelivery: "2025-04-18",
+      nextDelivery: "2025-04-28",
+      usageRate: "5/day",
+      status: "adequate"
+    },
+    {
+      id: 5,
+      name: "Soy Sauce",
+      category: "Sauces/Dips",
+      currentStock: 8,
+      minStock: 10,
+      unit: "liters",
+      lastDelivery: "2025-04-14",
+      nextDelivery: "2025-04-24",
+      usageRate: "1/day",
+      status: "low"
+    },
+    {
+      id: 6,
+      name: "Fresh Mango",
+      category: "Dessert Ingredients",
+      currentStock: 12,
+      minStock: 15,
+      unit: "kg",
+      lastDelivery: "2025-04-17",
+      nextDelivery: "2025-04-27",
+      usageRate: "2/day",
+      status: "low"
+    },
+    {
+      id: 7,
+      name: "Rice Flour",
+      category: "Wrappers/Dough",
+      currentStock: 45,
+      minStock: 30,
+      unit: "kg",
+      lastDelivery: "2025-04-16",
+      nextDelivery: "2025-04-26",
+      usageRate: "4/day",
+      status: "adequate"
+    },
+    {
+      id: 8,
+      name: "Chives",
+      category: "Dumpling Ingredients",
+      currentStock: 5,
+      minStock: 8,
+      unit: "kg",
+      lastDelivery: "2025-04-19",
+      nextDelivery: "2025-04-23",
+      usageRate: "1.5/day",
+      status: "low"
+    },
+    {
+      id: 9,
+      name: "Bamboo Steamers",
+      category: "Other",
+      currentStock: 40,
+      minStock: 25,
+      unit: "pieces",
+      lastDelivery: "2025-04-01",
+      nextDelivery: "2025-05-01",
+      usageRate: "0.2/day",
+      status: "adequate"
+    },
+    {
+      id: 10,
+      name: "Lotus Leaves",
+      category: "Other",
+      currentStock: 200,
+      minStock: 150,
+      unit: "pieces",
+      lastDelivery: "2025-04-05",
+      nextDelivery: "2025-04-25",
+      usageRate: "15/day",
+      status: "adequate"
+    }
+  ];
+
   // Fetch inventory data
   useEffect(() => {
-    const fetchInventory = async () => {
-      try {
-        setLoading(true);
-        // Fetch data from CSV file
-        const response = await fetch('data/DimSumDelight_Full.csv');
-        const csvText = await response.text();
-
-        // Parse CSV data
-        const rows = csvText.split('\n').filter(row => row.trim() !== '');
-        const headers = rows[0].split(',').map(header => header.trim());
-        const data = rows.slice(1).map(row => {
-          const values = row.split(',').map(value => value.trim());
-          return headers.reduce((acc, header, index) => {
-            acc[header] = values[index];
-            return acc;
-          }, {});
-        });
-
-        // Transform data into inventory format
-        const inventoryData = data.map((item, index) => ({
-          id: index + 1,
-          name: item['Name'],
-          category: item['Category'],
-          currentStock: parseFloat(item['Current Stock']),
-          minStock: parseFloat(item['Min Stock']),
-          unit: item['Unit'],
-          lastDelivery: item['Last Delivery'],
-          nextDelivery: item['Next Delivery'],
-          usageRate: item['Usage Rate'],
-          status: calculateStatus(parseFloat(item['Current Stock']), parseFloat(item['Min Stock']))
-        }));
-
-        setInventory(inventoryData);
-        // Save data to localStorage
-        localStorage.setItem('inventory', JSON.stringify(inventoryData));
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchInventory();
+    // Instead of fetching from CSV, use mock data
+    try {
+      setLoading(true);
+      setInventory(mockInventory);
+      localStorage.setItem('inventory', JSON.stringify(mockInventory));
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
   }, []);
 
   // Filter inventory based on search and filter

@@ -644,98 +644,143 @@ export default function Chatbot() {
       </div>
 
       {/* Merchant Profile Panel */}
-      {showFilterPanel && (
-        <div className="fixed right-0 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Store className="w-5 h-5 text-yellow-600" />
-                Merchant Profile & Insights Configuration
-              </h2>
-              <button
-                onClick={() => setShowFilterPanel(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </button>
-            </div>
+    {showFilterPanel && (
+      <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full max-h-[90vh] flex flex-col animate-in fade-in duration-300">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800">
+              <Store className="w-6 h-6 text-yellow-600" />
+              Business Profile Setup
+            </h2>
+            <button
+              onClick={() => setShowFilterPanel(false)}
+              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
-            <div className="flex-1 overflow-y-auto pr-2">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                setShowFilterPanel(false);
-              }}>
-                <div className="space-y-4">
+          <div className="flex-1 overflow-y-auto pr-2">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleMerchantProfileSave();
+              setShowFilterPanel(false);
+            }}>
+              <div className="space-y-6">
+                {/* Business Challenges Section */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <h3 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M16 8v-4l8 8-8 8v-4H2v-8h14z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Business Focus Areas
+                    <span className="text-sm font-normal text-gray-500 ml-2">(Select up to 3)</span>
+                  </h3>
                   
-
-                  {/* Location & Market Section */}
-                  
-
-                  {/* Business Challenges Section */}
-                  <div className="border-b pb-4">
-                    <h3 className="font-medium text-gray-800 mb-3">Business Focus Areas</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        'Sales growth',
-                        'Customer retention',
-                        'Marketing effectiveness',
-                        'Inventory management',
-                        'Staff productivity',
-                        'Cost reduction',
-                        'Digital transformation',
-                        'Delivery optimization',
-                        'Menu/pricing strategy',
-                        'Competitive positioning'
-                      ].map(challenge => (
-                          <label key={challenge} className="flex items-center text-sm">
-                            <input
-                              type="checkbox"
-                              checked={merchantProfile.challenges.includes(challenge)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  if (merchantProfile.challenges.length < 3) {
-                                    setMerchantProfile(prev => ({
-                                      ...prev,
-                                      challenges: [...prev.challenges, challenge]
-                                    }));
-                                  }
-                                } else {
-                                  setMerchantProfile(prev => ({
-                                    ...prev,
-                                    challenges: prev.challenges.filter(c => c !== challenge)
-                                  }));
-                                }
-                              }}
-                              className="mr-2"
-                            />
-                            {challenge}
-                          </label>
-                        ))}
-                    </div>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {[
+                      { id: 'sales', label: 'Sales growth', icon: 'trending-up' },
+                      { id: 'retention', label: 'Customer retention', icon: 'users' },
+                      { id: 'marketing', label: 'Marketing effectiveness', icon: 'megaphone' },
+                      { id: 'inventory', label: 'Inventory management', icon: 'package' },
+                      { id: 'productivity', label: 'Staff productivity', icon: 'briefcase' },
+                      { id: 'costs', label: 'Cost reduction', icon: 'trending-down' },
+                      { id: 'digital', label: 'Digital transformation', icon: 'smartphone' },
+                      { id: 'delivery', label: 'Delivery optimization', icon: 'truck' },
+                      { id: 'menu', label: 'Menu/pricing strategy', icon: 'tag' },
+                      { id: 'competition', label: 'Competitive positioning', icon: 'target' }
+                    ].map(challenge => (
+                      <div 
+                        key={challenge.id}
+                        className={`flex items-center rounded-lg p-3 cursor-pointer transition-all border ${
+                          merchantProfile.challenges.includes(challenge.label)
+                            ? 'bg-blue-50 border-blue-200 shadow-sm'
+                            : 'bg-white border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => {
+                          if (merchantProfile.challenges.includes(challenge.label)) {
+                            setMerchantProfile(prev => ({
+                              ...prev,
+                              challenges: prev.challenges.filter(c => c !== challenge.label)
+                            }));
+                          } else {
+                            if (merchantProfile.challenges.length < 3) {
+                              setMerchantProfile(prev => ({
+                                ...prev,
+                                challenges: [...prev.challenges, challenge.label]
+                              }));
+                            }
+                          }
+                        }}
+                      >
+                        <div className={`w-5 h-5 mr-3 flex-shrink-0 rounded ${
+                          merchantProfile.challenges.includes(challenge.label)
+                            ? 'text-blue-600'
+                            : 'text-gray-400'
+                        }`}>
+                          {/* Simple icon placeholder - replace with actual icons if desired */}
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            {challenge.icon === 'trending-up' && <path d="M23 6l-9.5 9.5-5-5L1 18" />}
+                            {challenge.icon === 'users' && <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>}
+                            {challenge.icon === 'megaphone' && <path d="M3 11l18-5v12L3 13v-2z" />}
+                            {challenge.icon === 'package' && <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />}
+                            {challenge.icon === 'briefcase' && <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>}
+                            {challenge.icon === 'trending-down' && <path d="M23 18l-9.5-9.5-5 5L1 6" />}
+                            {challenge.icon === 'smartphone' && <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>}
+                            {challenge.icon === 'truck' && <path d="M1 3h15v13H1z M16 8h4l3 3v5h-7 M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />}
+                            {challenge.icon === 'tag' && <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />}
+                            {challenge.icon === 'target' && <circle cx="12" cy="12" r="10"></circle>}
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium">{challenge.label}</span>
+                        {merchantProfile.challenges.includes(challenge.label) && (
+                          <div className="ml-auto bg-blue-100 text-blue-600 rounded-full p-1">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
+                  
+                  {merchantProfile.challenges.length === 3 && (
+                    <div className="mt-3 text-sm text-yellow-600 bg-yellow-50 p-2 rounded flex items-center gap-2">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      </svg>
+                      Maximum selection reached (3 focus areas)
+                    </div>
+                  )}
                 </div>
+              </div>
 
-                <div className="mt-6 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowFilterPanel(false)}
-                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
-                    onSubmit={handleMerchantProfileSave}
-                  >
-                    Save Configuration
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="mt-8 flex flex-col sm:flex-row sm:justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowFilterPanel(false)}
+                  className="order-2 sm:order-1 py-2 px-4 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="order-1 sm:order-2 py-3 px-6 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-yellow-300 flex items-center justify-center gap-2"
+                >
+                  <span>Save Profile</span>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-      )}
+      </div>
+    )}
     </div>
+
   );
 }
