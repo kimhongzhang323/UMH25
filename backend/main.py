@@ -1,6 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Annotated
 # from transformers import AutoTokenizer, AutoModelForCausalLM # Comment out real imports
 # from sentence_transformers import SentenceTransformer # Comment out real imports
 import torch
@@ -9,7 +10,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import io
 import csv
-import os
 from fastapi.middleware.cors import CORSMiddleware
 import customer_service
 
@@ -26,16 +26,16 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = origins,
-    allow_credentials = True,
-    allow_methods = ["GET", "POST", "PUT", "DELETE"]
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"]
 )
 
 app.include_router(customer_service.router)
 
 # Configuration
 MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"  # Keep for reference
-EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2" # Keep for reference
+EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"  # Keep for reference
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 MAX_NEW_TOKENS = 512
 TEMPERATURE = 0.7
@@ -55,28 +55,36 @@ if not TESTING:
         raise RuntimeError(f"Failed to load models: {str(e)}")
 else:
     print("Running in TESTING mode: Using mock models.")
+
     class MockTokenizer:
         def __init__(self, model_name):
             self.model_name = model_name
+
         def __call__(self, prompt, return_tensors="pt"):
-            return {"input_ids": torch.tensor([[1, 2, 3]])} # Dummy input IDs
+            return {"input_ids": torch.tensor([[1, 2, 3]])}  # Dummy input IDs
+
         def decode(self, output_ids, skip_special_tokens=True):
             return "Mock Llama Response"
+
     class MockModel:
         def __init__(self, model_name):
             self.model_name = model_name
+
         def generate(self, input_ids, max_new_tokens, temperature, do_sample):
-            return torch.tensor([[4, 5, 6]]) # Dummy output IDs
+            return torch.tensor([[4, 5, 6]])  # Dummy output IDs
+
     class MockEmbeddingModel:
         def __init__(self, model_name, device):
             self.model_name = model_name
             self.device = device
+
         def encode(self, text):
-            return np.array([0.1, 0.2, 0.3]) # Dummy embedding
+            return np.array([0.1, 0.2, 0.3])  # Dummy embedding
 
     tokenizer = MockTokenizer(MODEL_NAME)
     model = MockModel(MODEL_NAME)
     embedding_model = MockEmbeddingModel(EMBEDDING_MODEL, DEVICE)
+
 
 class Query(BaseModel):
     question: str
@@ -85,15 +93,18 @@ class Query(BaseModel):
     temperature: Optional[float] = TEMPERATURE
     use_csv_context: Optional[bool] = True  # Whether to use CSV data in RAG
 
+
 class CSVConfig(BaseModel):
     text_columns: List[str]  # Columns to use for text content
     id_column: Optional[str] = None  # Optional unique identifier column
     metadata_columns: Optional[List[str]] = None  # Columns to include as metadata
 
+
 class Document(BaseModel):
     text: str
     metadata: Optional[dict] = None
     source: Optional[str] = "csv"  # Track source of document
+
 
 class DocumentStore:
     def __init__(self):
@@ -126,7 +137,24 @@ class DocumentStore:
             self.embeddings = None
         self.document_ids = [self.document_ids[i] for i in indices_to_keep]
 
+
 document_store = DocumentStore()
+
+
+# Used by MerchantInfo
+class Location(BaseModel):
+    region: str
+    market_type: str
+
+
+class MerchantInfo(BaseModel):
+    merchant_type: str
+    product_type: str
+    business_size: str
+    challenges: List[str]
+    location: Location
+    language: str
+
 
 def process_csv_row(row: dict, config: CSVConfig) -> Document:
     """Convert a CSV row into a Document"""
@@ -144,9 +172,10 @@ def process_csv_row(row: dict, config: CSVConfig) -> Document:
 
     return Document(text=text, metadata=metadata, source="csv")
 
+
 def generate_prompt(question: str, context: List[str] = None) -> str:
     if context:
-        context_str = "\n".join([f"Context {i+1}: {c}" for i, c in enumerate(context)])
+        context_str = "\n".join([f"Context {i + 1}: {c}" for i, c in enumerate(context)])
         return f"""Answer the following question based on the provided context.
 
         {context_str}
@@ -164,6 +193,7 @@ def generate_prompt(question: str, context: List[str] = None) -> str:
         Question: {question}
 
         Answer:"""
+
 
 @app.post("/query")
 async def query_llama(query: Query):
@@ -195,6 +225,7 @@ async def query_llama(query: Query):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/upload_csv")
 async def upload_csv(
@@ -254,6 +285,7 @@ async def upload_csv(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/csv_columns")
 async def get_csv_columns(file: UploadFile = File(...)):
     """Endpoint to preview CSV columns"""
@@ -265,11 +297,32 @@ async def get_csv_columns(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/document_count")
 async def get_document_count():
     return {
         "total_documents": len(document_store.documents),
         "csv_documents": sum(1 for doc in document_store.documents if doc.source == "csv")
+    }
+
+
+@app.put("/update_merchant_info")
+async def update_merchant_info(merchant_info: MerchantInfo):
+    # Update merchant info somewhere
+    # Possibly just a global variable or database
+    return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.post("/send_chat")
+async def chat_to_llm(
+    message: Annotated[str, Form()],
+    chat_id: Annotated[int, Form()],
+    file: Annotated[UploadFile, File()]
+):
+    # Send data to LLM for processing
+    return {
+        "response": "Womp Womp",
+        "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
     }
 
 

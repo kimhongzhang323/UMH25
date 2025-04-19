@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Languages
 } from 'lucide-react';
+import jsConvert from 'js-convert-case';
 
 // Component
 export default function Chatbot() {
@@ -248,49 +249,42 @@ export default function Chatbot() {
     setInput('');
     setLoading(true);
 
-    fetch(import.meta.env.BACKEND_URL)
+    // Generate formData to be sent
+    let payload = new FormData();
+    payload.append("message", userMsg);
+    payload.append("chat_id", currentChatId);
+    payload.append("file", fileInputRef.current.files[0])
 
-    setTimeout(() => {
-      let responseText;
+    fetch(import.meta.env.BACKEND_URL + "/send_chat", {
+      method: "POST",
+      body: payload
+    })
+      .then(response => response.json())
+      .then(responseData => {
+        const botMsg = responseData.response;
 
-      if (merchantProfile.merchantType) {
-        responseText = generatePersonalizedMerchantResponse(input, merchantProfile);
-      } else {
-        responseText = generateFakeResponse(input, activeMode);
-      }
+        setMessages(prev => [...prev, botMsg]);
+        setLoading(false);
 
-      const botMsg = {
-        id: (Date.now() + 1).toString(),
-        text: responseText,
-        sender: 'bot',
-        timestamp: new Date(),
-        isImage: activeMode === 'image',
-        imageUrl: activeMode === 'image' ?
-          `https://source.unsplash.com/random/800x400/?${encodeURIComponent(input)}` : null
-      };
-
-      setMessages(prev => [...prev, botMsg]);
-      setLoading(false);
-
-      if (!currentChatId) {
-        saveChatToHistory();
-        setIsNewChat(false); // Reset new chat state after saving
-      } else {
-        setChatHistory(prev =>
-          prev.map(chat =>
-            chat.id === currentChatId
-              ? {
-                ...chat,
-                messages: [...chat.messages, userMsg, botMsg],
-                title: userMsg.text.substring(0, 30) || chat.title,
-                preview: botMsg.text.substring(0, 50) || 'New conversation',
-                timestamp: new Date()
-              }
-              : chat
-          )
-        );
-      }
-    }, 1500);
+        if (!currentChatId) {
+          saveChatToHistory();
+          setIsNewChat(false); // Reset new chat state after saving
+        } else {
+          setChatHistory(prev =>
+            prev.map(chat =>
+              chat.id === currentChatId
+                ? {
+                  ...chat,
+                  messages: [...chat.messages, userMsg, botMsg],
+                  title: userMsg.text.substring(0, 30) || chat.title,
+                  preview: botMsg.text.substring(0, 50) || 'New conversation',
+                  timestamp: new Date()
+                }
+                : chat
+            )
+          );
+        }
+      });
   };
 
   // Define the formatDate function before using it in JSX
@@ -320,16 +314,6 @@ export default function Chatbot() {
     setCurrentChatId(newChat.id);
   };
 
-  // Removed duplicate handleSubmit function
-
-  const generateFakeResponse = (userInput, mode) => {
-    return "fake shit"
-  };
-
-  const generatePersonalizedMerchantResponse = (query, profile) => {
-    return "womp-womp (with profile)"
-  };
-
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -352,6 +336,15 @@ export default function Chatbot() {
       reader.readAsDataURL(file);
     }
   };
+
+  const handleMerchantProfileSave = (e) => {
+    fetch(import.meta.env.BACKEND_URL + "/update_merchant_info", {
+      method: PUT,
+      body: JSON.stringify(
+        jsConvert.snakeKeys(merchantProfile)
+      )
+    });
+  }
 
   const toggleRecording = () => {
     if (!recognition) {
@@ -415,7 +408,7 @@ export default function Chatbot() {
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className={`fixed left-4 top-16 z-50 p-2 rounded-full bg-white border border-gray-200 shadow-sm ${sidebarOpen ? 'ml-64' : 'ml-0'
-          } transition-all duration-300`}
+} transition-all duration-300`}
       >
         {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
       </button>
@@ -423,7 +416,7 @@ export default function Chatbot() {
       {/* Sidebar */}
       <div
         className={`fixed w-64 bg-white border-r border-gray-200 flex flex-col h-[calc(100vh)] z-40 transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+}`}
       >
         <div className="p-4">
           <button
@@ -453,7 +446,7 @@ export default function Chatbot() {
                   key={chat.id}
                   onClick={() => loadChat(chat.id)}
                   className={`w-full text-left p-3 rounded-lg mb-2 hover:bg-gray-100 transition-colors ${currentChatId === chat.id ? 'bg-gray-100' : ''
-                    }`}
+}`}
                 >
                   <div className="font-medium text-gray-900 truncate">{chat.title}</div>
                   <div className="text-sm text-gray-500 truncate">{chat.preview}</div>
@@ -462,12 +455,12 @@ export default function Chatbot() {
               ))}
             </>
           ) : (
-            !isNewChat && ( // Only show "No previous chats" if there's no new chat either
-              <div className="p-2 text-sm text-gray-500 text-center">
-                No previous chats
-              </div>
-            )
-          )}
+              !isNewChat && ( // Only show "No previous chats" if there's no new chat either
+                <div className="p-2 text-sm text-gray-500 text-center">
+                  No previous chats
+                </div>
+              )
+            )}
         </div>
         {/* Merchant Profile Quick View if profile exists */}
         {merchantProfile.merchantType && (
@@ -506,95 +499,95 @@ export default function Chatbot() {
 
       {/* Main Content */}
       <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'
-        }`}>
+}`}>
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="max-w-3xl mx-auto w-full p-4">
             {messages.length === 0 ? (
               renderExamplePrompts()
             ) : (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`mb-6 last:mb-0 ${msg.sender === 'bot' ? 'pr-8' : 'pl-8'
-                    }`}
-                >
+                messages.map((msg) => (
                   <div
-                    className={`flex gap-4 ${msg.sender === 'bot' ? 'flex-row' : 'flex-row-reverse'
-                      }`}
+                    key={msg.id}
+                    className={`mb-6 last:mb-0 ${msg.sender === 'bot' ? 'pr-8' : 'pl-8'
+}`}
                   >
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender === 'bot'
-                        ? 'bg-blue-100 text-blue-600'
-                        : 'bg-purple-100 text-purple-600'
-                        }`}
+                      className={`flex gap-4 ${msg.sender === 'bot' ? 'flex-row' : 'flex-row-reverse'
+}`}
                     >
-                      {msg.sender === 'bot' ? (
-                        <img src="/grab.png" alt="HEX Assistant" className="w-6 h-6" />
-                      ) : (
-                        <span className="text-sm font-medium text-white">
-                          {merchantProfile.name ? merchantProfile.name.charAt(0) : "U"}
-                        </span>
-                      )}
-                    </div>
-                    <div
-                      className={`max-w-[calc(100%-56px)] ${msg.sender === 'bot' ? 'text-left' : 'text-right'
-                        }`}
-                    >
-                      {msg.mode && msg.sender === 'user' && (
-                        <div className="text-xs text-gray-500 mb-1">
-                          {msg.mode === 'image' ? 'Image generation' :
-                            msg.mode === 'deep-think' ? 'Deep thinking' :
-                              msg.mode === 'search' ? 'Web search' : 'Chat'}
-                        </div>
-                      )}
-                      {msg.file && (
-                        <div className="mb-2 p-2 bg-gray-100 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <File className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm">{msg.file.name}</span>
-                          </div>
-                          {msg.file.type.startsWith('image/') && (
-                            <img
-                              src={msg.file.preview}
-                              alt="Preview"
-                              className="mt-2 max-w-full max-h-40 rounded"
-                            />
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender === 'bot'
+? 'bg-blue-100 text-blue-600'
+: 'bg-purple-100 text-purple-600'
+}`}
+                      >
+                        {msg.sender === 'bot' ? (
+                          <img src="/grab.png" alt="HEX Assistant" className="w-6 h-6" />
+                        ) : (
+                            <span className="text-sm font-medium text-white">
+                              {merchantProfile.name ? merchantProfile.name.charAt(0) : "U"}
+                            </span>
                           )}
-                        </div>
-                      )}
-                      {msg.isImage ? (
-                        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-                          <img
-                            src={msg.imageUrl}
-                            alt="Generated content"
-                            className="w-full"
-                          />
-                          <div className="p-3 text-sm">
-                            <p>{msg.text}</p>
+                      </div>
+                      <div
+                        className={`max-w-[calc(100%-56px)] ${msg.sender === 'bot' ? 'text-left' : 'text-right'
+}`}
+                      >
+                        {msg.mode && msg.sender === 'user' && (
+                          <div className="text-xs text-gray-500 mb-1">
+                            {msg.mode === 'image' ? 'Image generation' :
+                              msg.mode === 'deep-think' ? 'Deep thinking' :
+                                msg.mode === 'search' ? 'Web search' : 'Chat'}
                           </div>
+                        )}
+                        {msg.file && (
+                          <div className="mb-2 p-2 bg-gray-100 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <File className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">{msg.file.name}</span>
+                            </div>
+                            {msg.file.type.startsWith('image/') && (
+                              <img
+                                src={msg.file.preview}
+                                alt="Preview"
+                                className="mt-2 max-w-full max-h-40 rounded"
+                              />
+                            )}
+                          </div>
+                        )}
+                        {msg.isImage ? (
+                          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                            <img
+                              src={msg.imageUrl}
+                              alt="Generated content"
+                              className="w-full"
+                            />
+                            <div className="p-3 text-sm">
+                              <p>{msg.text}</p>
+                            </div>
+                          </div>
+                        ) : (
+                            <div
+                              className={`inline-block px-4 py-3 rounded-2xl ${msg.sender === 'bot'
+? 'bg-white border border-gray-200'
+: 'bg-blue-600 text-white'
+}`}
+                            >
+                              <p className="whitespace-pre-wrap">{msg.text}</p>
+                            </div>
+                          )}
+                        <div className="text-xs text-gray-500 mt-1">
+                          {msg.timestamp.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </div>
-                      ) : (
-                        <div
-                          className={`inline-block px-4 py-3 rounded-2xl ${msg.sender === 'bot'
-                            ? 'bg-white border border-gray-200'
-                            : 'bg-blue-600 text-white'
-                            }`}
-                        >
-                          <p className="whitespace-pre-wrap">{msg.text}</p>
-                        </div>
-                      )}
-                      <div className="text-xs text-gray-500 mt-1">
-                        {msg.timestamp.toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
             {loading && (
               <div className="mb-6 pr-8">
                 <div className="flex gap-4 flex-row">
@@ -624,18 +617,18 @@ export default function Chatbot() {
               <button
                 onClick={() => setActiveMode('chat')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'chat'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+? 'bg-blue-100 text-blue-600'
+: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+}`}
               >
                 Chat
               </button>
               <button
                 onClick={() => setActiveMode('deep-think')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'deep-think'
-                  ? 'bg-purple-100 text-purple-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+? 'bg-purple-100 text-purple-600'
+: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+}`}
               >
                 <Brain className="w-4 h-4" />
                 Deep Think
@@ -643,9 +636,9 @@ export default function Chatbot() {
               <button
                 onClick={() => setActiveMode('search')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'search'
-                  ? 'bg-green-100 text-green-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+? 'bg-green-100 text-green-600'
+: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+}`}
               >
                 <Search className="w-4 h-4" />
                 Search
@@ -653,9 +646,9 @@ export default function Chatbot() {
               <button
                 onClick={() => setActiveMode('image')}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${activeMode === 'image'
-                  ? 'bg-orange-100 text-orange-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+? 'bg-orange-100 text-orange-600'
+: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+}`}
               >
                 <Image className="w-4 h-4" />
                 Text to Image
@@ -663,9 +656,9 @@ export default function Chatbot() {
               <button
                 onClick={() => setShowFilterPanel(true)}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${merchantProfile.merchantType
-                  ? 'bg-yellow-100 text-yellow-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+? 'bg-yellow-100 text-yellow-600'
+: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+}`}
               >
                 <ShoppingBag className="w-4 h-4" />
                 {merchantProfile.merchantType ? 'Merchant' : 'Business Profile'}
@@ -724,9 +717,9 @@ export default function Chatbot() {
                   type="button"
                   onClick={toggleRecording}
                   className={`p-2 rounded-lg mr-2 ${isRecording
-                    ? 'bg-red-100 text-red-600 animate-pulse'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                    }`}
+? 'bg-red-100 text-red-600 animate-pulse'
+: 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+}`}
                 >
                   {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
@@ -734,9 +727,9 @@ export default function Chatbot() {
                   type="submit"
                   disabled={!input.trim() || loading}
                   className={`p-2 rounded-lg ${input.trim()
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-100 text-gray-400'
-                    } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+? 'bg-blue-600 text-white hover:bg-blue-700'
+: 'bg-gray-100 text-gray-400'
+} transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -904,30 +897,30 @@ export default function Chatbot() {
                         'Menu/pricing strategy',
                         'Competitive positioning'
                       ].map(challenge => (
-                        <label key={challenge} className="flex items-center text-sm">
-                          <input
-                            type="checkbox"
-                            checked={merchantProfile.challenges.includes(challenge)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                if (merchantProfile.challenges.length < 3) {
+                          <label key={challenge} className="flex items-center text-sm">
+                            <input
+                              type="checkbox"
+                              checked={merchantProfile.challenges.includes(challenge)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  if (merchantProfile.challenges.length < 3) {
+                                    setMerchantProfile(prev => ({
+                                      ...prev,
+                                      challenges: [...prev.challenges, challenge]
+                                    }));
+                                  }
+                                } else {
                                   setMerchantProfile(prev => ({
                                     ...prev,
-                                    challenges: [...prev.challenges, challenge]
+                                    challenges: prev.challenges.filter(c => c !== challenge)
                                   }));
                                 }
-                              } else {
-                                setMerchantProfile(prev => ({
-                                  ...prev,
-                                  challenges: prev.challenges.filter(c => c !== challenge)
-                                }));
-                              }
-                            }}
-                            className="mr-2"
-                          />
-                          {challenge}
-                        </label>
-                      ))}
+                              }}
+                              className="mr-2"
+                            />
+                            {challenge}
+                          </label>
+                        ))}
                     </div>
                   </div>
 
@@ -1054,6 +1047,7 @@ export default function Chatbot() {
                   <button
                     type="submit"
                     className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                    onSubmit={handleMerchantProfileSave}
                   >
                     Save Configuration
                   </button>
