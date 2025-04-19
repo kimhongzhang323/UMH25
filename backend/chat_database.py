@@ -28,7 +28,15 @@ class ChatDatabase(BaseModel):
     chats: List[Chat]
 
     def add_message(self, message: Message, chat_id: str):
-        pass
+        if chat_id in self.messages:
+            self.messages[chat_id].append(message)
+
+            # Update the chat preview with the latest message
+            for chat in self.chats:
+                if chat.id == chat_id:
+                    chat.preview = message.text[:50] + ("..." if len(message.text) > 50 else "")
+                    chat.timestamp = message.timestamp
+                    break
 
     def get_all_messages(self, chat_id: str) -> List[Message]:
         return self.messages[chat_id]
