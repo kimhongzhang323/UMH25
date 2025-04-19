@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import supabase from '../utils/supabaseClient'
 import { useNavigate } from 'react-router-dom'
+import supabase from '../utils/supabaseClient'
 
-export default function Auth() {
+export default function AuthComponent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLogin, setIsLogin] = useState(true)
@@ -16,12 +16,23 @@ export default function Auth() {
     setError(null)
 
     try {
-      const { error } = isLogin
+      const { data, error } = isLogin
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({ email, password })
 
       if (error) throw error
-      navigate('/dashboard') // Redirect after auth
+
+      // For signup, check if email confirmation is needed
+      if (!isLogin && data?.user?.identities?.length === 0) {
+        alert('Please check your email for verification link')
+        return
+      }
+
+      // Force session refresh
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Authentication failed')
+
+      navigate('/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -78,7 +89,7 @@ export default function Auth() {
                   autoComplete="current-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.value)}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 />
               </div>
