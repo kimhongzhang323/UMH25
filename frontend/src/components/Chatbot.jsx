@@ -95,7 +95,7 @@ export default function Chatbot() {
   ];
 
   // State Management
-  const [messages, setMessages] = useState([
+  const [currentChatMessages, setCurrentChatMessages] = useState([
     {
       id: '1',
       text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
@@ -176,7 +176,7 @@ export default function Chatbot() {
     };
 
     scrollToBottom();
-  }, [messages, loading]);
+  }, [currentChatMessages, loading]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -192,15 +192,15 @@ export default function Chatbot() {
         prev.map((chat) =>
           chat.id === currentChatId ? {
             ...chat,
-            messages,
-            title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || chat.title,
-            preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
+            messages: currentChatMessages,
+            title: currentChatMessages.find(m => m.sender === 'user')?.text.substring(0, 30) || chat.title,
+            preview: currentChatMessages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
             timestamp: new Date()
           } : chat
         )
       );
     }
-  }, [messages, currentChatId]);
+  }, [currentChatMessages, currentChatId]);
 
   // Handlers
   // Removed duplicate loadChat function
@@ -208,7 +208,7 @@ export default function Chatbot() {
   // Update your newChat function to set this state
   const newChat = () => {
     setIsNewChat(true);
-    setMessages([
+    setCurrentChatMessages([
       {
         id: '1',
         text: 'Hello! I am your HEX assistant. I can help you with questions, writing, analysis, and more. How can I assist you today?',
@@ -227,7 +227,7 @@ export default function Chatbot() {
     setIsNewChat(false);
     const chat = chatHistory.find(c => c.id === chatId);
     if (chat) {
-      setMessages(chat.messages);
+      setCurrentChatMessages(chat.messages);
       setCurrentChatId(chatId);
     }
   };
@@ -245,7 +245,7 @@ export default function Chatbot() {
       mode: activeMode,
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    setCurrentChatMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
 
@@ -263,7 +263,7 @@ export default function Chatbot() {
       .then(responseData => {
         const botMsg = responseData.response;
 
-        setMessages(prev => [...prev, botMsg]);
+        setCurrentChatMessages(prev => [...prev, botMsg]);
         setLoading(false);
 
         if (!currentChatId) {
@@ -300,14 +300,14 @@ export default function Chatbot() {
   };
 
   const saveChatToHistory = () => {
-    if (messages.length <= 1) return;
+    if (currentChatMessages.length <= 1) return;
 
     const newChat = {
       id: `chat${Date.now()}`,
-      title: messages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
-      preview: messages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
+      title: currentChatMessages.find(m => m.sender === 'user')?.text.substring(0, 30) || 'New Chat',
+      preview: currentChatMessages.find(m => m.sender === 'bot')?.text.substring(0, 50) || 'New conversation',
       timestamp: new Date(),
-      messages: [...messages]
+      messages: [...currentChatMessages]
     };
 
     setChatHistory(prev => [newChat, ...prev]);
@@ -503,10 +503,10 @@ export default function Chatbot() {
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="max-w-3xl mx-auto w-full p-4">
-            {messages.length === 0 ? (
+            {currentChatMessages.length === 0 ? (
               renderExamplePrompts()
             ) : (
-                messages.map((msg) => (
+                currentChatMessages.map((msg) => (
                   <div
                     key={msg.id}
                     className={`mb-6 last:mb-0 ${msg.sender === 'bot' ? 'pr-8' : 'pl-8'
