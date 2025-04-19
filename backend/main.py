@@ -1,6 +1,6 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Annotated
 # from transformers import AutoTokenizer, AutoModelForCausalLM # Comment out real imports
 # from sentence_transformers import SentenceTransformer # Comment out real imports
 import torch
@@ -287,6 +287,23 @@ async def get_document_count():
     return {
         "total_documents": len(document_store.documents),
         "csv_documents": sum(1 for doc in document_store.documents if doc.source == "csv")
+    }
+
+
+@app.put("/update_merchant_info")
+async def update_merchant_info():
+    pass
+
+
+@app.post("/send_chat")
+async def chat_to_llm(
+    message: Annotated[str, Form()],
+    chat_id: Annotated[int, Form()],
+    file: Annotated[UploadFile, File()]
+):
+    return {
+        "response": "Womp Womp",
+        "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
     }
 
 
