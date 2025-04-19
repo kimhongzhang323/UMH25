@@ -593,6 +593,12 @@ const StaffManager = () => {
                   </span>
                 </li>
                 <li className="flex items-start">
+                  <FiAlertTriangle className="text-red-500 mt-0.5 mr-2 flex-shrink-0" size={16} />
+                  <span className="text-sm">
+                    David Kim needs to improve efficiency (35%) or consider firing.
+                  </span>
+                </li>
+                <li className="flex items-start">
                   <FiInfo className="text-blue-500 mt-0.5 mr-2 flex-shrink-0" size={16} />
                   <span className="text-sm">Consider promoting Sarah Johnson (91% efficiency) to a senior role.</span>
                 </li>
