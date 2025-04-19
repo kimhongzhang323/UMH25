@@ -4,10 +4,10 @@ import { FiAward, FiBarChart2, FiCheckCircle, FiGift, FiStar, FiTrendingUp } fro
 const ProfilePage = () => {
   // Merchant data with gamification elements
   const [merchant, setMerchant] = useState({
-    name: "KFC Malaysia",
-    location: "Bangsar, Kuala Lumpur",
-    joinDate: "2023-05-15",
-    avatar: "https://logo.clearbit.com/kfc.com",
+    name: "Dim Sum Delights",
+    location: "Petaling Jaya, Selangor",
+    joinDate: "2024-01-10",
+    avatar: "https://logo.clearbit.com/dimsumdelight.com",
     tier: "Gold",
     level: 3,
     points: 1250,
@@ -19,9 +19,9 @@ const ProfilePage = () => {
       avgRating: 4.67
     },
     achievements: [
-      { id: 1, name: "First 100 Sales", earned: true, date: "2023-06-01" },
-      { id: 2, name: "5-Star Rating Week", earned: true, date: "2023-07-15" },
-      { id: 3, name: "Top Performer", earned: true, date: "2023-08-20" },
+      { id: 1, name: "First 100 Sales", earned: true, date: "2024-02-01" },
+      { id: 2, name: "5-Star Rating Week", earned: true, date: "2024-03-15" },
+      { id: 3, name: "Top Performer", earned: true, date: "2024-04-20" },
       { id: 4, name: "Customer Favorite", earned: false },
       { id: 5, name: "Elite Seller", earned: false },
       { id: 6, name: "Perfect Month", earned: false }
