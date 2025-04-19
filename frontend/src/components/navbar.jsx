@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut } from 'lucide-react';
+import { LayoutDashboard, UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -208,11 +208,11 @@ export default function Navbar() {
                   Home
                 </a>
                 <a
-                  href="/chat"
+                  href="/dashboard"
                   className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
                 >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Chat
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
                 </a>
                 <a
                   href="/orders"

@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {useNavigate} from 'react-router-dom';
+import { 
+  FiAlertTriangle, 
+  FiPackage, 
+  FiCheckCircle,
+} from 'react-icons/fi';
 import PeakHoursChart from '../charts/PeakHoursChart';
 import OrderVolumeChart from '../charts/OrderVolumeChart';
 import jsPDF from 'jspdf';
 
 const Dashboard = () => {
+    // AI Features State
   // Function to handle PDF export
   const handleExportPDF = () => {
     const doc = new jsPDF();
@@ -56,9 +62,13 @@ const Dashboard = () => {
     popularTimes: [],
     sentimentAnalysis: {}
   });
+  
 
+  
   const [anomalies, setAnomalies] = useState([]);
-
+  const [inventory, setInventory] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
@@ -210,6 +220,56 @@ const Dashboard = () => {
           orderVolume: orderVolumeData,
           recentOrders
         });
+        setSalesPredictions({
+          nextWeekPrediction: 48471.25,
+          confidenceLevel: 85,
+          recommendedPrep: {
+            inventoryIncrease: "20%",
+            staffIncrease: "2 extra staff",
+            timing: "Friday dinner rush"
+          }
+        });
+        setMenuRecommendations({
+          bestPerformers: ["Pork Siu Mai", "Steamed BBQ Pork Buns", "Shrimp Har Gow"],
+          underperformers: ["BBQ Chicken Feet", "Century Egg Porridge"],
+          suggestedCombos: [
+            { items: ["Shrimp Har Gow", "Century Egg Porridge"], projectedIncrease: 15 },
+            { items: ["BBQ Chicken Feet", "Mango Pudding"], projectedIncrease: 10 },
+            { items: ["Pork Siu Mai", "Steamed BBQ Pork Buns"], projectedIncrease: 8 }
+          ]
+        });
+
+        setCustomerInsights({
+          customerSegments: [
+            { type: "Young Adults", percentage: 45 },
+            { type: "Families", percentage: 30 },
+            { type: "Professionals", percentage: 25 }
+          ],
+          popularTimes: [
+            { period: "12:00-14:00", percentage: 35 },
+            { period: "18:00-20:00", percentage: 40 },
+            { period: "20:00-22:00", percentage: 25 }
+          ],
+          sentimentAnalysis: {
+            positive: 78,
+            neutral: 18,
+            negative: 4
+          }
+        });
+        setAnomalies([
+          {
+            type: "Inventory Shortage",
+            description: "Pork Siu Mai running low (12% below optimal)",
+            severity: "High",
+            time: "10:30 AM"
+          },
+          {
+            type: "Staffing Alert",
+            description: "Predicted understaffing during Friday dinner rush",
+            severity: "Medium",
+            time: "Yesterday"
+          }
+        ]);
 
         // ... rest of your AI initialization code ...
       } catch (error) {
@@ -221,6 +281,136 @@ const Dashboard = () => {
     fetchAndProcessData();
   }, []);
 
+    // Fetch inventory data
+    useEffect(() => {
+      const fetchInventory = async () => {
+        try {
+          setLoading(true);
+          // Get data from localStorage
+          const savedInventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+          if (savedInventory.length === 0) {
+            // If no data in localStorage, use mock data
+            const mockInventory = [
+              {
+                id: 1,
+                name: "Zinger Burger Patty",
+                category: "Chicken",
+                currentStock: 42,
+                minStock: 50,
+                unit: "pieces",
+                lastDelivery: "2025-04-08",
+                nextDelivery: "2025-04-15",
+                usageRate: "15/day",
+                status: "low"
+              },
+              {
+                id: 2,
+                name: "Original Recipe Coating",
+                category: "Ingredients",
+                currentStock: 25,
+                minStock: 20,
+                unit: "kg",
+                lastDelivery: "2025-04-10",
+                nextDelivery: "2025-04-17",
+                usageRate: "3kg/day",
+                status: "adequate"
+              },
+              {
+                id: 3,
+                name: "Potatoes",
+                category: "Ingredients",
+                currentStock: 120,
+                minStock: 100,
+                unit: "kg",
+                lastDelivery: "2025-04-09",
+                nextDelivery: "2025-04-16",
+                usageRate: "20kg/day",
+                status: "adequate"
+              },
+              {
+                id: 4,
+                name: "Coleslaw Mix",
+                category: "Ingredients",
+                currentStock: 8,
+                minStock: 15,
+                unit: "kg",
+                lastDelivery: "2025-04-05",
+                nextDelivery: "2025-04-12",
+                usageRate: "2kg/day",
+                status: "low"
+              },
+              {
+                id: 5,
+                name: "Cheese Slices",
+                category: "Dairy",
+                currentStock: 200,
+                minStock: 150,
+                unit: "pieces",
+                lastDelivery: "2025-04-11",
+                nextDelivery: "2025-04-18",
+                usageRate: "30/day",
+                status: "adequate"
+              },
+              {
+                id: 6,
+                name: "Buns",
+                category: "Bakery",
+                currentStock: 60,
+                minStock: 80,
+                unit: "dozen",
+                lastDelivery: "2025-04-10",
+                nextDelivery: "2025-04-17",
+                usageRate: "10 dozen/day",
+                status: "low"
+              },
+              {
+                id: 7,
+                name: "Pepsi Syrup",
+                category: "Beverages",
+                currentStock: 5,
+                minStock: 5,
+                unit: "liters",
+                lastDelivery: "2025-04-07",
+                nextDelivery: "2025-04-14",
+                usageRate: "1 liter/day",
+                status: "critical"
+              },
+              {
+                id: 8,
+                name: "Hot & Spicy Marinade",
+                category: "Sauces",
+                currentStock: 12,
+                minStock: 10,
+                unit: "liters",
+                lastDelivery: "2025-04-09",
+                nextDelivery: "2025-04-16",
+                usageRate: "2 liters/day",
+                status: "adequate"
+              }
+            ];
+            setInventory(mockInventory);
+            // Save mock data to localStorage for future use
+            localStorage.setItem('inventory', JSON.stringify(mockInventory));
+          } else {
+            setInventory(savedInventory);
+          }
+          setLoading(false);
+        } catch (err) {
+          setError(err.message);
+          setLoading(false);
+        }
+      };
+  
+      fetchInventory();
+    }, []);
+
+    // Calculate inventory summary
+    const inventorySummary = {
+      totalItems: inventory.length,
+      lowStock: inventory.filter(item => item.status === 'low').length,
+      criticalStock: inventory.filter(item => item.status === 'critical').length,
+      adequateStock: inventory.filter(item => item.status === 'adequate').length
+    };
   // Format currency
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
@@ -336,6 +526,67 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Inventory Summary Cards */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-light text-gray-800">Inventory Summary</h2>
+          <a href="/inventory">
+          <button 
+            className="px-4 py-2 bg-blue-500 text-white rounded-md" 
+          >
+           Manage Inventory
+          </button>
+          </a>
+        </div>
+        
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Total Items</p>
+                        <p className="text-2xl font-medium">{inventorySummary.totalItems}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                        <FiPackage size={20} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Adequate Stock</p>
+                        <p className="text-2xl font-medium text-green-600">{inventorySummary.adequateStock}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-green-100 text-green-600">
+                        <FiCheckCircle size={20} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Low Stock</p>
+                        <p className="text-2xl font-medium text-amber-600">{inventorySummary.lowStock}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-amber-100 text-amber-600">
+                        <FiAlertTriangle size={20} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Critical Stock</p>
+                        <p className="text-2xl font-medium text-red-600">{inventorySummary.criticalStock}</p>
+                      </div>
+                      <div className="p-2 rounded-full bg-red-100 text-red-600">
+                        <FiAlertTriangle size={20} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
         {/* AI Features Section - Retained for later implementation */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* AI Sales Predictions */}
@@ -344,7 +595,7 @@ const Dashboard = () => {
               <svg className="w-6 h-6 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-800">AI Sales Forecast</h3>
+              <h3 className="text-lg font-medium text-gray-800">AI Sales Prediction</h3>
             </div>
             <p className="text-xl font-light text-gray-900 mb-2">
               Predicted sales next week: {formatCurrency(salesPredictions.nextWeekPrediction)}
@@ -374,7 +625,7 @@ const Dashboard = () => {
               <svg className="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-800">AI Menu Optimizer</h3>
+              <h3 className="text-lg font-medium text-gray-800">AI Menu Helper</h3>
             </div>
 
             <div className="mb-4">
@@ -419,7 +670,7 @@ const Dashboard = () => {
               <svg className="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-800">AI Anomaly Detection</h3>
+              <h3 className="text-lg font-medium text-gray-800">AI Alerts</h3>
             </div>
 
             {anomalies.length > 0 ? (
@@ -755,15 +1006,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Floating chat button */}
-      <button
-        onClick={() => setChatOpen(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 hover:cursor-pointer transition-colors"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
-      </button>
     </div>
   );
 };
