@@ -1,0 +1,174 @@
+[
+    {
+        "question": "How do I reset my GrabPay PIN?",
+        "answer": "Open Grab app > Go to GrabPay > Select 'Forgot PIN' > Verify identity via OTP > Set new 6-digit PIN"
+    },
+    {
+        "question": "Why was my Grab ride cancelled?",
+        "answer": "Cancellations can occur if driver can't reach you, payment issues, or safety concerns. You'll get SMS notification with specific reason."
+    },
+    {
+        "question": "How do I get a receipt for my GrabFood order?",
+        "answer": "Go to 'Orders' tab > Select order > Tap 'Receipt' > Can download PDF or email it"
+    },
+    {
+        "question": "What countries does Grab operate in?",
+        "answer": "Grab operates in Singapore, Malaysia, Indonesia, Thailand, Vietnam, Philippines, Myanmar, and Cambodia."
+    },
+    {
+        "question": "How do I contact Grab support?",
+        "answer": "In-app: Go to Help Center > Select issue > Choose 'Contact Us'. Available 24/7 in most markets."
+    },
+    {
+        "question": "How can I update my payment method in GrabPay?",
+        "answer": "Go to Grab app > GrabPay > Payment Methods > Select 'Add Payment Method' > Choose between debit/credit card or bank transfer"
+    },
+    {
+        "question": "Why is my GrabFood order taking longer than usual?",
+        "answer": "Delays may occur due to high demand, traffic, or restaurant issues. You’ll be notified if your order is significantly delayed."
+    },
+    {
+        "question": "How do I apply a promo code for GrabFood?",
+        "answer": "When placing an order, enter the promo code in the 'Promo Code' field at checkout. Ensure it’s valid and applicable for your order."
+    },
+    {
+        "question": "Can I cancel a Grab ride after booking?",
+        "answer": "You can cancel a ride within a few minutes of booking without a charge. After that, a cancellation fee may apply depending on the driver’s location."
+    },
+    {
+        "question": "How do I report an issue with a Grab driver?",
+        "answer": "Go to 'Trip History' > Select the ride > Tap 'Help' > Choose 'Report an Issue' > Provide details and submit."
+    },
+    {
+        "question": "How do I change the delivery address for my GrabFood order?",
+        "answer": "Once the order is placed, the delivery address cannot be changed. Please ensure your address is correct before completing the order."
+    },
+    {
+        "question": "How do I earn GrabRewards points?",
+        "answer": "Earn GrabRewards points by using Grab services like rides, GrabFood, GrabMart, and more. Points accumulate with every transaction."
+    },
+    {
+        "question": "How do I deactivate my Grab account?",
+        "answer": "In the Grab app, go to 'Settings' > 'Account' > 'Deactivate Account'. You’ll need to verify your identity and provide a reason for deactivation."
+    },
+    {
+        "question": "What should I do if I forgot my GrabPay PIN?",
+        "answer": "In the Grab app, go to GrabPay > 'Forgot PIN' > Verify your identity via OTP > Set a new 6-digit PIN."
+    },
+    {
+        "question": "Can I request a refund for a cancelled GrabFood order?",
+        "answer": "Refunds for cancelled orders are processed automatically. If you haven't received one within 5-7 business days, please contact Grab support."
+    },
+    {
+        "question": "How do I change the email address associated with my Grab account?",
+        "answer": "In the Grab app, go to 'Settings' > 'Profile' > 'Email' > Select 'Edit' to update your email address."
+    },
+    {
+        "question": "How can I refer a friend to Grab and earn rewards?",
+        "answer": "Go to 'GrabRewards' > 'Invite a Friend' > Share your referral code. Both you and your friend will earn rewards when they complete their first order."
+    },
+    {
+        "question": "Can I use GrabPay for in-store payments?",
+        "answer": "Yes, you can use GrabPay to pay at participating merchants. Look for the GrabPay logo at checkout or in the merchant's payment options."
+    },
+    {
+        "question": "What if my Grab driver is taking a longer route?",
+        "answer": "If you feel the route is unusually long, you can report the issue via the 'Help' section in your ride details. Grab support will review and take action if necessary."
+    },
+    {
+        "question": "How do I reset my Grab account password?",
+        "answer": "Go to Grab app > Tap 'Forgot Password' > Enter your registered email > Follow the instructions sent to your inbox to reset your password."
+    },
+    {
+        "question": "How do I check my GrabPay balance?",
+        "answer": "Open the Grab app > Go to GrabPay > Your balance will be displayed on the top of the screen."
+    },
+    {
+        "question": "How do I enable GrabPay QR code payments?",
+        "answer": "Open Grab app > GrabPay > Tap 'Scan QR' > Scan the merchant's QR code to make a payment."
+    },
+    {
+        "question": "Can I change the restaurant after placing a GrabFood order?",
+        "answer": "Once an order is placed, it cannot be changed. Please make sure you have selected the correct restaurant before confirming your order."
+    },
+    {
+        "question": "How can I track my Grab ride in real-time?",
+        "answer": "After booking a ride, you'll be able to track your driver’s location and estimated time of arrival in real-time on the map in the app."
+    },
+    {
+        "question": "Why is my GrabRewards account not earning points?",
+        "answer": "Ensure that your Grab account is linked to the transaction and that the service is eligible for points. Some promotions or discounts might exclude points."
+    },
+    {
+        "question": "How do I enable location services for Grab?",
+        "answer": "Go to your phone's settings > Location > Enable 'Allow Location Access' for Grab to ensure smooth ride bookings and delivery services."
+    },
+    {
+        "question": "How do I change the tip amount for my Grab ride?",
+        "answer": "You can add or adjust the tip after your ride is complete by going to the 'Trip History' section in the app and selecting 'Add Tip'."
+    },
+    {
+        "question": "How do I view my GrabFood order history?",
+        "answer": "Go to the 'Orders' tab in the Grab app > Tap 'Order History' to see all your past GrabFood orders."
+    },
+    {
+        "question": "What should I do if I left something in my Grab ride?",
+        "answer": "Go to 'Trip History' > Select the ride > Tap 'Lost Item' > Follow the instructions to contact your driver directly and arrange for the return."
+    },
+    {
+        "question": "How do I add a new phone number to my Grab account?",
+        "answer": "Go to 'Settings' > 'Profile' > Tap 'Phone Number' > Select 'Edit' and enter your new number. A verification code will be sent to the new number."
+    },
+    {
+        "question": "What is the maximum distance for a Grab ride?",
+        "answer": "Grab's ride distances vary by market, but typically the maximum distance is around 60 km. For longer trips, consider booking a longer-distance ride in advance."
+    },
+    {
+        "question": "Can I schedule a Grab ride in advance?",
+        "answer": "Yes, you can schedule a ride up to 7 days in advance by selecting the 'Schedule' option after entering your pickup and drop-off details."
+    },
+    {
+        "question": "How do I change the delivery time for my GrabFood order?",
+        "answer": "The delivery time cannot be changed once the order is placed. Ensure you choose a suitable delivery time before confirming your order."
+    },
+    {
+        "question": "How can I make my Grab account more secure?",
+        "answer": "Enable two-factor authentication (2FA) by going to 'Settings' > 'Security' > Turn on 'Two-Factor Authentication' for added protection."
+    },
+    {
+        "question": "How do I get a refund for a failed GrabFood order?",
+        "answer": "Refunds for failed orders will be processed automatically. If you haven't received a refund within 5-7 business days, please contact Grab support."
+    },
+    {
+        "question": "How do I remove a saved payment method from GrabPay?",
+        "answer": "Go to 'GrabPay' > 'Payment Methods' > Select the payment method you want to remove > Tap 'Delete'."
+    },
+    {
+        "question": "Can I use GrabPay to pay for services other than rides and food delivery?",
+        "answer": "Yes, GrabPay can be used for GrabMart, bills, insurance, and in-store payments at participating merchants."
+    },
+    {
+        "question": "Why is my GrabFood order delayed?",
+        "answer": "Delays may occur due to high demand, traffic conditions, or restaurant preparation time. Check your app for real-time updates or contact support if delay exceeds 30 minutes."
+    },
+    {
+        "question": "How do I track my order status?",
+        "answer": "Open Grab app > Orders tab > Select your order > View real-time updates including restaurant preparation and delivery progress."
+    },
+    {
+        "question": "What happens if items are missing from my order?",
+        "answer": "Report missing items: Orders > Select order > Report Issue > Missing Items. Refunds processed within 3-5 business days."
+    },
+    {
+        "question": "Can I modify my order after placing it?",
+        "answer": "Once an order is confirmed, modifications aren't possible. You'll need to cancel and place a new order if within cancellation window."
+    },
+    {
+        "question": "How long should I wait before reporting a late delivery?",
+        "answer": "If delivery exceeds estimated time by 30+ minutes, you can report: Orders > Select order > Report > Delivery Delay."
+    },
+    {
+        "question": "What if I received the wrong order?",
+        "answer": "Report immediately: Orders > Select order > Report Wrong Order. Take photos if possible. Our team will assist with refund/redelivery."
+    }
+]
