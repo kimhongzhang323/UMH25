@@ -184,18 +184,18 @@ export default function Chatbot() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
-  
+
     const userMsg = {
       id: uuidV4(),
       text: input,
       sender: 'user',
       timestamp: new Date(),
     };
-  
+
     setCurrentChatMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
-  
+
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat`, {
         method: "POST",
@@ -207,11 +207,11 @@ export default function Chatbot() {
           chat_id: currentChatId || "default",
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const responseData = await response.json();
       const botMsg = {
         id: uuidV4(),
@@ -219,7 +219,7 @@ export default function Chatbot() {
         sender: "bot",
         timestamp: new Date(),
       };
-  
+
       setCurrentChatMessages(prev => [...prev, botMsg]);
     } catch (error) {
       console.error("Error:", error);
@@ -229,7 +229,7 @@ export default function Chatbot() {
         sender: "bot",
         timestamp: new Date(),
       };
-  
+
       setCurrentChatMessages(prev => [...prev, errorMsg]);
     } finally {
       setLoading(false);
@@ -493,7 +493,7 @@ export default function Chatbot() {
                             )}
                           </div>
                         )}
-                        {msg.isImage ? (
+                        {msg.imageUrl ? (
                           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                             <img
                               src={msg.imageUrl}
