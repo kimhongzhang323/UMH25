@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FiSend, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle, FiX } from 'react-icons/fi';
+import { FiSend, FiSettings, FiMessageSquare, FiCheck, FiLoader, FiAlertCircle, FiX, FiChevronsLeft, FiChevronsRight } from 'react-icons/fi';
 
 // --- Configuration ---
 const API_BASE_URL = "http://127.0.0.1:8000/customer-service"; // Replace with your actual API base URL
@@ -30,6 +30,7 @@ const CustomerServicePage = () => {
   const [isLoadingChats, setIsLoadingChats] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true); // Start expanded
 
   // --- Refs ---
   const messagesEndRef = useRef(null); // Ref for the marker div at the end of messages (optional usage)
@@ -267,12 +268,12 @@ const CustomerServicePage = () => {
   const handleSelectChat = (chatId) => {
     // 1. Only proceed if selecting a DIFFERENT chat
     if (chatId === activeChatId) {
-        setChats(prevChats =>
-            prevChats.map(chat =>
-                (chat.id === chatId && chat.unread) ? { ...chat, unread: false } : chat
-            )
-        );
-        return;
+      setChats(prevChats =>
+        prevChats.map(chat =>
+          (chat.id === chatId && chat.unread) ? { ...chat, unread: false } : chat
+        )
+      );
+      return;
     }
 
     // 2. Update the active chat ID state
@@ -324,6 +325,10 @@ const CustomerServicePage = () => {
     }, 0);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(!isSidebarExpanded)
+  }
+
   // --- JSX Rendering ---
 
   // Loading State
@@ -361,23 +366,33 @@ const CustomerServicePage = () => {
 
       {/* --- Sidebar (Chat List) --- */}
       {/* MODIFIED: Added hidden, xl:flex, xl:flex-col, xl:flex-shrink-0, removed initial w-1/4 */}
-      <div className="hidden lg:flex lg:flex-col lg:flex-shrink-0 lg:w-1/4 border-r border-gray-200 bg-white">
+      <div className={`
+                relative flex flex-col h-screen
+                bg-white border-r border-gray-200
+                transition-all duration-300 ease-in-out /* Animate width change */
+                flex-shrink-0 /* Prevent shrinking */
+                ${isSidebarExpanded ? 'w-80' : 'w-0'} /* Conditional Width */
+                `}
+      >
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 flex-shrink-0"> {/* Ensure header doesn't shrink */}
-          <h2 className="text-xl font-semibold text-gray-800">Customer Messages</h2>
+
+          <h2 className="text-xl font-semibold text-gray-800">
+            {isSidebarExpanded ? "Customer Chats" : ""}
+          </h2>
           <div className="mt-4 flex items-center justify-between">
             <span className="text-sm text-gray-600">
-              {chats.filter(c => c.status !== 'resolved').length} active chats
+              {isSidebarExpanded ? `${chats.filter(c => c.status !== 'resolved').length} active chats` : ""}
             </span>
+            {/* Always render Toggle Button */}
             <button
-              onClick={handleToggleAutoReply}
-              title={autoReplyEnabled ? 'Disable AI Auto-Reply' : 'Enable AI Auto-Reply'}
-              className={`flex items-center text-xs sm:text-sm px-2.5 py-1 rounded-full transition-colors duration-150 ${autoReplyEnabled
-                  ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+              onClick={toggleSidebar}
+              className="text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded p-1"
+              aria-label={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
+              title={isSidebarExpanded ? "Collapse chat list" : "Expand chat list"}
             >
-              <FiMessageSquare className="mr-1" size={14} /> AI Reply {autoReplyEnabled ? 'ON' : 'OFF'}
+              {/* Change icon based on state */}
+              {isSidebarExpanded ? <FiChevronsLeft size={20} /> : <FiChevronsRight size={20} />}
             </button>
           </div>
         </div>
@@ -480,10 +495,10 @@ const CustomerServicePage = () => {
                   <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-start' : 'justify-end'}`}>
                     <div
                       className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-xl shadow-sm ${message.sender === 'customer'
-                          ? 'bg-white border border-gray-200 text-gray-800'
-                          : message.aiGenerated
-                            ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
-                            : 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white'
+                        ? 'bg-white border border-gray-200 text-gray-800'
+                        : message.aiGenerated
+                          ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
+                          : 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white'
                         } ${message.isError ? 'bg-red-100 border border-red-300 text-red-800' : ''}` // Style for errors
                       }
                     >
@@ -671,13 +686,15 @@ const CustomerServicePage = () => {
       </div>
 
       {/* Background Overlay for mobile settings */}
-      {isMobileSettingsOpen && (
-        <div
-          onClick={() => setIsMobileSettingsOpen(false)}
-          className="fixed inset-0 bg-black/30 z-40 xl:hidden"
-          aria-hidden="true"
-        ></div>
-      )}
+      {
+        isMobileSettingsOpen && (
+          <div
+            onClick={() => setIsMobileSettingsOpen(false)}
+            className="fixed inset-0 bg-black/30 z-40 xl:hidden"
+            aria-hidden="true"
+          ></div>
+        )
+      }
 
       {/* You might want a button to toggle the sidebar on smaller screens */}
       {/* Example (place in main chat header): */}
@@ -697,7 +714,7 @@ const CustomerServicePage = () => {
             </button>
         )} */}
 
-    </div>
+    </div >
   );
 };
 
