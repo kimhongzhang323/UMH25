@@ -198,7 +198,6 @@ VITE_SUPABASE_KEY=your_supabase_key
 
 # Backend
 API_KEY=your_genai_api
-DATABASE_URL=postgresql://user:password@localhost:5432/mexdb
 ```
 
 **3. Install Dependencies**  
@@ -213,10 +212,11 @@ cd backend && pip install -r requirements.txt
 **4. Setup AI Models**
 ```bash
 # Download and configure models (if running locally)
+cd backend
+
+# run AI model
 python rag_pipeline.py 
 
-# Or use cloud APIs (recommended for production)
-# Configure in .env file
 ```
 **5. Run Development Servers**  
 ```bash

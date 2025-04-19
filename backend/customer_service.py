@@ -46,14 +46,14 @@ async def get_chats():
             "id": 3,
             "customer": "Rajesh Kumar",
             "avatar": "https://randomuser.me/api/portraits/men/3.jpg",
-            "lastMessage": "Is the Hot & Spicy Chicken Feet very spicy?",
+            "lastMessage": "Is the Siu Mai Feet very spicy?",
             "status": "pending",
             "unread": True,
             "messages": [
                 {
                     "id": 1,
                     "sender": "customer",
-                    "text": "I want to try the Hot & Spicy Chicken Feet but I have low spice tolerance. How spicy is it?",
+                    "text": "I want to try the Pork Siu Mai Feet but I have low spice tolerance. How spicy is it?",
                     "time": "2025-04-10T09:45:00",
                     "read": True
                 }

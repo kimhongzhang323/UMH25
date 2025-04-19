@@ -62,7 +62,7 @@ const MenuGenerator = () => {
         price: 5.0,
         category: "chinese",
         popular: true,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "siumai.jpg",
         orderCount: 358,
         revenue: 1790.0,
         profitMargin: "High"
@@ -74,7 +74,7 @@ const MenuGenerator = () => {
         price: 4.75,
         category: "chinese",
         popular: true,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "steambq.jpg",
         orderCount: 272,
         revenue: 1292.0,
         profitMargin: "Medium"
@@ -86,7 +86,7 @@ const MenuGenerator = () => {
         price: 5.50,
         category: "chinese",
         popular: true,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "streamhargow.jpg",
         orderCount: 203,
         revenue: 1116.5,
         profitMargin: "High"
@@ -98,7 +98,7 @@ const MenuGenerator = () => {
         price: 3.50,
         category: "dessert",
         popular: true,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "mango.jpg",
         orderCount: 189,
         revenue: 661.5,
         profitMargin: "Very High"
@@ -110,7 +110,7 @@ const MenuGenerator = () => {
         price: 3.75,
         category: "dessert",
         popular: false,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "egg tart.jpg",
         orderCount: 156,
         revenue: 585.0,
         profitMargin: "Medium"
@@ -122,7 +122,7 @@ const MenuGenerator = () => {
         price: 6.25,
         category: "chinese",
         popular: false,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "stickrice.jpg",
         orderCount: 142,
         revenue: 887.5,
         profitMargin: "Medium"
@@ -134,7 +134,7 @@ const MenuGenerator = () => {
         price: 4.95,
         category: "chinese",
         popular: false,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "chive.jpg",
         orderCount: 135,
         revenue: 668.25,
         profitMargin: "Low"
@@ -146,7 +146,7 @@ const MenuGenerator = () => {
         price: 5.25,
         category: "chinese",
         popular: false,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "beef.jpg",
         orderCount: 128,
         revenue: 672.0,
         profitMargin: "Medium"
@@ -162,7 +162,7 @@ const MenuGenerator = () => {
         price: 6.75,
         category: "chinese",
         popular: false,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "truffle.jpg",
         isNew: true,
         aiSuggested: true,
         similarToId: 113,
@@ -175,7 +175,7 @@ const MenuGenerator = () => {
         price: 4.50,
         category: "dessert",
         popular: false,
-        imageUrl: "https://via.placeholder.com/150",
+        imageUrl: "mangopamelo.jpg",
         isNew: true,
         aiSuggested: true,
         similarToId: 114,
@@ -481,31 +481,7 @@ const MenuGenerator = () => {
                   </div>
                 </div>
                 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setMenuTheme('light')}
-                      className={`flex-1 p-3 border rounded-lg text-center transition-all ${
-                        menuTheme === 'light' 
-                          ? 'border-blue-500 bg-blue-50 text-blue-600' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      Light
-                    </button>
-                    <button
-                      onClick={() => setMenuTheme('dark')}
-                      className={`flex-1 p-3 border rounded-lg text-center transition-all ${
-                        menuTheme === 'dark' 
-                          ? 'border-blue-500 bg-blue-50 text-blue-600' 
-                          : 'border-gray-200 hover:border-gray-300 bg-gray-800 text-white'
-                      }`}
-                    >
-                      Dark
-                    </button>
-                  </div>
-                </div>
+                
                 
                 <button
                   onClick={exportMenu}

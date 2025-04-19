@@ -5,31 +5,30 @@ const AddItem = () => {
   const navigate = useNavigate();
   const [newItem, setNewItem] = useState({
     name: '',
-    cuisine_tag: '',
-    price: '',
-    current_stock: '',
-    min_stock: '',
+    category: '',
+    currentStock: '',
+    minStock: '',
     unit: '',
-    usageRate: '',
+    usageRate: ''
   });
 
   const categories = [
-    'Chicken',
-    'Ingredients',
-    'Dairy',
-    'Bakery',
-    'Beverages',
-    'Sauces',
+    'Dumpling Ingredients',
+    'BBQ Pork Ingredients',
+    'Shrimp Ingredients',
+    'Dessert Ingredients',
+    'Wrappers/Dough',
+    'Sauces/Dips',
     'Other'
   ];
 
   const units = [
-    'pieces',
     'kg',
+    'pieces',
     'liters',
-    'dozen',
+    'packs',
     'boxes',
-    'packets'
+    'dozen'
   ];
 
   const calculateStatus = (current, min) => {
@@ -52,17 +51,16 @@ const AddItem = () => {
       
       // Create new item with all required properties
       const itemToAdd = {
-        id: Date.now(), // Generate a unique ID
+        id: Date.now(),
         name: newItem.name,
-        category: newItem.cuisine_tag,
-        price: Number(newItem.price),
-        currentStock: Number(newItem.current_stock),
-        minStock: Number(newItem.min_stock),
+        category: newItem.category,
+        currentStock: Number(newItem.currentStock),
+        minStock: Number(newItem.minStock),
         unit: newItem.unit,
-        status: calculateStatus(Number(newItem.current_stock), Number(newItem.min_stock)),
+        status: calculateStatus(Number(newItem.currentStock), Number(newItem.minStock)),
         usageRate: usageRate,
         lastDelivery: new Date().toISOString().split('T')[0],
-        nextDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+        nextDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       };
 
       // Add new item to inventory
@@ -84,12 +82,6 @@ const AddItem = () => {
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Add New Item</h1>
-          <button
-            onClick={() => navigate('/inventory')}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
-          >
-            Cancel
-          </button>
         </div>
 
         <form onSubmit={handleNewItemSubmit} className="space-y-6">
@@ -107,8 +99,8 @@ const AddItem = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
             <select
-              value={newItem.cuisine_tag}
-              onChange={(e) => setNewItem({ ...newItem, cuisine_tag: e.target.value })}
+              value={newItem.category}
+              onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
               className="block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
               required
             >
@@ -121,26 +113,13 @@ const AddItem = () => {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Price (MYR)</label>
-            <input
-              type="number"
-              value={newItem.price}
-              onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-              className="block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-              min="0"
-              step="0.01"
-            />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Current Stock</label>
               <input
                 type="number"
-                value={newItem.current_stock}
-                onChange={(e) => setNewItem({ ...newItem, current_stock: e.target.value })}
+                value={newItem.currentStock}
+                onChange={(e) => setNewItem({ ...newItem, currentStock: e.target.value })}
                 className="block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 required
                 min="0"
@@ -151,8 +130,8 @@ const AddItem = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Stock</label>
               <input
                 type="number"
-                value={newItem.min_stock}
-                onChange={(e) => setNewItem({ ...newItem, min_stock: e.target.value })}
+                value={newItem.minStock}
+                onChange={(e) => setNewItem({ ...newItem, minStock: e.target.value })}
                 className="block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 required
                 min="0"
