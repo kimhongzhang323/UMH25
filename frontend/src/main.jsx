@@ -17,6 +17,7 @@ import PaymentPage from './components/Payment.jsx'
 import GrabAdsPage from './components/GrabAd.jsx'
 import AuthComponent from './components/AuthComponent.jsx'
 import AuthWrapper from './components/AuthWrapper.jsx'
+import AddItem from './components/Additem.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -83,6 +84,15 @@ createRoot(document.getElementById('root')).render(
               </AuthWrapper>
             }
           />
+          <Route
+            path="/add-item"
+            element={
+              <AuthWrapper>
+                <AddItem />
+              </AuthWrapper>
+            }
+          />
+
           <Route
             path="/sales-income"
             element={

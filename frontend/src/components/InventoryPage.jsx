@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FiAlertTriangle, 
   FiPackage, 
@@ -6,10 +7,12 @@ import {
   FiSearch, 
   FiTrendingUp,
   FiCheckCircle,
-  FiRefreshCw
+  FiRefreshCw,
+  FiXCircle
 } from 'react-icons/fi';
 
 const InventoryPage = () => {
+  const navigate = useNavigate();
   // Inventory state
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,118 +20,145 @@ const InventoryPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   const [reorderModalOpen, setReorderModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [pendingOrdersModalOpen, setPendingOrdersModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [orderQuantity, setOrderQuantity] = useState(1);
+  const [editedItem, setEditedItem] = useState(null);
+  const [pendingOrders, setPendingOrders] = useState([]);
+
+  const categories = [
+    'Chicken',
+    'Ingredients',
+    'Dairy',
+    'Bakery',
+    'Beverages',
+    'Sauces',
+    'Other'
+  ];
+
+  const units = [
+    'pieces',
+    'kg',
+    'liters',
+    'dozen',
+    'boxes',
+    'packets'
+  ];
 
   // Fetch inventory data
   useEffect(() => {
     const fetchInventory = async () => {
       try {
         setLoading(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock data
-        const mockInventory = [
-          {
-            id: 1,
-            name: "Zinger Burger Patty",
-            category: "Chicken",
-            currentStock: 42,
-            minStock: 50,
-            unit: "pieces",
-            lastDelivery: "2025-04-08",
-            nextDelivery: "2025-04-15",
-            usageRate: "15/day",
-            status: "low"
-          },
-          {
-            id: 2,
-            name: "Original Recipe Coating",
-            category: "Ingredients",
-            currentStock: 25,
-            minStock: 20,
-            unit: "kg",
-            lastDelivery: "2025-04-10",
-            nextDelivery: "2025-04-17",
-            usageRate: "3kg/day",
-            status: "adequate"
-          },
-          {
-            id: 3,
-            name: "Potatoes",
-            category: "Ingredients",
-            currentStock: 120,
-            minStock: 100,
-            unit: "kg",
-            lastDelivery: "2025-04-09",
-            nextDelivery: "2025-04-16",
-            usageRate: "20kg/day",
-            status: "adequate"
-          },
-          {
-            id: 4,
-            name: "Coleslaw Mix",
-            category: "Ingredients",
-            currentStock: 8,
-            minStock: 15,
-            unit: "kg",
-            lastDelivery: "2025-04-05",
-            nextDelivery: "2025-04-12",
-            usageRate: "2kg/day",
-            status: "low"
-          },
-          {
-            id: 5,
-            name: "Cheese Slices",
-            category: "Dairy",
-            currentStock: 200,
-            minStock: 150,
-            unit: "pieces",
-            lastDelivery: "2025-04-11",
-            nextDelivery: "2025-04-18",
-            usageRate: "30/day",
-            status: "adequate"
-          },
-          {
-            id: 6,
-            name: "Buns",
-            category: "Bakery",
-            currentStock: 60,
-            minStock: 80,
-            unit: "dozen",
-            lastDelivery: "2025-04-10",
-            nextDelivery: "2025-04-17",
-            usageRate: "10 dozen/day",
-            status: "low"
-          },
-          {
-            id: 7,
-            name: "Pepsi Syrup",
-            category: "Beverages",
-            currentStock: 5,
-            minStock: 5,
-            unit: "liters",
-            lastDelivery: "2025-04-07",
-            nextDelivery: "2025-04-14",
-            usageRate: "1 liter/day",
-            status: "critical"
-          },
-          {
-            id: 8,
-            name: "Hot & Spicy Marinade",
-            category: "Sauces",
-            currentStock: 12,
-            minStock: 10,
-            unit: "liters",
-            lastDelivery: "2025-04-09",
-            nextDelivery: "2025-04-16",
-            usageRate: "2 liters/day",
-            status: "adequate"
-          }
-        ];
-        
-        setInventory(mockInventory);
+        // Get data from localStorage
+        const savedInventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+        if (savedInventory.length === 0) {
+          // If no data in localStorage, use mock data
+          const mockInventory = [
+            {
+              id: 1,
+              name: "Zinger Burger Patty",
+              category: "Chicken",
+              currentStock: 42,
+              minStock: 50,
+              unit: "pieces",
+              lastDelivery: "2025-04-08",
+              nextDelivery: "2025-04-15",
+              usageRate: "15/day",
+              status: "low"
+            },
+            {
+              id: 2,
+              name: "Original Recipe Coating",
+              category: "Ingredients",
+              currentStock: 25,
+              minStock: 20,
+              unit: "kg",
+              lastDelivery: "2025-04-10",
+              nextDelivery: "2025-04-17",
+              usageRate: "3kg/day",
+              status: "adequate"
+            },
+            {
+              id: 3,
+              name: "Potatoes",
+              category: "Ingredients",
+              currentStock: 120,
+              minStock: 100,
+              unit: "kg",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "20kg/day",
+              status: "adequate"
+            },
+            {
+              id: 4,
+              name: "Coleslaw Mix",
+              category: "Ingredients",
+              currentStock: 8,
+              minStock: 15,
+              unit: "kg",
+              lastDelivery: "2025-04-05",
+              nextDelivery: "2025-04-12",
+              usageRate: "2kg/day",
+              status: "low"
+            },
+            {
+              id: 5,
+              name: "Cheese Slices",
+              category: "Dairy",
+              currentStock: 200,
+              minStock: 150,
+              unit: "pieces",
+              lastDelivery: "2025-04-11",
+              nextDelivery: "2025-04-18",
+              usageRate: "30/day",
+              status: "adequate"
+            },
+            {
+              id: 6,
+              name: "Buns",
+              category: "Bakery",
+              currentStock: 60,
+              minStock: 80,
+              unit: "dozen",
+              lastDelivery: "2025-04-10",
+              nextDelivery: "2025-04-17",
+              usageRate: "10 dozen/day",
+              status: "low"
+            },
+            {
+              id: 7,
+              name: "Pepsi Syrup",
+              category: "Beverages",
+              currentStock: 5,
+              minStock: 5,
+              unit: "liters",
+              lastDelivery: "2025-04-07",
+              nextDelivery: "2025-04-14",
+              usageRate: "1 liter/day",
+              status: "critical"
+            },
+            {
+              id: 8,
+              name: "Hot & Spicy Marinade",
+              category: "Sauces",
+              currentStock: 12,
+              minStock: 10,
+              unit: "liters",
+              lastDelivery: "2025-04-09",
+              nextDelivery: "2025-04-16",
+              usageRate: "2 liters/day",
+              status: "adequate"
+            }
+          ];
+          setInventory(mockInventory);
+          // Save mock data to localStorage for future use
+          localStorage.setItem('inventory', JSON.stringify(mockInventory));
+        } else {
+          setInventory(savedInventory);
+        }
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -162,21 +192,52 @@ const InventoryPage = () => {
   };
 
   const confirmReorder = () => {
+    // Add to pending orders
+    const newOrder = {
+      id: Date.now(),
+      itemName: selectedItem.name,
+      quantity: orderQuantity * getDefaultOrderQuantity(selectedItem),
+      unit: selectedItem.unit,
+      orderDate: new Date().toISOString(),
+      expectedDelivery: selectedItem.nextDelivery,
+      status: 'pending'
+    };
+    setPendingOrders(prev => [...prev, newOrder]);
+    
+    setReorderModalOpen(false);
+    setSelectedItem(null);
+    setOrderQuantity(1);
+  };
+
+  // Handle edit
+  const handleEdit = (item) => {
+    const strippedUsageRate = item.usageRate.replace(/\s*\/day$/i, '');
+    setSelectedItem(item);
+    setEditedItem({ ...item, usageRate: strippedUsageRate });
+    setEditModalOpen(true);
+  };
+
+  const confirmEdit = () => {
     const updatedInventory = inventory.map(item => {
       if (item.id === selectedItem.id) {
+        const formattedUsageRate = editedItem.usageRate.includes('/day') ? 
+          editedItem.usageRate : 
+          `${editedItem.usageRate}/day`;
+        const newStatus = calculateStatus(editedItem.currentStock, editedItem.minStock);
         return {
-          ...item,
-          currentStock: item.currentStock + (orderQuantity * getDefaultOrderQuantity(item)),
-          status: calculateStatus(item.currentStock + (orderQuantity * getDefaultOrderQuantity(item)), item.minStock)
+          ...editedItem,
+          usageRate: formattedUsageRate,
+          status: newStatus
         };
       }
       return item;
     });
     
     setInventory(updatedInventory);
-    setReorderModalOpen(false);
+    localStorage.setItem('inventory', JSON.stringify(updatedInventory));
+    setEditModalOpen(false);
     setSelectedItem(null);
-    setOrderQuantity(1);
+    setEditedItem(null);
   };
 
   // Helper functions
@@ -206,6 +267,10 @@ const InventoryPage = () => {
       case 'low': return 'Low';
       default: return 'Adequate';
     }
+  };
+
+  const formatUsageRate = (rate) => {
+    return rate.replace(/\s*\/day$/i, '');
   };
 
   if (error) {
@@ -241,13 +306,22 @@ const InventoryPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <h1 className="text-2xl font-bold text-gray-800">Inventory Management</h1>
-          <button 
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            onClick={() => alert('Add new item functionality would go here')}
-          >
-            <FiPlus className="mr-2" />
-            Add New Item
-          </button>
+          <div className="flex gap-3">
+            <button 
+              className="flex items-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+              onClick={() => setPendingOrdersModalOpen(true)}
+            >
+              <FiRefreshCw className="mr-2" />
+              Pending Orders
+            </button>
+            <button 
+              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => navigate('/add-item')}
+            >
+              <FiPlus className="mr-2" />
+              Add New Item
+            </button>
+          </div>
         </div>
 
         {/* Inventory Summary Cards */}
@@ -387,7 +461,7 @@ const InventoryPage = () => {
                           {getStatusText(item.status)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-500">{item.usageRate}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-500">{formatUsageRate(item.usageRate)}/day</td>
                       <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                         {new Date(item.nextDelivery).toLocaleDateString()}
                       </td>
@@ -400,7 +474,7 @@ const InventoryPage = () => {
                         </button>
                         <button 
                           className="text-gray-600 hover:text-gray-800"
-                          onClick={() => alert('Edit functionality would go here')}
+                          onClick={() => handleEdit(item)}
                         >
                           Edit
                         </button>
@@ -473,7 +547,7 @@ const InventoryPage = () => {
 
         {/* Reorder Modal */}
         {reorderModalOpen && selectedItem && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
@@ -539,6 +613,188 @@ const InventoryPage = () => {
                   >
                     Confirm Order
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        {editModalOpen && editedItem && (
+          <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Edit {editedItem.name}
+                </h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editedItem.name}
+                      onChange={(e) => setEditedItem({ ...editedItem, name: e.target.value })}
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category
+                    </label>
+                    <select
+                      value={editedItem.category}
+                      onChange={(e) => setEditedItem({ ...editedItem, category: e.target.value })}
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Current Stock
+                      </label>
+                      <input
+                        type="number"
+                        value={editedItem.currentStock}
+                        onChange={(e) => setEditedItem({ ...editedItem, currentStock: parseInt(e.target.value) || 0 })}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Minimum Stock
+                      </label>
+                      <input
+                        type="number"
+                        value={editedItem.minStock}
+                        onChange={(e) => setEditedItem({ ...editedItem, minStock: parseInt(e.target.value) || 0 })}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Unit
+                      </label>
+                      <select
+                        value={editedItem.unit}
+                        onChange={(e) => setEditedItem({ ...editedItem, unit: e.target.value })}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        {units.map((unit) => (
+                          <option key={unit} value={unit}>
+                            {unit}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Usage Rate
+                      </label>
+                      <input
+                        type="text"
+                        value={editedItem.usageRate}
+                        onChange={(e) => setEditedItem({ ...editedItem, usageRate: e.target.value })}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setEditModalOpen(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmEdit}
+                    className="px-4 py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-700"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Pending Orders Modal */}
+        {pendingOrdersModalOpen && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Pending Orders
+                  </h3>
+                  <button
+                    onClick={() => setPendingOrdersModalOpen(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <FiXCircle size={24} />
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Delivery</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {pendingOrders.length > 0 ? (
+                        pendingOrders.map((order) => (
+                          <tr key={order.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="font-medium text-gray-900">{order.itemName}</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                              {order.quantity} {order.unit}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                              {new Date(order.orderDate).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                              {new Date(order.expectedDelivery).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Pending
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                            No pending orders
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
