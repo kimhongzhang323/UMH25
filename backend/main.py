@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import time
 
 import customer_service
+from chat_database import Chat, ChatDatabase, Message
 
 
 app = FastAPI(
@@ -157,26 +158,6 @@ class MerchantInfo(BaseModel):
     challenges: List[str]
     location: Location
     language: str
-
-
-# ID should be UUID v4
-# timestamps are Unix timestamp
-class Chat(BaseModel):
-    id: str
-    title: str
-    preview: str
-    timestamp: int
-
-
-# id and chat_id should be UUID v4
-# sender is either 'user' or 'bot'
-# timestamps are Unix timestamp
-class Message(BaseModel):
-    id: str
-    text: str
-    sender: str
-    timestamp: int
-    image_url: str = None
 
 
 def generate_unix_timestamp() -> int:
@@ -406,6 +387,11 @@ async def get_menu_item(item_id: int):
         cuisine_tag=item['cuisine_tag'],
         price=item['item_price']
     )
+
+
+@app.get("/get_all_chats")
+async def get_all_chats(chat_id: str):
+    pass
 
 
 @app.post("/new_chat")
