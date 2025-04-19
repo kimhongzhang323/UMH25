@@ -28,20 +28,15 @@ class ChatDatabase(BaseModel):
     chats: List[Chat]
 
     def add_message(self, message: Message, chat_id: str):
-        if chat_id not in self.chats:
-            # Or raise HTTPException(status_code=404, detail=f"Chat with ID {chat_id} not found")
-            print(f"Error: Chat ID {chat_id} not found. Cannot add message.")
-            # Handle appropriately - maybe create the chat implicitly if desired?
-            # For now, just print error and return if chat doesn't exist
-            # raise ValueError(f"Chat with ID {chat_id} not found.") # Alternative: raise error
-            return
+        if chat_id in self.messages:
+            self.messages[chat_id].append(message)
 
-        # Ensure the message list exists for the chat_id
-        if chat_id not in self.messages:
-            self.messages[chat_id] = []
-
-        self.messages[chat_id].append(message)
-        print(f"Added message {message.id} to chat {chat_id}") # Debug print
+            # Update the chat preview with the latest message
+            for chat in self.chats:
+                if chat.id == chat_id:
+                    chat.preview = message.text[:50] + ("..." if len(message.text) > 50 else "")
+                    chat.timestamp = message.timestamp
+                    break
 
     def get_all_messages(self, chat_id: str) -> List[Message]:
         return self.messages[chat_id]

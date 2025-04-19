@@ -19,8 +19,8 @@ let messageIdCounter = Date.now();
 
 const CustomerServicePage = () => {
   // --- State ---
-  const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
-  const [aiResponseSpeed, setAiResponseSpeed] = useState('medium');
+  const [autoReplyEnabled, setAutoReplyEnabled] = useState(false);
+  const [aiResponseSpeed, setAiResponseSpeed] = useState('fast');
   const [aiTone, setAiTone] = useState('professional');
   const [currentMessage, setCurrentMessage] = useState('');
   const [activeChatId, setActiveChatId] = useState(null);
@@ -302,10 +302,26 @@ const CustomerServicePage = () => {
       const isFirstCustomerMessage = messages.filter(m => m.sender === 'customer').length === 1;
 
       if (isFirstCustomerMessage) {
-        triggerAIResponse(activeChatId);
+        let responseDelay = 0;
+
+        switch (aiResponseSpeed) {
+          case "fast":
+            responseDelay = 0;
+            break;
+          case "medium":
+            responseDelay = 10 * 1000;
+            break;
+          case "slow":
+            responseDelay = 30 * 1000;
+            break;
+        }
+
+        setTimeout(() => {
+          triggerAIResponse(activeChatId);
+        }, responseDelay)
       }
     }
-  }, [activeChatId, autoReplyEnabled, isAiTyping, triggerAIResponse, getActiveChat]);
+  }, [activeChatId, autoReplyEnabled, isAiTyping]);
 
   // --- JSX Rendering ---
 
