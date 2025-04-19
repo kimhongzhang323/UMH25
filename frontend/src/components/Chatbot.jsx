@@ -23,6 +23,8 @@ import {
 import jsConvert from 'js-convert-case';
 import { v4 as uuidV4 } from 'uuid';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 // Component
 export default function Chatbot() {
   // State Management
@@ -112,10 +114,13 @@ export default function Chatbot() {
   // Get all chats from user
   useEffect(() => {
     let ignore = false;
-    fetch(import.meta.env.BACKEND_URL + "/get_all_chats")
-    .then(response => response.json())
-    .then(responseData => {
-        setChatList(responseData)
+    fetch(BACKEND_URL + "/get_all_chats")
+      .then(response => response.json())
+      .then(responseData => {
+        setChatList(responseData);
+      })
+      .catch(err => {
+        console.log(err);
       });
 
     return () => { ignore = true };
@@ -158,7 +163,7 @@ export default function Chatbot() {
   // Update your loadChat function to reset the new chat state
   const loadChat = (chatId) => {
     setIsNewChat(false);
-    fetch(import.meta.env.BACKEND_URL + "/get_all_messages" +
+    fetch(BACKEND_URL + "/get_all_messages" +
       new URLSearchParams({ chat_id: chatId }).toString()
     )
       .then(response => response.json())
@@ -192,7 +197,7 @@ export default function Chatbot() {
     payload.append("chat_id", currentChatId);
     payload.append("file", fileInputRef.current.files[0])
 
-    fetch(import.meta.env.BACKEND_URL + "/send_chat", {
+    fetch(BACKEND_URL + "/send_chat", {
       method: "POST",
       body: payload
     })
@@ -260,7 +265,7 @@ export default function Chatbot() {
   };
 
   const handleMerchantProfileSave = (e) => {
-    fetch(import.meta.env.BACKEND_URL + "/update_merchant_info", {
+    fetch(BACKEND_URL + "/update_merchant_info", {
       method: PUT,
       body: JSON.stringify(
         jsConvert.snakeKeys(merchantProfile)
@@ -372,7 +377,12 @@ export default function Chatbot() {
                 >
                   <div className="font-medium text-gray-900 truncate">{chat.title}</div>
                   <div className="text-sm text-gray-500 truncate">{chat.preview}</div>
-                  <div className="text-xs text-gray-400 mt-1">{formatDate(chat.timestamp)}</div>
+                  <div className="text-xs text-gray-400 mt-1">{
+                    // Date() accepts Unix timestamp in milliseconds, so need to convert first
+                    formatDate(
+                      new Date(chat.timestamp * 1000)
+                    )
+                  }</div>
                 </button>
               ))}
             </>
