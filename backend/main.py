@@ -450,13 +450,19 @@ async def chat(request: ChatRequest):
         try:
             data = json.loads(response_text)
 
-            return JSONResponse(content={
-                "response": data["text"],
-                "image_url": "http://localhost:8000" + data["image"]})
+            # Construct the response with optional URL and image
+            response = {
+                "response": data.get("text", "No response available."),
+                "image_url": "http://localhost:8000" + data["image"] if "image" in data else None,
+                "url": data.get("url", None)  # Include the URL if it exists
+            }
+
+            return JSONResponse(content=response)
         except Exception as e:
             logger.error(e)
             return JSONResponse(content={
-                "response": response_text})
+                "response": response_text
+            })
 
     except Exception as e:
         logger.error(e)

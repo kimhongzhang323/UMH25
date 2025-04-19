@@ -192,19 +192,19 @@ export default function Chatbot() {
       timestamp: new Date(),
     };
 
-    setCurrentChatMessages(prev => [...prev, userMsg]);
+    setCurrentChatMessages((prev) => [...prev, userMsg]);
     setInput('');
     setLoading(true);
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           query: userMsg.text,
-          chat_id: currentChatId || "default",
+          chat_id: currentChatId || 'default',
         }),
       });
 
@@ -216,22 +216,23 @@ export default function Chatbot() {
       const botMsg = {
         id: uuidV4(),
         text: responseData.response || "Sorry, I couldn't process your request.",
-        sender: "bot",
+        sender: 'bot',
         timestamp: new Date(),
-        imageUrl: responseData.image_url
+        url: responseData.url || null, // Add URL if provided
+        image: responseData.image || null, // Add image if provided
       };
 
-      setCurrentChatMessages(prev => [...prev, botMsg]);
+      setCurrentChatMessages((prev) => [...prev, botMsg]);
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       const errorMsg = {
         id: uuidV4(),
-        text: "An error occurred while fetching the response. Please try again.",
-        sender: "bot",
+        text: 'An error occurred while fetching the response. Please try again.',
+        sender: 'bot',
         timestamp: new Date(),
       };
 
-      setCurrentChatMessages(prev => [...prev, errorMsg]);
+      setCurrentChatMessages((prev) => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }
