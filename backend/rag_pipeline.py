@@ -26,8 +26,14 @@ dimension = qa_embeddings.shape[1]
 index = faiss.IndexFlatL2(dimension)
 index.add(np.array(qa_embeddings))
 
+# Initialize chat history
+chat_history = []
+
 # Query function
 def query_rag(user_query):
+    global chat_history  # Use the global chat history
+
+    # Generate embedding for the user query
     query_embedding = model.encode([user_query])
     D, I = index.search(np.array(query_embedding), k=3)
 
@@ -35,17 +41,37 @@ def query_rag(user_query):
     top_k_qa = [qa_texts[i] for i in I[0]]
     context = "\n".join(top_k_qa)
 
-    prompt = f"""Use the following question-answer pairs to help answer the user's question.Make sure use the same language as input.Answer the question concisely without asking follow up question.Understand the user question and query in the vector database and find the most similar answer for it using english and response in the same language as input.Give the response as the same language as input. ITS A MUST to use same language. If from the vector database its in english make it into the input language.Calculate the similarities of the question by the user and the question in vector db, if its lesser then 70% u shud generate a text to tell the user to consult the support staff in this "url", make the notice professional
+    # Include chat history in the context
+    history_context = "\n".join([f"User: {q}\nAssistant: {a}" for q, a in chat_history])
+    full_context = f"{history_context}\n\nContext:\n{context}"
+
+    # Prompt with chat history
+    prompt = f"""
+You are an intelligent assistant tasked with answering user questions based on the provided context and chat history. Follow these guidelines strictly:
+
+1. Always respond in the same language as the user's input. If the context is in English but the input is in another language, translate the response to match the input language.
+2. Use the vector database to find the most similar question-answer pair based on the user's query. If the similarity score is below 70%, inform the user to consult the support staff at this "url" in a professional tone.
+3. Provide concise and accurate answers without asking follow-up questions.
+4. Ensure the response is professional and easy to understand.
+
+Chat History:
+{history_context}
 
 Context:
 {context}
 
 User Question: {user_query}
-Answer:"""
+
+Answer:
+"""
 
     # Use Gemini to generate the answer
     generation_model = genai.GenerativeModel("gemini-2.0-flash")
     response = generation_model.generate_content(prompt)
+
+    # Update chat history
+    chat_history.append((user_query, response.text))
+
     return response.text
 
 # Interactive CLI

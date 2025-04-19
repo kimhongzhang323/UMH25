@@ -403,5 +403,38 @@
           "code": "order_time_bins = pd.cut(pd.to_datetime(df['order_time']).dt.hour, bins=24)\nvalue_by_time = df.groupby(order_time_bins)['order_value'].mean()\nplt.figure(figsize=(10,6))\nvalue_by_time.plot(kind='bar', color='#00B14F')\nplt.title('Order Value by Order Time')\nplt.xlabel('Order Time (Hour)')\nplt.ylabel('Average Order Value ($)')",
           "insight": "Peak order value time: {value_by_time.idxmax()} (${value_by_time.max():,.2f})"
       }
+  },
+  {
+      "question": "How can I generate an invoice?",
+      "answer": {
+          "text": "You can generate an invoice for your orders using the invoice management system. Access the dashboard to create and download invoices.",
+          "type": "action",
+          "action": {
+              "label": "Generate Invoice",
+              "url": "/invoice-management"
+          }
+      }
+  },
+  {
+      "question": "Help me to create an invoice for xxx",
+      "answer": {
+          "text": "You can create an invoice for xxx using the invoice management system. Access the dashboard to create and download invoices.",
+          "type": "action",
+          "action": {
+              "label": "Create Invoice for xxx",
+              "url": "/invoice-management"
+          }
+      }
+  },
+  {
+      "question": "How can I reduce expenses in my merchant?",
+      "answer": {
+          "text": "To reduce expenses, consider optimizing your inventory, negotiating better supplier deals, and minimizing operational costs. Visit the expense management dashboard for detailed insights.",
+          "type": "action",
+          "action": {
+              "label": "View Inventory Details",
+              "url": "/inventory"
+          }
+      }
   }
 ]
