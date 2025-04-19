@@ -468,8 +468,7 @@ export default function Chatbot() {
                           )}
                       </div>
                       <div
-                        className={`max-w-[calc(100%-56px)] ${msg.sender === 'bot' ? 'text-left' : 'text-right'
-}`}
+                        className="max-w-[calc(100%-56px)]"
                       >
                         {msg.mode && msg.sender === 'user' && (
                           <div className="text-xs text-gray-500 mb-1">
