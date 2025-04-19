@@ -313,16 +313,6 @@ export default function Chatbot() {
     setCurrentChatId(newChat.id);
   };
 
-  // Removed duplicate handleSubmit function
-
-  const generateFakeResponse = (userInput, mode) => {
-    return "fake shit"
-  };
-
-  const generatePersonalizedMerchantResponse = (query, profile) => {
-    return "womp-womp (with profile)"
-  };
-
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
