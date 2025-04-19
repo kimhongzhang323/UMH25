@@ -162,10 +162,16 @@ export default function Chatbot() {
 
   // Update your loadChat function to reset the new chat state
   const loadChat = (chatId) => {
+    if (chatId == currentChatId)
+      return
+
     setIsNewChat(false);
-    fetch(BACKEND_URL + "/get_all_messages" +
-      new URLSearchParams({ chat_id: chatId }).toString()
-    )
+    setCurrentChatMessages([]);
+
+    let getAllMessagesAPI = new URL(BACKEND_URL + "/get_all_messages");
+    getAllMessagesAPI.searchParams.append("chat_id", chatId);
+
+    fetch(getAllMessagesAPI.toString())
       .then(response => response.json())
       .then(responseData => {
         setCurrentChatMessages(prev => [ ...prev, ...responseData])
