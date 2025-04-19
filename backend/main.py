@@ -184,13 +184,14 @@ def generate_unix_timestamp() -> int:
     value = int(time.time())
     return value
 
-  
+
 # Menu Item Models
 class MenuItemBase(BaseModel):
     item_id: int
     name: str
     cuisine_tag: str
     price: float
+
 
 class MenuItem(MenuItemBase):
     current_stock: int = 0
@@ -378,7 +379,7 @@ async def get_menu_items():
     df = pd.read_csv('data/DimSumDelight_Full.csv')
     # Get unique items and their latest prices
     items = df.groupby(['item_id', 'item_name', 'cuisine_tag', 'item_price']).size().reset_index()
-    
+
     return [
         MenuItem(
             item_id=row['item_id'],
@@ -395,10 +396,10 @@ async def get_menu_item(item_id: int):
     """Get a specific menu item by ID"""
     df = pd.read_csv('data/DimSumDelight_Full.csv')
     item = df[df['item_id'] == item_id].iloc[0]
-    
+
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
-        
+
     return MenuItem(
         item_id=item['item_id'],
         name=item['item_name'],
