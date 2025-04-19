@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { User, UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut, UtensilsCrossed } from 'lucide-react';
+import { LayoutDashboard, User, UserCog, Bell, MessageSquare, Home, Menu, X, ShoppingCart, AlertTriangle, Star, Truck, CreditCard, Map, Users, Settings, Warehouse, DollarSign, LogOut, UtensilsCrossed } from 'lucide-react';
 
 export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState(null);
 
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen);
@@ -41,37 +42,61 @@ export default function Navbar() {
       content: 'Only 2 portions of Nasi Lemak remaining',
       time: '1 hour ago',
       action: 'Restock now'
-    },
-    {
-      id: 4,
-      type: 'review',
-      icon: <Star className="h-5 w-5 text-amber-500" />,
-      title: 'New 5-star review',
-      content: 'Customer rated their experience 5 stars',
-      time: '2 hours ago',
-      action: 'See review'
-    },
-    {
-      id: 5,
-      type: 'delivery',
-      icon: <Truck className="h-5 w-5 text-purple-500" />,
-      title: 'Delivery update',
-      content: 'Order #4561 is out for delivery',
-      time: '3 hours ago',
-      action: 'Track order'
-    },
-    {
-      id: 6,
-      type: 'payment',
-      icon: <CreditCard className="h-5 w-5 text-emerald-500" />,
-      title: 'Payment received',
-      content: 'RM 120.80 payment processed successfully',
-      time: '1 day ago',
-      action: 'View receipt'
     }
   ];
 
-  const unreadCount = notifications.length; // In real app, filter for unread
+  const unreadCount = notifications.length;
+
+  // Menu items with submenus
+  const menuItems = [
+    {
+      id: 'home',
+      label: 'Home',
+      icon: <Home className="h-5 w-5" />,
+      href: '/chat'
+    },
+    
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      href: '/dashboard'
+    },
+    {
+      id: 'customer-service',
+      label: 'Customer Service',
+      icon: <Users className="h-5 w-5" />,
+      href: '/customer-service'
+    },
+    {
+      id: 'sales',
+      label: 'Sales',
+      icon: <DollarSign className="h-5 w-5" />,
+      submenu: [
+        {
+          label: 'Sales & Income',
+          icon: <DollarSign className="h-4 w-4" />,
+          href: '/sales-income'
+        },
+        {
+          label: 'Menu',
+          icon: <UtensilsCrossed className="h-4 w-4" />,
+          href: '/menu'
+        },
+        {
+          label: 'Inventory',
+          icon: <Warehouse className="h-4 w-4" />,
+          href: '/inventory'
+        }
+      ]
+    },
+    {
+      id: 'staff',
+      label: 'Staff',
+      icon: <UserCog className="h-5 w-5" />,
+      href: '/staff-manager'
+    }
+  ];
 
   return (
     <>
@@ -85,8 +110,9 @@ export default function Navbar() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:hidden`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:hidden`}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center">
@@ -107,60 +133,46 @@ export default function Navbar() {
           </button>
         </div>
         <div className="p-4 flex flex-col">
-          <a
-            href="/"
-            className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md mb-2"
-            onClick={toggleMobileMenu}
-          >
-            <Home className="h-5 w-5 mr-2" />
-            Home
-          </a>
-          <a
-            href="/chat"
-            className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md"
-            onClick={toggleMobileMenu}
-          >
-            <MessageSquare className="h-5 w-5 mr-2" />
-            Chat
-          </a>
-          <a
-            href="/orders"
-            className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 transition-colors"
-          >
-            <Map className="h-5 w-5 mr-2" />
-            Map
-          </a>
-          <a
-            href="/customer-service"
-            className="flex items-center space-x-3 px-3 py-3 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md"
-            onClick={toggleMobileMenu}
-          >
-            <Users className="h-5 w-5 mr-2" />
-            Customer Service
-          </a>
-          <a
-            href="/inventory"
-            className="flex items-center space-x-3 px-3 py-3 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md"
-            onClick={toggleMobileMenu}
-          >
-            <Warehouse className="h-5 w-5 mr-2" />
-            Inventory
-          </a>
-          <a
-            href="/sales-income"
-            className="flex items-center space-x-3 px-3 py-3 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md"
-            onClick={toggleMobileMenu}
-          >
-            <DollarSign className="h-5 w-5 mr-2" />
-            Sales
-          </a>
-
+          {menuItems.map((item) => (
+            <div key={item.id}>
+              {item.submenu ? (
+                <div className="mb-2">
+                  <button className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md">
+                    {item.icon}
+                    <span className="ml-2">{item.label}</span>
+                  </button>
+                  <div className="ml-6 mt-1 space-y-1">
+                    {item.submenu.map((subItem) => (
+                      <a
+                        key={subItem.label}
+                        href={subItem.href}
+                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
+                        onClick={toggleMobileMenu}
+                      >
+                        {subItem.icon}
+                        <span className="ml-2">{subItem.label}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <a
+                  href={item.href}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md mb-2"
+                  onClick={toggleMobileMenu}
+                >
+                  {item.icon}
+                  <span className="ml-2">{item.label}</span>
+                </a>
+              )}
+            </div>
+          ))}
           <a
             href="/logout"
-            className="inline-flex items-center space-x-3 px-3 py-3 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors"
+            className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 hover:text-green-600 hover:bg-gray-50 rounded-md mt-2"
           >
-            <LogOut className="h-5 w-5 mr-2 ml-1" />
-            Log Out
+            <LogOut className="h-5 w-5" />
+            <span className="ml-2">Log Out</span>
           </a>
         </div>
       </div>
@@ -192,138 +204,113 @@ export default function Navbar() {
               </div>
 
               {/* Desktop Navigation Links */}
-              <div className="hidden lg:flex space-x-6">
-                <a
-                  href="/"
-                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-900 hover:text-green-600 transition-colors hover:cursor-pointer"
-                >
-                  <Home className="mr-2 h-4 w-4" />
-                  Home
-                </a>
-                <a
-                  href="/chat"
-                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Chat
-                </a>
-                <a
-                  href="/orders"
-                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                  onClick={toggleMobileMenu}
-                >
-                  <Map className="mr-3 h-5 w-5" />
-                  Map
-                </a>
-                <a
-                  href="/customer-service"
-                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                  onClick={toggleMobileMenu}
-                >
-                  <Users className="mr-3 h-5 w-5" />
-                  Customer Service
-                </a>
-                <a
-                  href="/inventory"
-                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                  onClick={toggleMobileMenu}
-                >
-                  <Warehouse className="mr-3 h-5 w-5" />
-                  Inventory
-                </a>
-                <a
-                  href="/menu"
-                  className="flex items-center pb-1 py-2 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-md"
-                  onClick={toggleMobileMenu}
-                >
-                  <UtensilsCrossed className="mr-3 h-5 w-5" />
-                  Menu
-                </a>
-                <a
-                  href="/sales-income"
-                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
-                  onClick={toggleMobileMenu}
-                >
-                  <DollarSign className="mr-3 h-5 w-5" />
-                  Sales
-                </a>
-                <a
-                  href="/staff-manager"
-                  className="inline-flex items-center pt-1 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors"
-                  onClick={toggleMobileMenu}
-                >
-                  <UserCog className="mr-3 h-5 w-5" />
-                  Staff
-                </a>
+              <div className="hidden lg:flex space-x-2">
+                {menuItems.map((item) => (
+                  <div 
+                    key={item.id}
+                    className="relative"
+                    onMouseEnter={() => setHoveredItem(item.id)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    <a
+                      href={item.href}
+                      className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
+                        hoveredItem === item.id ? 'text-green-600' : 'text-gray-900'
+                      } hover:text-green-600 transition-colors`}
+                    >
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </a>
+                    
+                    {item.submenu && hoveredItem === item.id && (
+                      <div className="absolute left-0 mt-0 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                        <div className="py-1">
+                          {item.submenu.map((subItem) => (
+                            <a
+                              key={subItem.label}
+                              href={subItem.href}
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-green-600"
+                            >
+                              {subItem.icon}
+                              <span className="ml-2">{subItem.label}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Right side - Notifications */}
-            <div className="relative">
-              <button
-                onClick={toggleNotifications}
-                className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer transition-colors relative"
-                aria-label="Notifications"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-              <button
-                className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer transition-colors relative"
-                aria-label="Profile"
-              >
-                <a href="/profile" className="flex items-center">
-                  <User size={25} />
-                </a>
+            {/* Right side - Notifications and Profile */}
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <button
+                  onClick={toggleNotifications}
+                  className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer transition-colors relative"
+                  aria-label="Notifications"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
                 
-              </button>
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
-                    <p className="text-xs text-gray-500">{unreadCount} unread notifications</p>
-                  </div>
-                  <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                    {notifications.map((notification) => (
-                      <div key={notification.id} className="px-4 py-3 hover:bg-gray-50">
-                        <div className="flex items-start">
-                          <div className="flex-shrink-0">
-                            {notification.icon}
-                          </div>
-                          <div className="ml-3 flex-1">
-                            <p className="text-sm font-medium text-gray-900">
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {notification.content}
-                            </p>
-                            <div className="mt-2 flex items-center justify-between">
-                              <p className="text-xs text-gray-400">
-                                {notification.time}
+                {isNotificationsOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                      <p className="text-xs text-gray-500">{unreadCount} unread notifications</p>
+                    </div>
+                    <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                      {notifications.map((notification) => (
+                        <div key={notification.id} className="px-4 py-3 hover:bg-gray-50">
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                              {notification.icon}
+                            </div>
+                            <div className="ml-3 flex-1">
+                              <p className="text-sm font-medium text-gray-900">
+                                {notification.title}
                               </p>
-                              <button className="text-xs bg-gray-100 text-gray-800 hover:bg-gray-200 px-2 py-1 rounded transition-colors hover:cursor-pointer">
-                                {notification.action}
-                              </button>
+                              <p className="text-sm text-gray-500 mt-1">
+                                {notification.content}
+                              </p>
+                              <div className="mt-2 flex items-center justify-between">
+                                <p className="text-xs text-gray-400">
+                                  {notification.time}
+                                </p>
+                                <button className="text-xs bg-gray-100 text-gray-800 hover:bg-gray-200 px-2 py-1 rounded transition-colors hover:cursor-pointer">
+                                  {notification.action}
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+                      <a
+                        href="#"
+                        className="text-xs font-medium text-green-600 hover:text-green-800 block text-center"
+                      >
+                        View all notifications
+                      </a>
+                    </div>
                   </div>
-                  <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-                    <a
-                      href="#"
-                      className="text-xs font-medium text-green-600 hover:text-green-800 block text-center"
-                    >
-                      View all notifications
-                    </a>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
+              
+              <a
+                href="/profile"
+                className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 hover:cursor-pointer transition-colors"
+                aria-label="Profile"
+              >
+                <User size={20} />
+              </a>
             </div>
           </div>
         </div>
