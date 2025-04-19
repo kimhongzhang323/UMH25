@@ -214,7 +214,7 @@ const Dashboard = () => {
           recentOrders
         });
         setSalesPredictions({
-          nextWeekPrediction: 14250,
+          nextWeekPrediction: 48471.25,
           confidenceLevel: 85,
           recommendedPrep: {
             inventoryIncrease: "20%",
