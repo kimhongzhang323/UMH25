@@ -156,6 +156,25 @@ class MerchantInfo(BaseModel):
     language: str
 
 
+# ID should be UUID v4
+# timestamps are Unix timestamp
+class Chat(BaseModel):
+    id: str
+    title: str
+    preview: str
+    timestamp: int
+
+
+# id and chat_id should be UUID v4
+# sender is either 'user' or 'bot'
+# timestamps are Unix timestamp
+class Message(BaseModel):
+    id: str
+    text: str
+    sender: str
+    timestamp: int
+
+
 def process_csv_row(row: dict, config: CSVConfig) -> Document:
     """Convert a CSV row into a Document"""
     # Combine specified text columns
@@ -320,10 +339,87 @@ async def chat_to_llm(
     file: Annotated[UploadFile, File()]
 ):
     # Send data to LLM for processing
+    # Save chat to database
     return {
         "response": "Womp Womp",
         "image_URL": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpadoru.wiki%2Fimages%2Fpadoru.png&f=1&nofb=1&ipt=a7cff58e3937272582c2417e06a3dd748494dd39be4a5678c62df4687eb1c3c8"
     }
+
+
+@app.get("/get_all_chats")
+async def get_all_chats() -> list[Chat]:
+    # Read database for list of chats
+    # Note that messages are NOT part of this data
+    # should compare to another database table with the matching chat ID
+    return [
+        Chat(
+            id="f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            title="Customer Engagement Strategies",
+            preview="Let's discuss ways to improve your customer retention rates.",
+            timestamp=1713542400
+        ),
+        Chat(
+            id="38d28c87-5e13-4bd5-a3ba-e88f87e7838c",
+            title="Inventory Management",
+            preview="I've analyzed your stock patterns and identified optimization opportunities.",
+            timestamp=1713543600
+        ),
+        Chat(
+            id="b0e46453-7184-41e5-b14b-9f5a9d29b456",
+            title="Marketing Campaign Review",
+            preview="How can we adjust your social media advertising to increase conversions?",
+            timestamp=1713545400
+        ),
+        Chat(
+            id="65a7c97d-f239-4c5d-89cc-5a37f5b1cdf3",
+            title="Sales Analytics Report",
+            preview="Your Q1 numbers show interesting patterns in customer buying habits.",
+            timestamp=1713549000
+        ),
+        Chat(
+            id="c29143a3-e83d-48e5-ac8a-f51277cf72ea",
+            title="E-commerce Platform Upgrade",
+            preview="I recommend these improvements to your online checkout process.",
+            timestamp=1713552600
+        )
+    ]
+
+
+@app.get("/get_all_messages")
+async def get_messages(chat_id: str):
+    # Return all messages under the specific chat
+    return [
+        Message(
+            id="8f7d1a6e-9c5a-4b3d-8a7e-2e8d79c10e44",
+            text="Womp womp... our sales are down 15% this quarter.",
+            sender="user",
+            timestamp=1713542400
+        ),
+        Message(
+            id="3e7c8945-f2a1-4d6b-ba3c-d98e1c045f22",
+            text="Don't worry! Every womp womp moment is an opportunity for improvement. Let's analyze what happened.",
+            sender="bot",
+            timestamp=1713542460
+        ),
+        Message(
+            id="b23d8f7a-4c5e-4a9b-8d3f-e2c7a1b9d634",
+            text="Womp womp wooooomp. Our biggest competitor just launched a huge promotion.",
+            sender="user",
+            timestamp=1713542520
+        ),
+        Message(
+            id="7a1b4d6e-2c5f-4e8d-9a3b-6c7e5d8f9a1b",
+            text="I see the womp womp situation, but this gives us a chance to differentiate. What unique value can you offer?",
+            sender="bot",
+            timestamp=1713542580
+        ),
+        Message(
+            id="5e9d2c1b-7a3f-4e8d-9c5b-2a4f7e3d8c1a",
+            text="*sad trombone* Womp womp... Our marketing budget is already maxed out.",
+            sender="user",
+            timestamp=1713542640
+        )
+    ]
 
 
 if __name__ == "__main__":
