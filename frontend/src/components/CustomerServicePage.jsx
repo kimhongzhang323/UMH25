@@ -265,17 +265,31 @@ const CustomerServicePage = () => {
 
   // Handle selecting a chat from the sidebar
   const handleSelectChat = (chatId) => {
-    if (chatId === activeChatId) return; // Don't re-process if already active
+    // 1. Only proceed if selecting a DIFFERENT chat
+    if (chatId === activeChatId) {
+        setChats(prevChats =>
+            prevChats.map(chat =>
+                (chat.id === chatId && chat.unread) ? { ...chat, unread: false } : chat
+            )
+        );
+        return;
+    }
 
-    // const previouslySelectedChat = getActiveChat(); // Not strictly needed for this logic
-    const chatToSelect = chats.find(c => c.id === chatId);
-
+    // 2. Update the active chat ID state
     setActiveChatId(chatId);
 
+    // 3. Update the chats state to mark the selected chat as read
+    setChats(prevChats =>
+      prevChats.map(chat =>
+        chat.id === chatId ? { ...chat, unread: false } : chat
+      )
+    );
     // Mark the newly selected chat as read
     setChats(prevChats => prevChats.map(c =>
       c.id === chatId ? { ...c, unread: false } : c
     ));
+
+    // TODO: When to trigger AI?
 
     // Check if AI should respond to the *last customer message* in the *newly selected* chat
     // This might be useful if auto-reply was off or failed previously.
@@ -288,13 +302,6 @@ const CustomerServicePage = () => {
     // and AI isn't already typing for *this* chat, consider triggering.
     // The useEffect (scroll) might already handle this if selecting makes new content appear,
     // but if the chat was just waiting for a response, this might be a place to trigger.
-    if (chatToSelect && chatToSelect.messages?.length > 0 && autoReplyEnabled && !isAiTyping[chatId]) {
-      const lastMsg = chatToSelect.messages[chatToSelect.messages.length - 1];
-      if (lastMsg.sender === 'customer') {
-        console.log(`Triggering AI for chat ${chatId} upon selection.`);
-        triggerAIResponse(chatId);
-      }
-    }
   };
 
   // Mark a chat as resolved (Placeholder - Needs backend integration)
